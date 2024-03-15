@@ -13,7 +13,6 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request=exchange.getRequest();
-        System.out.println("asdasd");
         exchange.mutate()
                 .request(builder -> builder.header("user-info","66"))
                 .build();
