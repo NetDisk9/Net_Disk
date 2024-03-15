@@ -11,6 +11,7 @@
     <modules>
         <module>net-common</module>
         <module>net-service</module>
+        <module>net-gateway</module>
     </modules>
 
     <parent>

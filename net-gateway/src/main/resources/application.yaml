@@ -1,0 +1,14 @@
+#server:
+#  8080
+#spring:
+#  application:
+#    name: gateway
+#  cloud:
+#    nacos:
+#      server-addr: 121.41.97.160:8848
+#    gateway:
+#      routes:
+#        - id: user-service
+#          uri : lb://user-service
+#          predicates:
+#            - Path:/user/**

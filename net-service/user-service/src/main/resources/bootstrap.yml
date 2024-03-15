@@ -16,5 +16,5 @@ spring:
         file-extension: yaml
 #        namespace: ${spring.cloud.nacos.discovery.namespace}
         shared-configs:
-          - dataId: shared-jdbc.yamlgi
+          - dataId: shared-jdbc.yaml
           - data-id: user-service.yaml
