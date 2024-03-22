@@ -2,12 +2,16 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/net-common/net-based/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/net-common/net-based/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/net-common/net-mybatis/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/net-common/net-mybatis/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/net-common/net-redis/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/net-common/net-redis/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/net-common/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/net-common/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/net-gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/net-service/email-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/net-service/email-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/net-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/net-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/net-service/user-service/src/main/java" charset="UTF-8" />
