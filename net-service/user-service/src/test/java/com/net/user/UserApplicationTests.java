@@ -1,5 +1,6 @@
 package com.net.user;
 
+import com.net.redis.utils.RedisUtil;
 import com.net.user.entity.SysUser;
 import com.net.user.service.SysUserService;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,14 @@ import javax.annotation.Resource;
 public class UserApplicationTests {
     @Resource
     SysUserService userService;
+    @Resource
+    RedisUtil redisUtil;
 
+    @Test
+    public void redisTest(){
+        redisUtil.set("abc",123);
+        System.out.println(redisUtil.get("abc"));
+    }
     @Test
     public void add() {
         userService.save(
@@ -21,4 +29,5 @@ public class UserApplicationTests {
         );
 
     }
+
 }
