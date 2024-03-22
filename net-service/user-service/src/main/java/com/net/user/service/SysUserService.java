@@ -1,5 +1,6 @@
 package com.net.user.service;
 
+import com.net.common.dto.ResponseResult;
 import com.net.user.entity.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -12,5 +13,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2024-03-15
  */
 public interface SysUserService extends IService<SysUser> {
-
+    public ResponseResult getUserIdByEmailAndPassword(String email, String password);
+    public ResponseResult getUserIdByUserIdAndPassword(Long userId,String password);
+    public ResponseResult getUserIdByUsernameAndPassword(String username,String password);
+    public Long getUserIdByEmail(String email);
+    public String getUserLoginCode(String email);
 }

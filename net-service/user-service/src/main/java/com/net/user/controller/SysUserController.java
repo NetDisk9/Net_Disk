@@ -12,6 +12,9 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
+import com.net.common.util.JWTUtil;
+import com.net.common.util.SHAUtil;
+import com.net.redis.utils.RedisUtil;
 import com.net.user.entity.SysUser;
 import com.net.user.pojo.dto.LoginDTO;
 import com.net.user.pojo.dto.RegisterDTO;
@@ -19,6 +22,7 @@ import com.net.user.pojo.dto.UpdatePasswordDTO;
 import com.net.user.pojo.dto.UserDTO;
 import com.net.user.pojo.vo.UserVO;
 import com.net.user.service.SysUserService;
+import io.netty.util.internal.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
@@ -43,7 +47,41 @@ public class SysUserController {
 
     @PostMapping("/login")
     public ResponseResult login(@RequestBody LoginDTO loginDTO){
-        return ResponseResult.okResult(ResultCodeEnum.SUCCESS);
+        if(loginDTO==null|| StringUtil.isNullOrEmpty(loginDTO.getPassword())) {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+//        loginDTO.setPassword(SHAUtil.encrypt(loginDTO.getPassword()));
+        ResponseResult result=null;
+        if(!StringUtil.isNullOrEmpty(loginDTO.getEmail())) {
+            result = userService.getUserIdByEmailAndPassword(loginDTO.getEmail(), loginDTO.getPassword());
+        }
+        else if(loginDTO.getId()!=null){
+            result = userService.getUserIdByUserIdAndPassword(loginDTO.getId(), loginDTO.getPassword());
+        }
+        else if(!StringUtil.isNullOrEmpty(loginDTO.getUsername())){
+            result=userService.getUserIdByUsernameAndPassword(loginDTO.getUsername(),loginDTO.getPassword());
+        }
+        else{
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        if(result.getCode()!=200){
+            return result;
+        }
+        Long userId=(Long) result.getData();
+        result.setData(JWTUtil.getJWT(userId+""));
+        return result;
+    }
+    @PostMapping("/code/login")
+    public ResponseResult loginByCode(@RequestBody LoginDTO loginDTO){
+        if(loginDTO==null||StringUtil.isNullOrEmpty(loginDTO.getCode())||StringUtil.isNullOrEmpty(loginDTO.getEmail())){
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        if(!loginDTO.getCode().equals(userService.getUserLoginCode(loginDTO.getEmail()))){
+            return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR);
+        }
+        Long userId=userService.getUserIdByEmail(loginDTO.getEmail());
+        return ResponseResult.okResult(JWTUtil.getJWT(userId+""));
+
     }
     @PostMapping("/register")
     public ResponseResult register(@RequestBody RegisterDTO registerDTO){

@@ -20,6 +20,9 @@ public enum ResultCodeEnum {
     // SIGN验签 100~120
     SIGN_INVALID(100,"无效的SIGN"),
     SIG_TIMEOUT(101,"SIGN已过期"),
+    PARAM_ERROR(403,"参数错误"),
+    CODE_ERROR(440,"验证码错误"),
+
     // 参数错误 500~1000
     PARAM_REQUIRE(500,"缺少参数"),
     PARAM_INVALID(501,"无效参数"),

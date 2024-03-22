@@ -40,8 +40,13 @@ public class EmailServiceImpl implements EmailService {
         simpleMailMessage.setTo(email);
         simpleMailMessage.setSubject("title");
         simpleMailMessage.setText(code+"");
-        javaMailSender.send(simpleMailMessage);
-        return ResponseResult.okResult(null);
+        try {
+            javaMailSender.send(simpleMailMessage);
+        }
+        catch (Exception e){
+            return ResponseResult.errorResult(422,"参数错误");
+        }
+        return ResponseResult.okResult(200,"响应成功");
     }
 
     public void setSet(Map<String, String> set) {

@@ -1,29 +1,31 @@
-package com.net.gateway.util;
+package com.net.common.util;
 
 import io.jsonwebtoken.Jwts;
-import io.netty.util.internal.StringUtil;
+import io.jsonwebtoken.SignatureAlgorithm;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class JWTUtil {
     private static final String key="NET-DISK-PASSWORD"; //key
-//    public static  String getJWT(UserDTO userDTO) {
-//        Map map=new HashMap<>();
-//        map.put("user",userDTO);
-//        String ret = Jwts.builder().
-//                signWith(SignatureAlgorithm.HS256,key).  //加密方式H256，密钥为key
-//                        setClaims(map).
-//                setExpiration(new Date(System.currentTimeMillis()+3600*1000)).  //超时时间
-//                        compact();
-//        return ret;
-//    }
+    public static  String getJWT(String text) {
+        Map map=new HashMap<>();
+        map.put("userid",text);
+        String ret = Jwts.builder().
+                signWith(SignatureAlgorithm.HS256,key).  //加密方式H256，密钥为key
+                        setClaims(map).
+                setExpiration(new Date(System.currentTimeMillis()+3600*1000)).  //超时时间
+                        compact();
+        return ret;
+    }
 
     public static String parseJWT(String plainText) throws Exception{
         String userDTO=null;
-            if(StringUtil.isNullOrEmpty(plainText))
-                throw new Exception();
-            Map map=(Map) Jwts.parser().setSigningKey(key).parseClaimsJws(plainText).getBody(); //取出user数据，由于user是对象，会在内部被封装为map。如果是基础类型，应该会被封装为String吧大概
-
+        if(plainText==null||plainText.length()==0){
+            throw new Exception();
+        }
+        Map map=(Map) Jwts.parser().setSigningKey(key).parseClaimsJws(plainText).getBody();
         return (String) map.get("userid");
     }
 //    public static void saveJWT(UserDTO userDTO){
