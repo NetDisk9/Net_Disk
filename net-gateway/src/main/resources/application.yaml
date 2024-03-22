@@ -12,3 +12,5 @@
 #          uri : lb://user-service
 #          predicates:
 #            - Path:/user/**
+exclude:
+  path: /user/login,/email
