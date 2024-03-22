@@ -1,0 +1,5 @@
+spring:
+  redis:
+    host: 121.41.97.160
+    port: 6379
+    password: Baozi0318
