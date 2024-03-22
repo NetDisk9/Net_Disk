@@ -14,6 +14,7 @@ spring:
         mime:
           splitlongparameters: false
     default-encoding: UTF-8
-key:
-  login=email:code:login
-  register=email:code:register
+properties:
+  set:
+    login: "email:code:login:"
+    register: "email:code:register:"

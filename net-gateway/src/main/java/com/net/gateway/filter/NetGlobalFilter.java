@@ -23,31 +23,32 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request=exchange.getRequest();
-        if(isExclude(request.getPath().toString())){
-            System.out.println("ok");
-            return chain.filter(exchange);
-        }
-        List<String> list=request.getHeaders().get("authorization");
-        String token=null;
-        if(list!=null&&!list.isEmpty()){
-            token=list.get(0);
-        }
-        String userId;
-        System.out.println(token);
-        try{
-            userId= JWTUtil.parseJWT(token);
-            System.out.println(userId);
-        }
-        catch (Exception e){
-            System.out.println("6666");
-            ServerHttpResponse response = exchange.getResponse();
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            return response.setComplete();
-        }
-        exchange.mutate()
-                .request(builder -> builder.header("user-info",userId))
-                .build();
         return chain.filter(exchange);
+//        if(isExclude(request.getPath().toString())){
+//            System.out.println("ok");
+//            return chain.filter(exchange);
+//        }
+//        List<String> list=request.getHeaders().get("authorization");
+//        String token=null;
+//        if(list!=null&&!list.isEmpty()){
+//            token=list.get(0);
+//        }
+//        String userId;
+//        System.out.println(token);
+//        try{
+//            userId= JWTUtil.parseJWT(token);
+//            System.out.println(userId);
+//        }
+//        catch (Exception e){
+//            System.out.println("6666");
+//            ServerHttpResponse response = exchange.getResponse();
+//            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+//            return response.setComplete();
+//        }
+//        exchange.mutate()
+//                .request(builder -> builder.header("user-info",userId))
+//                .build();
+//        return chain.filter(exchange);
     }
 
     @Override
