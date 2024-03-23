@@ -1,8 +1,8 @@
 server:
-  port: 8082
+  port: 8083
 spring:
   application:
-    name: email-service # 服务名称
+    name: file-service # 服务名称
   profiles:
     active: dev
   cloud:
@@ -14,3 +14,9 @@ spring:
         file-extension: yaml
         shared-configs:
           - dataId: shared-jdbc.yaml
+net:
+  alioss:
+    endpoint: oss-cn-shenzhen.aliyuncs.com
+    access-key-id: LTAI5tGuQ8gvJesWR63ZUiXz
+    access-key-secret: b4whqWnNQ5bYqPMi9uPtGeaunwHTf5
+    bucket-name: wangluodapangzi

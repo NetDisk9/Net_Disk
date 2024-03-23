@@ -60,6 +60,9 @@ public class ResponseResult<T> implements Serializable {
         }
         return result;
     }
+    public static ResponseResult okResult() {
+        return okResult(ResultCodeEnum.SUCCESS);
+    }
 
     public static ResponseResult okResult(ResultCodeEnum enums) {
         ResponseResult result = setAppHttpCodeEnum(enums,enums.getMessage());
@@ -159,7 +162,7 @@ public class ResponseResult<T> implements Serializable {
 
 
         //根据不用的业务返回不同的提示信息  比如：当前操作需要登录、参数错误
-        ResponseResult result2 = ResponseResult.errorResult(ResultCodeEnum.NEED_LOGIN,"自定义提示信息");
+        ResponseResult result2 = ResponseResult.errorResult(ResultCodeEnum.SERVER_ERROR,"自定义提示信息");
         System.out.println(JSON.toJSONString(result2));
         System.out.println("=====================================");
 

@@ -20,6 +20,7 @@ public class SHAUtil {
         byte[] digest = messageDigest.digest();
         //字符数组转换成字符串返回
         String result = byteArrayToHexString(digest);
+        result = result.substring(0,64);
         return result;
     }
     private static String byteArrayToHexString(byte[] bytes) {

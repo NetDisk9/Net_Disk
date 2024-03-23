@@ -1,11 +1,18 @@
 server:
   port: 8080
 spring:
+  main:
+    allow-bean-definition-overriding: true
+    web-application-type: reactive
   application:
     name: gateway
   cloud:
     nacos:
       server-addr: 121.41.97.160:8848
+      config:
+        file-extension: yaml
+        shared-configs:
+          - dataId: shared-jdbc.yaml
     gateway:
       routes:
         - id: user-service
@@ -16,3 +23,7 @@ spring:
           uri : lb://email-service
           predicates:
             - Path=/email/**
+        - id: file-service
+          uri : lb://file-service
+          predicates:
+            - Path=/file/**
