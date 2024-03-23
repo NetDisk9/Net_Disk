@@ -15,20 +15,28 @@ import com.net.common.enums.ResultCodeEnum;
 import com.net.common.util.JWTUtil;
 import com.net.common.util.SHAUtil;
 import com.net.redis.utils.RedisUtil;
+import com.net.user.entity.LoginLog;
 import com.net.user.entity.SysUser;
 import com.net.user.pojo.dto.LoginDTO;
 import com.net.user.pojo.dto.RegisterDTO;
 import com.net.user.pojo.dto.UpdatePasswordDTO;
 import com.net.user.pojo.dto.UserDTO;
 import com.net.user.pojo.vo.UserVO;
+import com.net.user.service.LoginLogService;
 import com.net.user.service.SysUserService;
+import com.net.user.util.IPUtil;
 import io.netty.util.internal.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 
 /**
@@ -44,9 +52,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class SysUserController {
     private final SysUserService userService;
-
+    private final LoginLogService loginLogService;
     @PostMapping("/login")
-    public ResponseResult login(@RequestBody LoginDTO loginDTO){
+    public ResponseResult login(@RequestBody LoginDTO loginDTO, HttpServletRequest request){
         if(loginDTO==null|| StringUtil.isNullOrEmpty(loginDTO.getPassword())) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
@@ -69,17 +77,24 @@ public class SysUserController {
         }
         Long userId=(Long) result.getData();
         result.setData(JWTUtil.getJWT(userId+""));
+        String ip=IPUtil.getIp(request);
+        String address=IPUtil.getIpAddress(ip);
+        loginLogService.save(new LoginLog(userId,loginDTO.getDeviceName(),loginDTO.getDeviceOS(), LocalDateTime.now(),address,ip));
         return result;
     }
     @PostMapping("/code/login")
-    public ResponseResult loginByCode(@RequestBody LoginDTO loginDTO){
+    public ResponseResult loginByCode(@RequestBody LoginDTO loginDTO,HttpServletRequest request){
         if(loginDTO==null||StringUtil.isNullOrEmpty(loginDTO.getCode())||StringUtil.isNullOrEmpty(loginDTO.getEmail())){
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
         if(!loginDTO.getCode().equals(userService.getUserLoginCode(loginDTO.getEmail()))){
             return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR);
         }
+        userService.deleteUserLoginCode(loginDTO.getEmail());
         Long userId=userService.getUserIdByEmail(loginDTO.getEmail());
+        String ip=IPUtil.getIp(request);
+        String address=IPUtil.getIpAddress(ip);
+        loginLogService.save(new LoginLog(userId,loginDTO.getDeviceName(),loginDTO.getDeviceOS(), LocalDateTime.now(),address,ip));
         return ResponseResult.okResult(JWTUtil.getJWT(userId+""));
 
     }
@@ -114,5 +129,10 @@ public class SysUserController {
     public ResponseResult uploadAvatar(@RequestBody MultipartFile multipartFile){
         return ResponseResult.okResult(ResultCodeEnum.SUCCESS);
     }
+//    @GetMapping("/test")
+//    public ResponseResult test(){
+//        System.out.println(BaseContext.getCurrentId());
+//        return new ResponseResult().ok(200,"");
+//    }
 
 }

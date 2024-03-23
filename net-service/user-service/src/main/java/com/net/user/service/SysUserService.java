@@ -18,4 +18,5 @@ public interface SysUserService extends IService<SysUser> {
     public ResponseResult getUserIdByUsernameAndPassword(String username,String password);
     public Long getUserIdByEmail(String email);
     public String getUserLoginCode(String email);
+    public void deleteUserLoginCode(String email);
 }

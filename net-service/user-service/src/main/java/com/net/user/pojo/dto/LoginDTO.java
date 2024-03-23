@@ -34,4 +34,6 @@ public class LoginDTO {
      * 验证码
      */
     private String code;
+    private String deviceName;
+    private String deviceOS;
 }

@@ -60,10 +60,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     public String getUserLoginCode(String email) {
 
         String code=redisUtil.get("email:code:login:"+email).toString();
-        if(!StringUtil.isNullOrEmpty(code)){
-            redisUtil.del("email:code:login:"+email);
-        }
         return code;
+    }
+
+    @Override
+    public void deleteUserLoginCode(String email) {
+        redisUtil.del("email:code:login:"+email);
     }
 
     @Override
