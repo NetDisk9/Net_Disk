@@ -184,6 +184,7 @@ public class SysUserController {
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseResult uploadAvatar(@RequestPart MultipartFile[] multipartFiles) {
         try {
+
             return fileClient.upload(multipartFiles);
         } catch (IOException e) {
             throw new CustomException(ResultCodeEnum.SERVER_ERROR);

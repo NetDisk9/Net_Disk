@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -27,6 +28,8 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
     private String[] excludePath;
     @Resource
     private RedisUtil redisUtil;
+
+    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -71,10 +74,14 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
         return 0;
     }
 
-    public boolean isExclude(String path) {
-        for (int i = 0; i < excludePath.length; i++)
-            if (path.startsWith(excludePath[i]))
+    private boolean isExclude(String antPath) {
+        for (String pathPattern : excludePath) {
+            //antPathMatcher来匹配 类似/search/**
+            if(antPathMatcher.match(pathPattern, antPath)){
                 return true;
+            }
+        }
         return false;
     }
+
 }
