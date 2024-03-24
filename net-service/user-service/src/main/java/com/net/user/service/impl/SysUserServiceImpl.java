@@ -8,6 +8,7 @@ import com.net.common.enums.ResultCodeEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.net.common.util.SHAUtil;
+import com.net.redis.constant.RedisConstants;
 import com.net.redis.utils.RedisUtil;
 import com.net.user.entity.SysUser;
 import com.net.user.mapper.SysUserMapper;
@@ -42,7 +43,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             return ResponseResult.errorResult(ResultCodeEnum.USERNAME_HASUSED);
         } else if (checkEmailExists(registerDTO.getEmail())) {
             return ResponseResult.errorResult(ResultCodeEnum.EMAIL_HASUSED);
-        } else if (!Objects.equals(redisUtil.get("email:code:register:" + registerDTO.getEmail()).toString(), registerDTO.getCode())) {
+        } else if (!Objects.equals(redisUtil.get(RedisConstants.EMAIL_CODE_REGISTER + registerDTO.getEmail()).toString(), registerDTO.getCode())) {
             return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR);
         }
         SysUser sysUser = SysUser.builder()
@@ -78,7 +79,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         queryWrapper.eq(SysUser::getPassword,SHAUtil.encrypt(password)).eq(supplier,data).select(SysUser::getId);
         SysUser user=getOne(queryWrapper);
         if(user==null||user.getId()==null){
-            return ResponseResult.errorResult(403,"用户名或密码错误");
+            return ResponseResult.errorResult(ResultCodeEnum.LOGIN_PASSWORD_ERROR);
         }
         return ResponseResult.okResult(user.getId());
 
@@ -98,7 +99,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public String getUserLoginCode(String email) {
-        String code=redisUtil.get("email:code:login:"+email).toString();
+        String code=redisUtil.get(RedisConstants.EMAIL_CODE_LOGIN+email).toString();
         return code;
     }
 
@@ -135,7 +136,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public void deleteUserLoginCode(String email) {
-        redisUtil.del("email:code:login:"+email);
+        redisUtil.del(RedisConstants.EMAIL_CODE_LOGIN+email);
     }
 
     @Override
