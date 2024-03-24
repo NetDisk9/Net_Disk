@@ -18,7 +18,8 @@ public enum ResultCodeEnum {
     // 参数段
     IMAGE_FORMAT_ERROR(432,"图片格式错误"),
     CODE_ERROR(440,"验证码错误"),
-    TOKEN_ERROR(440,"token错误"),
+    TOKEN_ERROR(442,"token错误"),
+    EMAIL_HASUSED(453,"邮箱已被注册"),
     SERVER_ERROR(500,"服务器内部错误"),
     ;
 

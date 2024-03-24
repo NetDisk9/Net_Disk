@@ -7,8 +7,6 @@ import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.net.common.dto.ResponseResult;
-import com.net.common.enums.ResultCodeEnum;
 import com.net.common.util.SHAUtil;
 import com.net.redis.utils.RedisUtil;
 import com.net.user.entity.SysUser;
@@ -16,24 +14,15 @@ import com.net.user.mapper.SysUserMapper;
 import com.net.user.pojo.dto.RegisterDTO;
 import com.net.user.pojo.dto.UpdatePasswordDTO;
 import com.net.user.pojo.dto.UserDTO;
-import com.net.user.pojo.vo.DeviceVO;
 import com.net.user.pojo.vo.UserVO;
 import com.net.user.service.SysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.net.user.util.RegexUtil;
-import io.netty.util.internal.StringUtil;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * <p>
@@ -50,17 +39,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     public ResponseResult insertRegisterInfo(RegisterDTO registerDTO) {
         if (checkUsernameExists(registerDTO.getUsername())) {
-            return ResponseResult.errorResult(411, "用户名已被占用");
+            return ResponseResult.errorResult(ResultCodeEnum.USERNAME_HASUSED);
         } else if (checkEmailExists(registerDTO.getEmail())) {
-            return ResponseResult.errorResult(453, "邮箱已被注册");
+            return ResponseResult.errorResult(ResultCodeEnum.EMAIL_HASUSED);
         } else if (!Objects.equals(redisUtil.get("email:code:register:" + registerDTO.getEmail()).toString(), registerDTO.getCode())) {
-            return ResponseResult.errorResult(440, "验证码错误");
+            return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR);
         }
         SysUser sysUser = SysUser.builder()
                 .username(registerDTO.getUsername())
                 .email(registerDTO.getEmail())
                 .password(SHAUtil.encrypt(registerDTO.getPassword()))
-                .avatar("")
+                .avatar("https://wangluodapangzi.oss-cn-shenzhen.aliyuncs.com/595d009f-bffc-4efd-b7cf-24262a323ceb.png")
                 .status(0)
                 .method("111") // 默认111，三种方式全开，即ID/用户名/邮箱登录
                 .build();
@@ -175,5 +164,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .set(SysUser::getMethod, methods);
         this.update(updateWrapper);
         return ResponseResult.okResult();
+    }
+
+    @Override
+    public ResponseResult updateAvatar(String avatarPath) {
+        LambdaUpdateWrapper<SysUser> updateWrapper=new LambdaUpdateWrapper<>();
+        updateWrapper
+                .eq(SysUser::getId, BaseContext.getCurrentId())
+                .set(SysUser::getAvatar, avatarPath);
+        this.update(updateWrapper);
+        return ResponseResult.okResult(avatarPath);
     }
 }

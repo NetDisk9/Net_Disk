@@ -184,8 +184,14 @@ public class SysUserController {
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseResult uploadAvatar(@RequestPart MultipartFile[] multipartFiles) {
         try {
-
-            return fileClient.upload(multipartFiles);
+            ResponseResult uploadResult = fileClient.upload(multipartFiles);
+            if(uploadResult.getCode()==ResultCodeEnum.SUCCESS.getCode()) {// 上传成功
+                ArrayList<String>avatarList = (ArrayList<String>) uploadResult.getData();
+                String avatarPath = StringUtils.join(avatarList, ",");
+                return userService.updateAvatar(avatarPath);
+            }else{
+                throw new CustomException(ResultCodeEnum.SERVER_ERROR);
+            }
         } catch (IOException e) {
             throw new CustomException(ResultCodeEnum.SERVER_ERROR);
         }

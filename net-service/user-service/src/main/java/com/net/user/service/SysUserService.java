@@ -30,5 +30,6 @@ public interface SysUserService extends IService<SysUser> {
     ResponseResult getLoginMethod();
     ResponseResult updateLoginMethod(String methods);
 
+    ResponseResult updateAvatar(String data);
 }
 
