@@ -59,7 +59,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         SysUser sysUser = SysUser.builder()
                 .username(registerDTO.getUsername())
                 .email(registerDTO.getEmail())
-                .password(registerDTO.getPassword())
+                .password(SHAUtil.encrypt(registerDTO.getPassword()))
+                .avatar("")
                 .status(0)
                 .method("111") // 默认111，三种方式全开，即ID/用户名/邮箱登录
                 .build();

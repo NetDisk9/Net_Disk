@@ -85,7 +85,7 @@ public class SysUserController {
     }
 
     @PutMapping("/login/method")
-    public ResponseResult updateLoginMethod(@RequestHeader("type") String methods) {
+    public ResponseResult updateLoginMethod(@RequestParam("type") String methods) {
         if (!methods.matches("[01]{3}")) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
