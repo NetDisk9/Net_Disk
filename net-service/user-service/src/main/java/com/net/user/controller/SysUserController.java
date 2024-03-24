@@ -11,6 +11,7 @@ import com.net.common.util.JWTUtil;
 import com.net.redis.utils.RedisUtil;
 import com.net.user.entity.LoginLog;
 import com.net.user.pojo.dto.LoginDTO;
+import com.net.user.pojo.dto.RegisterDTO;
 import com.net.user.pojo.dto.UpdatePasswordDTO;
 import com.net.user.pojo.dto.UserDTO;
 import com.net.user.service.LoginLogService;
@@ -27,6 +28,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -75,6 +79,20 @@ public class SysUserController {
         return ResponseResult.okResult(token);
     }
 
+    @GetMapping("/login/method")
+    public ResponseResult getLoginMethod() {
+        return userService.getLoginMethod();
+    }
+
+    @PutMapping("/login/method")
+    public ResponseResult updateLoginMethod(@RequestHeader("type") String methods) {
+        if (!methods.matches("[01]{3}")) {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        return userService.updateLoginMethod(methods);
+    }
+
+
     @PostMapping("/code/login")
     public ResponseResult loginByCode(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
         if (loginDTO == null || StringUtil.isNullOrEmpty(loginDTO.getCode()) || StringUtil.isNullOrEmpty(loginDTO.getEmail())) {
@@ -99,6 +117,17 @@ public class SysUserController {
     @GetMapping("/info")
     public ResponseResult getUserInfo() {
         return userService.getUserInfo();
+    }
+
+    @GetMapping("/info/login")
+    public ResponseResult getLoginRecord() {
+        List<LoginLog> records = new ArrayList<>();
+        for (LoginLog loginLog : loginLogService.list()) {
+            if (Objects.equals(loginLog.getUserId(), BaseContext.getCurrentId())) {
+                records.add(loginLog);
+            }
+        }
+        return ResponseResult.okResult(records);
     }
 
     @PutMapping("/update")
@@ -160,5 +189,22 @@ public class SysUserController {
             throw new CustomException(ResultCodeEnum.SERVER_ERROR);
         }
     }
+
+    @PostMapping("/register")
+    public ResponseResult register(@RequestBody RegisterDTO registerDTO, HttpServletRequest request) {
+        if (registerDTO == null || StringUtil.isNullOrEmpty(registerDTO.getUsername()) ||
+                                   StringUtil.isNullOrEmpty(registerDTO.getPassword()) ||
+                                   StringUtil.isNullOrEmpty(registerDTO.getEmail()) ||
+                                   StringUtil.isNullOrEmpty(registerDTO.getCode())) {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        return userService.insertRegisterInfo(registerDTO);
+    }
+
+    @GetMapping("/device")
+    public ResponseResult getDevice() {
+        return loginLogService.getDevice();
+    }
+
 
 }

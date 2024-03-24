@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.core.SpringVersion;
 
 /**
  * <p>
@@ -66,6 +67,12 @@ public class SysUser implements Serializable {
      * 状态 0启用 1禁用
      */
     private Integer status;
+
+    /**
+     *
+     * 登录方式
+     */
+    private String  method;
 
     public SysUser(Long id) {
         this.id = id;

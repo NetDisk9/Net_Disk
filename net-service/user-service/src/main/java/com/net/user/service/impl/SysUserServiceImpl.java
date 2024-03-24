@@ -13,8 +13,10 @@ import com.net.common.util.SHAUtil;
 import com.net.redis.utils.RedisUtil;
 import com.net.user.entity.SysUser;
 import com.net.user.mapper.SysUserMapper;
+import com.net.user.pojo.dto.RegisterDTO;
 import com.net.user.pojo.dto.UpdatePasswordDTO;
 import com.net.user.pojo.dto.UserDTO;
+import com.net.user.pojo.vo.DeviceVO;
 import com.net.user.pojo.vo.UserVO;
 import com.net.user.service.SysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,6 +26,9 @@ import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,6 +47,38 @@ import java.util.function.Supplier;
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements SysUserService {
     @Autowired
     RedisUtil redisUtil;
+    @Override
+    public ResponseResult insertRegisterInfo(RegisterDTO registerDTO) {
+        if (checkUsernameExists(registerDTO.getUsername())) {
+            return ResponseResult.errorResult(411, "用户名已被占用");
+        } else if (checkEmailExists(registerDTO.getEmail())) {
+            return ResponseResult.errorResult(453, "邮箱已被注册");
+        } else if (!Objects.equals(redisUtil.get("email:code:register:" + registerDTO.getEmail()).toString(), registerDTO.getCode())) {
+            return ResponseResult.errorResult(440, "验证码错误");
+        }
+        SysUser sysUser = SysUser.builder()
+                .username(registerDTO.getUsername())
+                .email(registerDTO.getEmail())
+                .password(registerDTO.getPassword())
+                .status(0)
+                .method("111") // 默认111，三种方式全开，即ID/用户名/邮箱登录
+                .build();
+        this.save(sysUser); // 使用MyBatis-Plus的save方法
+        return ResponseResult.okResult(sysUser.getId().toString()); // 插入成功，返回新用户的ID
+    }
+    public boolean checkUsernameExists(String username) {
+        LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysUser::getUsername, username).select(SysUser::getId);
+        SysUser user = this.getOne(queryWrapper);
+        return user != null;
+    }
+    public boolean checkEmailExists(String email) {
+        LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysUser::getEmail, email).select(SysUser::getId);
+        SysUser user = this.getOne(queryWrapper);
+        return user != null;
+    }
+
     @Override
     public ResponseResult getUserIdByEmailAndPassword(String email, String password) {
         return getUserIdByPassword(SysUser::getEmail,email,password);
@@ -117,5 +154,25 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         queryWrapper.eq(SysUser::getEmail,email).select(SysUser::getId);
         SysUser user=getOne(queryWrapper);
         return user.getId();
+    }
+
+    @Override
+    public ResponseResult getLoginMethod() {
+        LambdaQueryWrapper<SysUser> queryWrapper =new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysUser::getId,BaseContext.getCurrentId());
+        SysUser user = getOne(queryWrapper);
+        Map<String, String> data = new HashMap<>();
+        data.put("type", user.getMethod());
+        return ResponseResult.okResult(data);
+    }
+
+    @Override
+    public ResponseResult updateLoginMethod(String methods) {
+        LambdaUpdateWrapper<SysUser> updateWrapper=new LambdaUpdateWrapper<>();
+        updateWrapper
+                .eq(SysUser::getId, BaseContext.getCurrentId())
+                .set(SysUser::getMethod, methods);
+        this.update(updateWrapper);
+        return ResponseResult.okResult();
     }
 }
