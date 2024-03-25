@@ -181,7 +181,7 @@ public class SysUserController {
         if (!RegexUtil.checkPasswordValid(newPassword)) { // 格式不正确
             responseResult = ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
-        
+
         // 根据Id和输入的密码查找用户
         responseResult = userService.getUserByUserIdAndPassword(BaseContext.getCurrentId(), oldPassword);
         if (responseResult != null && responseResult.getCode() != ResultCodeEnum.SUCCESS.getCode()) { // 密码错误
