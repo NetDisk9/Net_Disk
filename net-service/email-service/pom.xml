@@ -6,16 +6,9 @@
         <groupId>org.example</groupId>
         <artifactId>net-service</artifactId>
         <version>1.0-SNAPSHOT</version>
-        <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example</groupId>
     <artifactId>email-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>email-service</name>
-    <description>email-service</description>
-    <properties>
-        <java.version>17</java.version>
-    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

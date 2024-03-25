@@ -20,14 +20,17 @@ public class LoginLog {
     private LocalDateTime loginTime;
     private String loginAddress;
     private String loginIp;
+    private String loginType;
 
-    public LoginLog(Long userId, String deviceName, String deviceOS, LocalDateTime loginTime, String loginAddress, String loginIp) {
+    public LoginLog(Long userId, String deviceName, String deviceOS, LocalDateTime loginTime, String loginAddress, String loginIp, String loginType) {
+        this.logId = logId;
         this.userId = userId;
         this.deviceName = deviceName;
         this.deviceOS = deviceOS;
         this.loginTime = loginTime;
         this.loginAddress = loginAddress;
         this.loginIp = loginIp;
+        this.loginType = loginType;
     }
 
     public LoginLog() {

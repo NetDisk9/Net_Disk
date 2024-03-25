@@ -71,29 +71,29 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public ResponseResult getUserIdByEmailAndPassword(String email, String password) {
-        return getUserIdByPassword(SysUser::getEmail,email,password);
+    public ResponseResult getUserByEmailAndPassword(String email, String password) {
+        return getUserByPassword(SysUser::getEmail,email,password);
     }
-    public<T> ResponseResult getUserIdByPassword(SFunction<SysUser,T> supplier, T data, String password){
+    public<T> ResponseResult getUserByPassword(SFunction<SysUser,T> supplier, T data, String password){
         LambdaQueryWrapper<SysUser> queryWrapper=new LambdaQueryWrapper<>();
-        queryWrapper.eq(SysUser::getPassword,SHAUtil.encrypt(password)).eq(supplier,data).select(SysUser::getId);
+        queryWrapper.eq(SysUser::getPassword,SHAUtil.encrypt(password)).eq(supplier,data);
         SysUser user=getOne(queryWrapper);
         if(user==null||user.getId()==null){
             return ResponseResult.errorResult(ResultCodeEnum.LOGIN_PASSWORD_ERROR);
         }
-        return ResponseResult.okResult(user.getId());
+        return ResponseResult.okResult(user);
 
     }
 
     @Override
-    public ResponseResult getUserIdByUserIdAndPassword(Long userId, String password) {
-        return getUserIdByPassword(SysUser::getId,userId,password);
+    public ResponseResult getUserByUserIdAndPassword(Long userId, String password) {
+        return getUserByPassword(SysUser::getId,userId,password);
 
     }
 
     @Override
-    public ResponseResult getUserIdByUsernameAndPassword(String username, String password) {
-        return getUserIdByPassword(SysUser::getUsername,username,password);
+    public ResponseResult getUserByUsernameAndPassword(String username, String password) {
+        return getUserByPassword(SysUser::getUsername,username,password);
 
     }
 
@@ -140,11 +140,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public Long getUserIdByEmail(String email) {
+    public SysUser getUserByEmail(String email) {
         LambdaQueryWrapper<SysUser> queryWrapper=new LambdaQueryWrapper<>();
-        queryWrapper.eq(SysUser::getEmail,email).select(SysUser::getId);
+        queryWrapper.eq(SysUser::getEmail,email);
         SysUser user=getOne(queryWrapper);
-        return user.getId();
+        return user;
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.net.common.exception.CustomException;
 import com.net.common.util.JWTUtil;
 import com.net.redis.utils.RedisUtil;
 import com.net.user.entity.LoginLog;
+import com.net.user.entity.SysUser;
 import com.net.user.pojo.dto.LoginDTO;
 import com.net.user.pojo.dto.RegisterDTO;
 import com.net.user.pojo.dto.UpdatePasswordDTO;
@@ -56,26 +57,38 @@ public class SysUserController {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
 //        loginDTO.setPassword(SHAUtil.encrypt(loginDTO.getPassword()));
+        String selectedMethod=null;
         ResponseResult result = null;
         if (!StringUtil.isNullOrEmpty(loginDTO.getEmail())) {
-            result = userService.getUserIdByEmailAndPassword(loginDTO.getEmail(), loginDTO.getPassword());
+            result = userService.getUserByEmailAndPassword(loginDTO.getEmail(), loginDTO.getPassword());
+            selectedMethod="100";
         } else if (loginDTO.getId() != null) {
-            result = userService.getUserIdByUserIdAndPassword(loginDTO.getId(), loginDTO.getPassword());
+            result = userService.getUserByUserIdAndPassword(loginDTO.getId(), loginDTO.getPassword());
+            selectedMethod="111";
         } else if (!StringUtil.isNullOrEmpty(loginDTO.getUsername())) {
-            result = userService.getUserIdByUsernameAndPassword(loginDTO.getUsername(), loginDTO.getPassword());
+            result = userService.getUserByUsernameAndPassword(loginDTO.getUsername(), loginDTO.getPassword());
+            selectedMethod="010";
         } else {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
         if (result.getCode() != 200) {
             return result;
         }
-        Long userId = (Long) result.getData();
+        SysUser user=(SysUser)result.getData();
+        Long userId = user.getId();
+        String loginType=user.getMethod();
+        if(selectedMethod.charAt(0)=='1'&&loginType.charAt(0)!='1'){
+            return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
+        }
+        else if(selectedMethod.charAt(1)=='1'&&loginType.charAt(0)!='1'){
+            return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
+        }
         String token = JWTUtil.getJWT(userId + "");
         // 存到redis
         redisUtil.set(RedisConstants.LOGIN_USER_KEY + token, token, RedisConstants.LOGIN_USER_TTL);
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
-        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(), address, ip));
+        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(), address, ip,selectedMethod));
         return ResponseResult.okResult(token);
     }
 
@@ -102,10 +115,15 @@ public class SysUserController {
             return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR);
         }
         userService.deleteUserLoginCode(loginDTO.getEmail());
-        Long userId = userService.getUserIdByEmail(loginDTO.getEmail());
+        SysUser user = userService.getUserByEmail(loginDTO.getEmail());
+        Long userId=user.getId();
+        String loginMethod=user.getMethod();
+        if(loginMethod.charAt(2)!='1'){
+            return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
+        }
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
-        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(), address, ip));
+        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(), address, ip,"001"));
 
         String token = JWTUtil.getJWT(userId + "");
         // 存到redis
@@ -169,8 +187,11 @@ public class SysUserController {
             return responseResult;
         }
         // 根据Id和输入的密码查找用户
-        responseResult = userService.getUserIdByUserIdAndPassword(BaseContext.getCurrentId(), oldPassword);
-
+        responseResult = userService.getUserByUserIdAndPassword(BaseContext.getCurrentId(), oldPassword);
+        if (responseResult != null && responseResult.getCode() != ResultCodeEnum.SUCCESS.getCode()) { // 密码错误
+            redisUtil.set(RedisConstants.PASSWORD_ERROR_TIMES, times + 1, RedisConstants.PASSWORD_ERROR_TTL);
+            return responseResult;
+        }
         // 修改密码
         responseResult = userService.updatePassword(updatePasswordDTO);
         if (responseResult != null && responseResult.getCode() == ResultCodeEnum.SUCCESS.getCode()) { // 修改成功

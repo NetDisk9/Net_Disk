@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RequestBody;
  */
 public interface SysUserService extends IService<SysUser> {
     ResponseResult insertRegisterInfo(RegisterDTO registerDTO);
-    ResponseResult getUserIdByEmailAndPassword(String email, String password);
-    ResponseResult getUserIdByUserIdAndPassword(Long userId, String password);
-    ResponseResult getUserIdByUsernameAndPassword(String username, String password);
-    Long getUserIdByEmail(String email);
+    ResponseResult getUserByEmailAndPassword(String email, String password);
+    ResponseResult getUserByUserIdAndPassword(Long userId, String password);
+    ResponseResult getUserByUsernameAndPassword(String username, String password);
+    SysUser getUserByEmail(String email);
     String getUserLoginCode(String email);
     void deleteUserLoginCode(String email);
     ResponseResult updatePassword(UpdatePasswordDTO updatePasswordDTO);

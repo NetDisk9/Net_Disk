@@ -15,6 +15,8 @@ public enum ResultCodeEnum {
     USERNAME_HASUSED(411,"用户名已被占用"),
     PASSWORD_MISTAKE_EXCESSIVE(421,"密码错误次数过多"),
     PARAM_ERROR(422,"参数格式错误"),
+    LOGIN_METHOD_UNSUPPORT(423,"登录方式不支持"),
+
     // 参数段
     IMAGE_FORMAT_ERROR(432,"图片格式错误"),
     CODE_ERROR(440,"验证码错误"),

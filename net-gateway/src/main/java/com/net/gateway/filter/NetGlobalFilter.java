@@ -1,5 +1,7 @@
 package com.net.gateway.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
 import com.net.common.exception.CustomException;
 import com.net.gateway.util.JWTUtil;
@@ -10,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -46,18 +50,26 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
         }
         String userId;
         System.out.println(token);
-        try {
-            // 从redis中获取相同的token
-            String redisToken = (String) redisUtil.get(RedisConstants.LOGIN_USER_KEY + token);
-            if (redisToken == null || !redisToken.equals(token)) {
-                // token已经失效了
-                System.out.println("token失效");
-                throw new CustomException(ResultCodeEnum.TOKEN_ERROR);
+        try{
+            try {
+                // 从redis中获取相同的token
+                String redisToken = (String) redisUtil.get(RedisConstants.LOGIN_USER_KEY + token);
+                if (redisToken == null || !redisToken.equals(token)) {
+                    // token已经失效了
+                    System.out.println("token失效");
+                    throw new CustomException(ResultCodeEnum.TOKEN_ERROR);
+                }
+                userId = JWTUtil.parseJWT(token);
+                System.out.println(userId);
+            } catch (Exception e) {
+                ServerHttpResponse response = exchange.getResponse();
+                DataBufferFactory bufferFactory = response.bufferFactory();
+                ObjectMapper objectMapper = new ObjectMapper();
+                DataBuffer wrap = bufferFactory.wrap(objectMapper.writeValueAsBytes(new ResponseResult<>(408, (ResultCodeEnum.TOKEN_ERROR))));
+                return response.writeWith(Mono.fromSupplier(() -> wrap));
             }
-            userId = JWTUtil.parseJWT(token);
-            System.out.println(userId);
-        } catch (Exception e) {
-
+        }catch (Exception e){
+            e.printStackTrace();
             ServerHttpResponse response = exchange.getResponse();
             response.setStatusCode(HttpStatus.UNAUTHORIZED);
             return response.setComplete();
