@@ -12,6 +12,8 @@
         <module>net-common</module>
         <module>net-service</module>
         <module>net-gateway</module>
+        <module>net-service/file-service</module>
+        <module>net-service-api</module>
     </modules>
 
     <parent>

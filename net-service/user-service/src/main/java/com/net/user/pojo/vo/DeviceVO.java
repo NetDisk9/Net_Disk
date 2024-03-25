@@ -17,17 +17,17 @@ public class DeviceVO {
     /**
      * 设备名
      */
-    private String DeviceName;
+    private String deviceName;
     /**
      * 操作系统
      */
-    private String DeviceOS;
+    private String deviceOS;
     /**
      * 登录类型
      */
-    private String LoginType;
+    private String loginType;
     /**
      * 登录时间
      */
-    private String LoginTime;
+    private String loginTime;
 }

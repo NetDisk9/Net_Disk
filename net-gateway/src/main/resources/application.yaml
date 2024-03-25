@@ -1,2 +1,2 @@
 exclude:
-  path: /user/login,/email,/user/register,/user/code/login
+  path: /user/login,/email/**,/user/register,/user/code/login
