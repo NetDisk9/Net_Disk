@@ -43,7 +43,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             return ResponseResult.errorResult(ResultCodeEnum.USERNAME_HASUSED);
         } else if (checkEmailExists(registerDTO.getEmail())) {
             return ResponseResult.errorResult(ResultCodeEnum.EMAIL_HASUSED);
-        } else if (!Objects.equals(redisUtil.get(RedisConstants.EMAIL_CODE_REGISTER + registerDTO.getEmail()).toString(), registerDTO.getCode())) {
+        } else if (redisUtil.get(RedisConstants.EMAIL_CODE_REGISTER + registerDTO.getEmail()) == null ||
+                !Objects.equals(redisUtil.get(RedisConstants.EMAIL_CODE_REGISTER + registerDTO.getEmail()).toString(), registerDTO.getCode())) {
             return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR);
         }
         SysUser sysUser = SysUser.builder()
