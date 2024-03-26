@@ -20,6 +20,7 @@ import com.net.user.service.SysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +39,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Autowired
     RedisUtil redisUtil;
     @Override
-    public ResponseResult insertRegisterInfo(RegisterDTO registerDTO) {
+    public ResponseResult insertRegisterInfo(@RequestBody RegisterDTO registerDTO) {
+        System.out.println(registerDTO.getEmail());
+        System.out.println(RedisConstants.EMAIL_CODE_REGISTER);
         if (checkUsernameExists(registerDTO.getUsername())) {
             return ResponseResult.errorResult(ResultCodeEnum.USERNAME_HASUSED);
         } else if (checkEmailExists(registerDTO.getEmail())) {
