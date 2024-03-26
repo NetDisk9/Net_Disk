@@ -65,13 +65,14 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
                 ServerHttpResponse response = exchange.getResponse();
                 DataBufferFactory bufferFactory = response.bufferFactory();
                 ObjectMapper objectMapper = new ObjectMapper();
-                DataBuffer wrap = bufferFactory.wrap(objectMapper.writeValueAsBytes(new ResponseResult<>(408, (ResultCodeEnum.TOKEN_ERROR))));
+                DataBuffer wrap = bufferFactory.wrap(objectMapper.writeValueAsBytes(new ResponseResult<>(442, (ResultCodeEnum.TOKEN_ERROR))));
+                response.setStatusCode(HttpStatus.OK);
+                System.out.println("ok");
                 return response.writeWith(Mono.fromSupplier(() -> wrap));
             }
         }catch (Exception e){
             e.printStackTrace();
             ServerHttpResponse response = exchange.getResponse();
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
             return response.setComplete();
         }
 

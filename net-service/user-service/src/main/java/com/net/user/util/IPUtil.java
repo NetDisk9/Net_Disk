@@ -1,12 +1,12 @@
 package com.net.user.util;
 
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.resource.ClassPathResource;
 import org.lionsoul.ip2region.xdb.Searcher;
 import org.springframework.util.ResourceUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,7 +20,17 @@ public class IPUtil {
         }
         if (searcher == null) {
             try {
-                File file = ResourceUtils.getFile("classpath:ipdb/ip2region.xdb");
+                File file = new File("ip2region.xdb");
+                if(!file.exists()){
+                    InputStream fileInputStream = new ClassPathResource("classpath:ipdb/ip2region.xdb").getStream();
+                    OutputStream outputStream=new FileOutputStream(file);
+                    byte[] bytes=new byte[1024];
+                    while(fileInputStream.read(bytes)!=-1){
+                        outputStream.write(bytes);
+                    }
+                    fileInputStream.close();
+                    outputStream.close();
+                }
                 String dbPath = file.getPath();
                 searcher = Searcher.newWithFileOnly(dbPath);
             } catch (FileNotFoundException e) {

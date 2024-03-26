@@ -29,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -88,7 +90,7 @@ public class SysUserController {
         redisUtil.set(RedisConstants.LOGIN_USER_KEY + token, token, RedisConstants.LOGIN_USER_TTL);
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
-        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(), address, ip,selectedMethod));
+        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip,selectedMethod));
         return ResponseResult.okResult(token);
     }
 
@@ -123,7 +125,7 @@ public class SysUserController {
         }
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
-        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(), address, ip,"001"));
+        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip,"001"));
 
         String token = JWTUtil.getJWT(userId + "");
         // 存到redis
