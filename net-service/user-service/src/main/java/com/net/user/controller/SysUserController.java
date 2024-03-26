@@ -79,11 +79,13 @@ public class SysUserController {
         SysUser user=(SysUser)result.getData();
         Long userId = user.getId();
         String loginType=user.getMethod();
-        if(selectedMethod.charAt(0)=='1'&&loginType.charAt(0)!='1'){
-            return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
-        }
-        else if(selectedMethod.charAt(1)=='1'&&loginType.charAt(0)!='1'){
-            return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
+        if(!selectedMethod.equals("111")){
+            if(selectedMethod.charAt(0)=='1'&&loginType.charAt(0)!='1'){
+                return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
+            }
+            else if(selectedMethod.charAt(1)=='1'&&loginType.charAt(1)!='1'){
+                return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
+            }
         }
         String token = JWTUtil.getJWT(userId + "");
         // 存到redis
