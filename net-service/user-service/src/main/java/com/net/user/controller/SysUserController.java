@@ -59,31 +59,30 @@ public class SysUserController {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
 //        loginDTO.setPassword(SHAUtil.encrypt(loginDTO.getPassword()));
-        String selectedMethod=null;
+        String selectedMethod = null;
         ResponseResult result = null;
         if (!StringUtil.isNullOrEmpty(loginDTO.getEmail())) {
             result = userService.getUserByEmailAndPassword(loginDTO.getEmail(), loginDTO.getPassword());
-            selectedMethod="100";
+            selectedMethod = "100";
         } else if (loginDTO.getId() != null) {
             result = userService.getUserByUserIdAndPassword(loginDTO.getId(), loginDTO.getPassword());
-            selectedMethod="111";
+            selectedMethod = "111";
         } else if (!StringUtil.isNullOrEmpty(loginDTO.getUsername())) {
             result = userService.getUserByUsernameAndPassword(loginDTO.getUsername(), loginDTO.getPassword());
-            selectedMethod="010";
+            selectedMethod = "010";
         } else {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
         if (result.getCode() != 200) {
             return result;
         }
-        SysUser user=(SysUser)result.getData();
+        SysUser user = (SysUser) result.getData();
         Long userId = user.getId();
-        String loginType=user.getMethod();
-        if(!selectedMethod.equals("111")){
-            if(selectedMethod.charAt(0)=='1'&&loginType.charAt(0)!='1'){
+        String loginType = user.getMethod();
+        if (!selectedMethod.equals("111")) {
+            if (selectedMethod.charAt(0) == '1' && loginType.charAt(0) != '1') {
                 return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
-            }
-            else if(selectedMethod.charAt(1)=='1'&&loginType.charAt(1)!='1'){
+            } else if (selectedMethod.charAt(1) == '1' && loginType.charAt(1) != '1') {
                 return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
             }
         }
@@ -92,7 +91,7 @@ public class SysUserController {
         redisUtil.set(RedisConstants.LOGIN_USER_KEY + token, token, RedisConstants.LOGIN_USER_TTL);
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
-        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip,selectedMethod));
+        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, selectedMethod));
         return ResponseResult.okResult(token);
     }
 
@@ -120,14 +119,14 @@ public class SysUserController {
         }
         userService.deleteUserLoginCode(loginDTO.getEmail());
         SysUser user = userService.getUserByEmail(loginDTO.getEmail());
-        Long userId=user.getId();
-        String loginMethod=user.getMethod();
-        if(loginMethod.charAt(2)!='1'){
+        Long userId = user.getId();
+        String loginMethod = user.getMethod();
+        if (loginMethod.charAt(2) != '1') {
             return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
         }
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
-        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip,"001"));
+        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, "001"));
 
         String token = JWTUtil.getJWT(userId + "");
         // 存到redis
@@ -185,17 +184,20 @@ public class SysUserController {
         if (!RegexUtil.checkPasswordValid(newPassword)) { // 格式不正确
             responseResult = ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
-
+        if (responseResult != null && responseResult.getCode() != ResultCodeEnum.SUCCESS.getCode()) { // 密码错误
+            redisUtil.set(RedisConstants.PASSWORD_ERROR_TIMES + BaseContext.getCurrentId(), times + 1, RedisConstants.PASSWORD_ERROR_TTL);
+            return responseResult;
+        }
         // 根据Id和输入的密码查找用户
         responseResult = userService.getUserByUserIdAndPassword(BaseContext.getCurrentId(), oldPassword);
         if (responseResult != null && responseResult.getCode() != ResultCodeEnum.SUCCESS.getCode()) { // 密码错误
-            redisUtil.set(RedisConstants.PASSWORD_ERROR_TIMES, times + 1, RedisConstants.PASSWORD_ERROR_TTL);
+            redisUtil.set(RedisConstants.PASSWORD_ERROR_TIMES + BaseContext.getCurrentId(), times + 1, RedisConstants.PASSWORD_ERROR_TTL);
             return responseResult;
         }
         // 修改密码
         responseResult = userService.updatePassword(updatePasswordDTO);
         if (responseResult != null && responseResult.getCode() == ResultCodeEnum.SUCCESS.getCode()) { // 修改成功
-            redisUtil.del(RedisConstants.PASSWORD_ERROR_TIMES);
+            redisUtil.del(RedisConstants.PASSWORD_ERROR_TIMES + BaseContext.getCurrentId());
             redisUtil.del(RedisConstants.LOGIN_USER_KEY + token);
             return responseResult;
         }
@@ -206,11 +208,11 @@ public class SysUserController {
     public ResponseResult uploadAvatar(@RequestPart MultipartFile[] multipartFiles) {
         try {
             ResponseResult uploadResult = fileClient.upload(multipartFiles);
-            if(uploadResult.getCode()==ResultCodeEnum.SUCCESS.getCode()) {// 上传成功
-                ArrayList<String>avatarList = (ArrayList<String>) uploadResult.getData();
+            if (uploadResult.getCode() == ResultCodeEnum.SUCCESS.getCode()) {// 上传成功
+                ArrayList<String> avatarList = (ArrayList<String>) uploadResult.getData();
                 String avatarPath = StringUtils.join(avatarList, ",");
                 return userService.updateAvatar(avatarPath);
-            }else{
+            } else {
                 throw new CustomException(ResultCodeEnum.SERVER_ERROR);
             }
         } catch (IOException e) {
@@ -221,9 +223,9 @@ public class SysUserController {
     @PostMapping("/register")
     public ResponseResult register(@RequestBody RegisterDTO registerDTO, HttpServletRequest request) {
         if (registerDTO == null || StringUtil.isNullOrEmpty(registerDTO.getUsername()) ||
-                                   StringUtil.isNullOrEmpty(registerDTO.getPassword()) ||
-                                   StringUtil.isNullOrEmpty(registerDTO.getEmail()) ||
-                                   StringUtil.isNullOrEmpty(registerDTO.getCode())) {
+                StringUtil.isNullOrEmpty(registerDTO.getPassword()) ||
+                StringUtil.isNullOrEmpty(registerDTO.getEmail()) ||
+                StringUtil.isNullOrEmpty(registerDTO.getCode())) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
         System.out.println("test");

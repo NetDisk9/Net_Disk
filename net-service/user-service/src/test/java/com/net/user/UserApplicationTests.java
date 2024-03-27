@@ -34,9 +34,15 @@ public class UserApplicationTests {
 //    public void testPassword(){
 //        System.out.println(SHAUtil.encrypt("Baozi0318"));
 //    }
-//    @Test
-//    public void test(){
-//        System.out.println(RegexUtil.checkPasswordValid("consequat"));
-//    }
+    @Test
+    public void test(){
+        System.out.println(RegexUtil.checkPasswordValid("consequat"));
+        System.out.println(RegexUtil.checkPasswordValid("123456788"));
+        System.out.println(RegexUtil.checkPasswordValid("WEWAEWAEAE"));
+        System.out.println(RegexUtil.checkPasswordValid("Baozi0318"));
+        System.out.println(RegexUtil.checkPasswordValid("BA123OZI23"));
+        System.out.println(RegexUtil.checkPasswordValid("BA@ZIASD"));
+        System.out.println(RegexUtil.checkPasswordValid("BAZISASD"));
+    }
 
 }
