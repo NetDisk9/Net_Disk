@@ -170,11 +170,11 @@ public class SysUserController {
         String oldPassword = updatePasswordDTO.getOldPassword();
         String newPassword = updatePasswordDTO.getNewPassword();
         int times = 0;
-        if (redisUtil.get(RedisConstants.PASSWORD_ERROR_TIMES) != null) { // 获取失败次数
-            times = (int) redisUtil.get(RedisConstants.PASSWORD_ERROR_TIMES);
+        if (redisUtil.get(RedisConstants.PASSWORD_ERROR_TIMES + BaseContext.getCurrentId()) != null) { // 获取失败次数
+            times = (int) redisUtil.get(RedisConstants.PASSWORD_ERROR_TIMES + BaseContext.getCurrentId());
         }
         if (times >= RedisConstants.MAX_ERROR_TIMES) { // 失败次数过多
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+            return ResponseResult.errorResult(ResultCodeEnum.PASSWORD_MISTAKE_EXCESSIVE);
         }
         ResponseResult responseResult = null;
 
