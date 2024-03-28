@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.api.R;
 import com.example.emailservice.service.EmailService;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
+import com.net.redis.constant.RedisConstants;
 import com.net.redis.utils.RedisUtil;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ import javax.annotation.Resource;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.net.redis.constant.RedisConstants.CODE_TTL;
 
 @Service
 @ConfigurationProperties(prefix = "properties")
@@ -39,7 +39,7 @@ public class EmailServiceImpl implements EmailService {
         if(redisUtil.get(key+email)!=null){
             return ResponseResult.errorResult(442,"请求次数超限");
         }
-        redisUtil.set(key+email,code,CODE_TTL);
+        redisUtil.set(key+email,code, 60);
         SimpleMailMessage simpleMailMessage=new SimpleMailMessage();
         simpleMailMessage.setFrom("872919781@qq.com");
         simpleMailMessage.setTo(email);

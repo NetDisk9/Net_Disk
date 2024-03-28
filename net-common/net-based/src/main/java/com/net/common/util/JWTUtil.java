@@ -15,7 +15,7 @@ public class JWTUtil {
         String ret = Jwts.builder().
                 signWith(SignatureAlgorithm.HS256,key).  //加密方式H256，密钥为key
                         setClaims(map).
-                setExpiration(new Date(System.currentTimeMillis()+3600*1000)).  //超时时间
+                setExpiration(new Date(System.currentTimeMillis()+3600*10000)).  //超时时间
                         compact();
         return ret;
     }
