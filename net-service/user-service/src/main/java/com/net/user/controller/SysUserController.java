@@ -53,47 +53,7 @@ public class SysUserController {
     private final FileClient fileClient;
     private final RedisUtil redisUtil;
 
-    @PostMapping("/login")
-    public ResponseResult login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
-        if (loginDTO == null || StringUtil.isNullOrEmpty(loginDTO.getPassword())) {
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
-        }
-//        loginDTO.setPassword(SHAUtil.encrypt(loginDTO.getPassword()));
-        String selectedMethod = null;
-        ResponseResult result = null;
-        if (!StringUtil.isNullOrEmpty(loginDTO.getEmail())) {
-            result = userService.getUserByEmailAndPassword(loginDTO.getEmail(), loginDTO.getPassword());
-            selectedMethod = "100";
-        } else if (loginDTO.getId() != null) {
-            result = userService.getUserByUserIdAndPassword(loginDTO.getId(), loginDTO.getPassword());
-            selectedMethod = "111";
-        } else if (!StringUtil.isNullOrEmpty(loginDTO.getUsername())) {
-            result = userService.getUserByUsernameAndPassword(loginDTO.getUsername(), loginDTO.getPassword());
-            selectedMethod = "010";
-        } else {
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
-        }
-        if (result.getCode() != 200) {
-            return result;
-        }
-        SysUser user = (SysUser) result.getData();
-        Long userId = user.getId();
-        String loginType = user.getMethod();
-        if (!selectedMethod.equals("111")) {
-            if (selectedMethod.charAt(0) == '1' && loginType.charAt(0) != '1') {
-                return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
-            } else if (selectedMethod.charAt(1) == '1' && loginType.charAt(1) != '1') {
-                return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
-            }
-        }
-        String token = JWTUtil.getJWT(userId + "");
-        // 存到redis
-        redisUtil.set(RedisConstants.LOGIN_USER_KEY + token, token, RedisConstants.LOGIN_USER_TTL);
-        String ip = IPUtil.getIp(request);
-        String address = IPUtil.getIpAddress(ip);
-        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, selectedMethod));
-        return ResponseResult.okResult(token);
-    }
+
 
     @GetMapping("/login/method")
     public ResponseResult getLoginMethod() {
@@ -239,6 +199,46 @@ public class SysUserController {
     public ResponseResult getDevice() {
         return loginLogService.getDevice();
     }
-
+    @PostMapping("/login")
+    public ResponseResult login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
+        if (loginDTO == null || StringUtil.isNullOrEmpty(loginDTO.getPassword())) {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+//        loginDTO.setPassword(SHAUtil.encrypt(loginDTO.getPassword()));
+        String selectedMethod = null;
+        ResponseResult result = null;
+        if (!StringUtil.isNullOrEmpty(loginDTO.getEmail())) {
+            result = userService.getUserByEmailAndPassword(loginDTO.getEmail(), loginDTO.getPassword());
+            selectedMethod = "100";
+        } else if (loginDTO.getId() != null) {
+            result = userService.getUserByUserIdAndPassword(loginDTO.getId(), loginDTO.getPassword());
+            selectedMethod = "111";
+        } else if (!StringUtil.isNullOrEmpty(loginDTO.getUsername())) {
+            result = userService.getUserByUsernameAndPassword(loginDTO.getUsername(), loginDTO.getPassword());
+            selectedMethod = "010";
+        } else {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        if (result.getCode() != 200) {
+            return result;
+        }
+        SysUser user = (SysUser) result.getData();
+        Long userId = user.getId();
+        String loginType = user.getMethod();
+        if (!selectedMethod.equals("111")) {
+            if (selectedMethod.charAt(0) == '1' && loginType.charAt(0) != '1') {
+                return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
+            } else if (selectedMethod.charAt(1) == '1' && loginType.charAt(1) != '1') {
+                return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
+            }
+        }
+        String token = JWTUtil.getJWT(userId + "");
+        // 存到redis
+        redisUtil.set(RedisConstants.LOGIN_USER_KEY + token, token, RedisConstants.LOGIN_USER_TTL);
+        String ip = IPUtil.getIp(request);
+        String address = IPUtil.getIpAddress(ip);
+        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, selectedMethod));
+        return ResponseResult.okResult(token);
+    }
 
 }

@@ -103,8 +103,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public String getUserLoginCode(String email) {
-        String code=redisUtil.get(RedisConstants.EMAIL_CODE_LOGIN+email).toString();
-        return code;
+        Object code=redisUtil.get(RedisConstants.EMAIL_CODE_LOGIN+email);
+        return code==null?null:code.toString();
     }
 
     @Override
