@@ -30,4 +30,8 @@ public class DeviceVO {
      * 登录时间
      */
     private String loginTime;
+    /**
+     * 首次登录时间
+     */
+    private String firstLoginTime;
 }

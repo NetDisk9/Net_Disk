@@ -15,16 +15,41 @@ import com.net.user.service.LoginLogService;
 import com.net.user.service.SysUserService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
 @Service
 public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLog> implements LoginLogService {
     @Override
     public ResponseResult getDevice() {
-        LambdaQueryWrapper<LoginLog> queryWrapper =new LambdaQueryWrapper<>();
-        queryWrapper.eq(LoginLog::getUserId, BaseContext.getCurrentId())
-                .orderByDesc(LoginLog::getLoginTime)
-                .last("limit 1");
-        LoginLog one = this.getOne(queryWrapper);
-        DeviceVO deviceVO = BeanUtil.copyProperties(one, DeviceVO.class);
-        return ResponseResult.okResult(deviceVO);
+        LambdaQueryWrapper<LoginLog> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(LoginLog::getUserId, BaseContext.getCurrentId());
+        List<LoginLog> loginLogs = this.list(queryWrapper);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        Map<String, Integer> uniqueDeviceNames = new HashMap<>();
+        List<DeviceVO> devices = new ArrayList<>();
+        Integer cnt = 0;
+        for (LoginLog log : loginLogs) {
+            String deviceName = log.getDeviceName();
+            if (uniqueDeviceNames.containsKey(deviceName)) {
+                DeviceVO device = devices.get(uniqueDeviceNames.get(deviceName));
+                device.setLoginTime(max(LocalDateTime.parse(device.getLoginTime(), formatter), log.getLoginTime()).toString());
+                device.setFirstLoginTime(min(LocalDateTime.parse(device.getFirstLoginTime(), formatter), log.getLoginTime()).toString());
+            } else {
+                uniqueDeviceNames.put(deviceName, cnt);
+                devices.add(BeanUtil.copyProperties(log, DeviceVO.class));
+                devices.get(cnt).setFirstLoginTime(log.getLoginTime().toString());
+                cnt += 1;
+            }
+        }
+        return ResponseResult.okResult(devices);
+    }
+    public LocalDateTime max(LocalDateTime x, LocalDateTime y) {
+        return x.isAfter(y) ? x : y;
+    }
+    public LocalDateTime min(LocalDateTime x, LocalDateTime y) {
+        return x.isAfter(y) ? y : x;
     }
 }
