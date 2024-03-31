@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
 import com.net.common.exception.CustomException;
+import com.net.gateway.constant.RedirectConstants;
 import com.net.gateway.util.JWTUtil;
 import com.net.redis.constant.RedisConstants;
 import com.net.redis.utils.RedisUtil;
@@ -24,6 +25,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
+import java.net.URI;
 import java.util.List;
 
 @Component
@@ -66,8 +68,8 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
                 DataBufferFactory bufferFactory = response.bufferFactory();
                 ObjectMapper objectMapper = new ObjectMapper();
                 DataBuffer wrap = bufferFactory.wrap(objectMapper.writeValueAsBytes(new ResponseResult<>(442, (ResultCodeEnum.TOKEN_ERROR))));
-                response.setStatusCode(HttpStatus.OK);
-                System.out.println("ok");
+                response.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
+                response.getHeaders().setLocation(URI.create(RedirectConstants.TOKEN_ERROR_REDIRECT_URL));
                 return response.writeWith(Mono.fromSupplier(() -> wrap));
             }
         }catch (Exception e){

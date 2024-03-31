@@ -39,7 +39,7 @@ public class EmailServiceImpl implements EmailService {
         if(redisUtil.get(key+email)!=null){
             return ResponseResult.errorResult(442,"请求次数超限");
         }
-        redisUtil.set(key+email,code, 5*60);
+        redisUtil.set(key+email,code, RedisConstants.CODE_TTL);
         SimpleMailMessage simpleMailMessage=new SimpleMailMessage();
         simpleMailMessage.setFrom("872919781@qq.com");
         simpleMailMessage.setTo(email);
