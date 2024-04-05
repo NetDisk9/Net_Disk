@@ -36,7 +36,8 @@ public class EmailServiceImpl implements EmailService {
         }
         int code=RandomUtils.nextInt((int)1e5,(int)1e6-1);
         String key=set.get(type);
-        if(redisUtil.get(key+email)!=null){
+        Long expire=redisUtil.getExpire(key+email);
+        if(expire>0&&RedisConstants.CODE_TTL-expire<=60){
             return ResponseResult.errorResult(442,"请求次数超限");
         }
         redisUtil.set(key+email,code, RedisConstants.CODE_TTL);

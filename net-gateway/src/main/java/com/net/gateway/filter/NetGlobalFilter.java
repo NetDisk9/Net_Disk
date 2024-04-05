@@ -64,12 +64,14 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
                 userId = JWTUtil.parseJWT(token);
                 System.out.println(userId);
             } catch (Exception e) {
+                e.printStackTrace();
                 ServerHttpResponse response = exchange.getResponse();
                 DataBufferFactory bufferFactory = response.bufferFactory();
                 ObjectMapper objectMapper = new ObjectMapper();
                 DataBuffer wrap = bufferFactory.wrap(objectMapper.writeValueAsBytes(new ResponseResult<>(442, (ResultCodeEnum.TOKEN_ERROR))));
-                response.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
-                response.getHeaders().setLocation(URI.create(RedirectConstants.TOKEN_ERROR_REDIRECT_URL));
+                response.setStatusCode(HttpStatus.OK);
+//                response.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
+//                response.getHeaders().setLocation(URI.create(RedirectConstants.TOKEN_ERROR_REDIRECT_URL));
                 return response.writeWith(Mono.fromSupplier(() -> wrap));
             }
         }catch (Exception e){
