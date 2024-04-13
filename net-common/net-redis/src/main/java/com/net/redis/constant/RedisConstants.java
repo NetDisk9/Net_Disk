@@ -9,6 +9,8 @@ public class RedisConstants {
     public static final String EMAIL_CODE_REGISTER = "email:code:register:";
     public static final String EMAIL_CODE_LOGIN = "email:code:login:";
     public static final String PASSWORD_ERROR_TIMES = "password:error:";
+    public static final String USER_PERMISSION="user:permission:";
+    public static final String USER_ROLE="user:role:";
     public static final Long PASSWORD_ERROR_TTL = 3600L;
     public static final int CODE_TTL=300;
 

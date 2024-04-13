@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.net.user.mapper.RoleMapper">
+    <resultMap type="com.net.user.entity.RoleEntity" id="roleMap">
+        <result property="roleId" column="role_id"/>
+        <result property="roleName" column="role_name"/>
+        <result property="roleCode" column="role_code"/>
+    </resultMap>
+    <select id="listRoleByUserId" resultMap="roleMap">
+        select sys_user_role.role_id,role_name,role_code from sys_user_role join sys_role on sys_user_role.user_id = #{userId} and sys_user_role.role_id=sys_role.role_id;
+    </select>
+
+</mapper>

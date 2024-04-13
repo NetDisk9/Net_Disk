@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.net.user.mapper.PermissionMapper">
+    <select id="listPath" resultType="String">
+        select path from  sys_user_role join sys_role_permission on #{userId} = user_id and sys_user_role.role_id = sys_role_permission.role_id
+            join sys_permission on sys_role_permission.permission_id = sys_permission.permission_id;
+    </select>
+
+</mapper>

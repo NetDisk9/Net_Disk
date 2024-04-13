@@ -240,5 +240,9 @@ public class SysUserController {
         loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, selectedMethod));
         return ResponseResult.okResult(token);
     }
+    @GetMapping("/test")
+    public void get(){
+        System.out.println("test");
+    }
 
 }
