@@ -44,4 +44,10 @@ public class GlobalExceptionHandler {
         log.error("catch exception:{}",e);
         return ResponseResult.errorResult(e.getResultCodeEnum());
     }
+    @ExceptionHandler(AuthException.class)
+    @ResponseBody
+    public ResponseResult exception(AuthException e){
+        log.error("catch exception:{}",e);
+        return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
+    }
 }

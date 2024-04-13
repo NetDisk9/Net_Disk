@@ -2,7 +2,10 @@ package com.net.user.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.net.common.context.BaseContext;
+import com.net.common.dto.ResponseResult;
+import com.net.common.enums.ResultCodeEnum;
 import com.net.common.enums.RoleEnum;
+import com.net.common.exception.AuthException;
 import com.net.user.entity.RoleEntity;
 import com.net.user.mapper.AdminMapper;
 import com.net.user.pojo.dto.UserQueryDTO;
@@ -22,12 +25,19 @@ public class AdminServiceImpl implements AdminService {
     @Resource
     RoleService roleService;
     @Override
-    public PageVO listUser(UserQueryDTO userQueryDTO) {
+    public PageVO listUser(UserQueryDTO userQueryDTO) throws AuthException {
         PageVO<UserInfoVO> pageVO=new PageVO<>();
+        RoleEntity userRoleEntity=roleService.getTopRankRoleEntity(BaseContext.getCurrentId());
         if(userQueryDTO.getRoleId()==null){
-            Long nowRoleId=roleService.getTopRankRoleEntity(BaseContext.getCurrentId()).getRoleId();
+            Long nowRoleId=userRoleEntity.getRoleId();
             userQueryDTO.setRoleId(nowRoleId);
             userQueryDTO.setIsAll(1);
+        }
+        else {
+            RoleEntity roleEntity=roleService.getById(userQueryDTO.getRoleId());
+            if(roleEntity.getRoleRank()>=userRoleEntity.getRoleRank()){
+                throw new AuthException();
+            }
         }
         List<UserInfoVO> list=adminMapper.listUser(userQueryDTO);
         pageVO.setList(list);

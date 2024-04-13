@@ -3,6 +3,7 @@ package com.net.user.controller;
 import com.alibaba.nacos.api.common.ResponseCode;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
+import com.net.common.exception.AuthException;
 import com.net.common.util.DateFormatUtil;
 import com.net.user.pojo.dto.UserQueryDTO;
 import com.net.user.service.AdminService;
@@ -19,7 +20,7 @@ public class AdminController extends BaseAdminController{
     @Resource
     AdminService adminService;
     @PostMapping("/list")
-    public ResponseResult listUser(@RequestBody UserQueryDTO userQueryDTO,int page,int pageSize){
+    public ResponseResult listUser(@RequestBody UserQueryDTO userQueryDTO,int page,int pageSize) throws AuthException {
         if(!initQuery(userQueryDTO,page,pageSize)){
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }

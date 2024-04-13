@@ -237,6 +237,9 @@ public class SysUserController {
         return ResponseResult.okResult(token);
     }
     public boolean checkLoginMethod(SysUser user,String method){
+        if(user.getStatus()==1){
+            return false;
+        }
         if(roleService.isSuperAdministrator(user.getId())){
             return method.equals("010");
         }
