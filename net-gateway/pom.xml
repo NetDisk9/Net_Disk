@@ -71,7 +71,7 @@
         </dependency>
         <dependency>
             <groupId>org.example</groupId>
-            <artifactId>net-common</artifactId>
+            <artifactId>net-based</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
