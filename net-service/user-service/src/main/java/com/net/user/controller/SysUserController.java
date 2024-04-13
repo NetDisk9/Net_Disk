@@ -9,6 +9,7 @@ import com.net.common.enums.ResultCodeEnum;
 import com.net.common.exception.CustomException;
 import com.net.common.util.JWTUtil;
 import com.net.redis.utils.RedisUtil;
+import com.net.user.constant.LoginMethodConstants;
 import com.net.user.entity.LoginLog;
 import com.net.user.entity.SysUser;
 import com.net.user.pojo.dto.LoginDTO;
@@ -81,8 +82,7 @@ public class SysUserController {
         userService.deleteUserLoginCode(loginDTO.getEmail());
         SysUser user = userService.getUserByEmail(loginDTO.getEmail());
         Long userId = user.getId();
-        String loginMethod = user.getMethod();
-        if (loginMethod.charAt(2) != '1') {
+        if(!checkLoginMethod(user,LoginMethodConstants.EMAILANDCODE)){
             return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
         }
         String ip = IPUtil.getIp(request);
@@ -225,13 +225,8 @@ public class SysUserController {
         }
         SysUser user = (SysUser) result.getData();
         Long userId = user.getId();
-        String loginType = user.getMethod();
-        if (!selectedMethod.equals("111")) {
-            if (selectedMethod.charAt(0) == '1' && loginType.charAt(0) != '1') {
-                return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
-            } else if (selectedMethod.charAt(1) == '1' && loginType.charAt(1) != '1') {
-                return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
-            }
+        if(!checkLoginMethod(user,selectedMethod)){
+            return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
         }
         String token = JWTUtil.getJWT(userId + "");
         // 存到redis
@@ -240,6 +235,21 @@ public class SysUserController {
         String address = IPUtil.getIpAddress(ip);
         loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, selectedMethod));
         return ResponseResult.okResult(token);
+    }
+    public boolean checkLoginMethod(SysUser user,String method){
+        if(roleService.isSuperAdministrator(user.getId())){
+            return method.equals("010");
+        }
+        if(method.equals(LoginMethodConstants.ID)){
+            return true;
+        }
+        if(method.equals(LoginMethodConstants.USERNAME)){
+            return user.getMethod().charAt(1)=='1';
+        }
+        else if(method.equals(LoginMethodConstants.EMAILANDPASSWORD)){
+            return user.getMethod().charAt(0)=='1';
+        }
+        return user.getMethod().charAt(2)=='1';
     }
     @GetMapping("/test")
     public void get(){
