@@ -9,10 +9,11 @@
         <result property="status" column="status"/>
     </resultMap>
     <select id="listUser" resultMap="roleMap">
-        select * from
+        select user_id,username,email,status,login_time from
         (
             (select u.id user_id,username,email,status,
-                    (select max(login_Time) from user_log b where u.id = b.user_id  ) login_time
+                    (select max(login_Time) from user_log b where u.id = b.user_id  ) login_time,
+                    (select max(role_rank) from sys_user_role c join sys_role d on c.role_id = d.role_id where c.user_id = u.id) role_rank
             from sys_user u
             ) user
         )
@@ -23,18 +24,22 @@
             <if test="status != null"> status = #{status}</if>
             <if test="begTime != null and begTime != '' "> and DATE(login_time) &gt;= DATE(#{begTime}) </if>
             <if test="endTime != null and endTime != ''"> and DATE(login_time) &lt;= DATE(#{endTime}) </if>
-            <if test=""> </if>
+            <if test="isAll == 0">
+                and (select role_rank from sys_role where role_id = #{roleId} ) = role_rank
+            </if>
+            <if test="isAll == 1">
+                and (select role_rank from sys_role where role_id = #{roleId} ) > role_rank
+            </if>
         </where>
         limit #{index},#{pageSize}
     </select>
     <select id="getTotal" resultType="Integer">
         select count(*) from
         (
-        (select u.id user_id,username,email,status, (select max(login_Time) from user_log b where u.id = b.user_id  ) login_time
+        (select u.id user_id,username,email,status,
+        (select max(login_Time) from user_log b where u.id = b.user_id  ) login_time,
+        (select max(role_rank) from sys_user_role c join sys_role d on c.role_id = d.role_id where c.user_id = u.id) role_rank
         from sys_user u
-        where u.id not in
-        (select b.user_id from sys_user_role b join sys_role c on b.role_id=c.role_id
-        where role_name='super' or role_name='administrator')
         ) user
         )
         <where>
@@ -44,6 +49,12 @@
             <if test="status != null"> status = #{status}</if>
             <if test="begTime != null and begTime != '' "> and DATE(login_time) &gt;= DATE(#{begTime}) </if>
             <if test="endTime != null and endTime != ''"> and DATE(login_time) &lt;= DATE(#{endTime}) </if>
+            <if test="isAll == 0">
+                and (select role_rank from sys_role where role_id = #{roleId} ) = role_rank
+            </if>
+            <if test="isAll == 1">
+                and (select role_rank from sys_role where role_id = #{roleId} ) > role_rank
+            </if>
         </where>
     </select>
 

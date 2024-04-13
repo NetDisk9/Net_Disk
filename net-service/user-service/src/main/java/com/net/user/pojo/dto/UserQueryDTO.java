@@ -19,5 +19,6 @@ public class UserQueryDTO {
     private Integer statusOrder;
     private Integer index;
     private Integer pageSize;
+    private Integer isAll=0;
 
 }

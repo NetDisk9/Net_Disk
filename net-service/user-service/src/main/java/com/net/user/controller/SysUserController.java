@@ -16,6 +16,7 @@ import com.net.user.pojo.dto.RegisterDTO;
 import com.net.user.pojo.dto.UpdatePasswordDTO;
 import com.net.user.pojo.dto.UserDTO;
 import com.net.user.service.LoginLogService;
+import com.net.user.service.RoleService;
 import com.net.user.service.SysUserService;
 import com.net.user.util.IPUtil;
 import com.net.user.util.RegexUtil;
@@ -52,7 +53,7 @@ public class SysUserController {
     private final LoginLogService loginLogService;
     private final FileClient fileClient;
     private final RedisUtil redisUtil;
-
+    private final RoleService roleService;
 
 
     @GetMapping("/login/method")

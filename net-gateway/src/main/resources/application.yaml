@@ -1,4 +1,4 @@
 exclude:
   path: /user/login,/email/**,/user/register,/user/code/login
 redirect:
-  path: /admin/list
+  path: null

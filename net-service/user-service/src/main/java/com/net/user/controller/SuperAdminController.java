@@ -19,11 +19,4 @@ import java.util.Date;
 public class SuperAdminController extends BaseAdminController {
     @Resource
     SuperAdminService superAdminService;
-    @PostMapping("/list")
-    public ResponseResult listUser(@RequestBody UserQueryDTO userQueryDTO, int page, int pageSize){
-        if(!initQuery(userQueryDTO,page,pageSize)){
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
-        }
-        return ResponseResult.okResult(superAdminService.listUser(userQueryDTO));
-    }
 }

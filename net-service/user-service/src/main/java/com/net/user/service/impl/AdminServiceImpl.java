@@ -1,6 +1,7 @@
 package com.net.user.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.net.common.context.BaseContext;
 import com.net.common.enums.RoleEnum;
 import com.net.user.entity.RoleEntity;
 import com.net.user.mapper.AdminMapper;
@@ -23,14 +24,19 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public PageVO listUser(UserQueryDTO userQueryDTO) {
         PageVO<UserInfoVO> pageVO=new PageVO<>();
+        if(userQueryDTO.getRoleId()==null){
+            Long nowRoleId=roleService.getTopRankRoleEntity(BaseContext.getCurrentId()).getRoleId();
+            userQueryDTO.setRoleId(nowRoleId);
+            userQueryDTO.setIsAll(1);
+        }
         List<UserInfoVO> list=adminMapper.listUser(userQueryDTO);
         pageVO.setList(list);
         pageVO.setLen(list.size());
         pageVO.setTot(getTotal(userQueryDTO));
-        RoleEntity roleEntity=roleService.getRoleVOByName(RoleEnum.USER.getName());
-        RoleVO roleVO=new RoleVO();
-        BeanUtil.copyProperties(roleEntity,roleVO);
         for(var temp:list){
+            RoleEntity roleEntity=roleService.getTopRankRoleEntity(temp.getUserId());
+            RoleVO roleVO=new RoleVO();
+            BeanUtil.copyProperties(roleEntity,roleVO);
             temp.setRoleVO(roleVO);
         }
         System.out.println(list);

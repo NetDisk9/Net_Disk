@@ -1,5 +1,6 @@
 package com.net.user.controller;
 
+import com.net.common.context.BaseContext;
 import com.net.user.entity.RoleEntity;
 import com.net.user.service.RoleService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +17,8 @@ public class RoleController {
     RoleService roleService;
     @GetMapping("/issuper")
     public String isSuperAdministrator(@RequestParam String id){
-        return roleService.isSuperAdministrator().toString();
+        Long userId= BaseContext.getCurrentId();
+        return roleService.isSuperAdministrator(userId).toString();
     }
 
 }

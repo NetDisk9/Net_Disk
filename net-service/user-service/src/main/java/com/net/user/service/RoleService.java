@@ -4,7 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.net.user.entity.RoleEntity;
 
 public interface RoleService extends IService<RoleEntity> {
-    public Boolean isSuperAdministrator();
-    public Boolean isAdministrator();
+    public Boolean isSuperAdministrator(Long userId);
+    public Boolean isAdministrator(Long userId);
     public RoleEntity getRoleVOByName(String name);
+    public RoleEntity getTopRankRoleEntity(Long userId);
 }

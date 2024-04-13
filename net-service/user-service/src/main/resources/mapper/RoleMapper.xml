@@ -5,9 +5,11 @@
         <result property="roleId" column="role_id"/>
         <result property="roleName" column="role_name"/>
         <result property="roleCode" column="role_code"/>
+        <result property="roleRank" column="role_rank"/>
+
     </resultMap>
     <select id="listRoleByUserId" resultMap="roleMap">
-        select sys_user_role.role_id,role_name,role_code from sys_user_role join sys_role on sys_user_role.user_id = #{userId} and sys_user_role.role_id=sys_role.role_id;
+        select sys_user_role.role_id,role_name,role_code,role_rank from sys_user_role join sys_role on sys_user_role.user_id = #{userId} and sys_user_role.role_id=sys_role.role_id;
     </select>
 
 </mapper>
