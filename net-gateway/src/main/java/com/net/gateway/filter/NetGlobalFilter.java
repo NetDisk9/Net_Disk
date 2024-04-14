@@ -74,6 +74,7 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
             return finishResponse(exchange.getResponse(),ResponseResult.errorResult(ResultCodeEnum.TOKEN_ERROR));
         }
         String path=request.getPath().toString();
+        System.out.println(path);
         BaseContext.setCurrentId(Long.parseLong(userId));
         if(!havePermission(userId,request.getPath().toString())){
             return finishResponse(exchange.getResponse(),ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED));

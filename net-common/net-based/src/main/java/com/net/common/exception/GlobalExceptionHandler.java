@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseResult exception(Exception e){
         e.printStackTrace();
-        log.error("catch exception:{}",e.getMessage());
+        log.error("捕获异常 exception:{}",e.getMessage());
         return ResponseResult.errorResult(ResultCodeEnum.SERVER_ERROR);
     }
 
@@ -41,13 +41,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomException.class)
     @ResponseBody
     public ResponseResult exception(CustomException e){
-        log.error("catch exception:{}",e);
+        log.error("捕获异常 exception:{}",e.getMessage());
         return ResponseResult.errorResult(e.getResultCodeEnum());
     }
     @ExceptionHandler(AuthException.class)
     @ResponseBody
     public ResponseResult exception(AuthException e){
-        log.error("catch exception:{}",e);
+        log.error("捕获异常 exception:{}",e.getMessage());
         return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
     }
 }

@@ -182,7 +182,7 @@ public class SysUserController {
     }
 
     @PostMapping("/register")
-    public ResponseResult register(@RequestBody RegisterDTO registerDTO, HttpServletRequest request) {
+    public ResponseResult register(@RequestBody RegisterDTO registerDTO) {
         if (registerDTO == null || StringUtil.isNullOrEmpty(registerDTO.getUsername()) ||
                 StringUtil.isNullOrEmpty(registerDTO.getPassword()) ||
                 StringUtil.isNullOrEmpty(registerDTO.getEmail()) ||
