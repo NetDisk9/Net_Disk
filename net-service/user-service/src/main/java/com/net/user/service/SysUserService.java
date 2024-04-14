@@ -1,12 +1,14 @@
 package com.net.user.service;
 
 import com.net.common.dto.ResponseResult;
+import com.net.common.enums.ResultCodeEnum;
 import com.net.user.entity.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.net.user.pojo.dto.RegisterDTO;
 import com.net.user.pojo.dto.UpdatePasswordDTO;
 import com.net.user.pojo.dto.UserDTO;
-import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
 
 /**
  * <p>
@@ -31,5 +33,10 @@ public interface SysUserService extends IService<SysUser> {
     ResponseResult updateLoginMethod(String methods);
 
     ResponseResult updateAvatar(String data);
+
+    List<SysUser> addBatchUserByAdmin(int count, long roleId);
+
+    ResponseResult addUserByAdmin(String username, String password, Long roleId);
 }
+
 
