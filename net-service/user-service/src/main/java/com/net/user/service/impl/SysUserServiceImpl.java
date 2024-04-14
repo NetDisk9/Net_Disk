@@ -71,7 +71,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         this.save(sysUser); // 使用MyBatis-Plus的save方法
         return ResponseResult.okResult(sysUser.getId().toString()); // 插入成功，返回新用户的ID
     }
-
+    @Override
     public boolean checkUsernameExists(String username) {
         LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(SysUser::getUsername, username).select(SysUser::getId);
@@ -79,6 +79,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         return user != null;
     }
 
+    @Override
     public boolean checkEmailExists(String email) {
         LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(SysUser::getEmail, email).select(SysUser::getId);
