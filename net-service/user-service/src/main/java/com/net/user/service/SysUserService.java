@@ -20,6 +20,7 @@ import java.util.List;
  */
 public interface SysUserService extends IService<SysUser> {
     ResponseResult insertRegisterInfo(RegisterDTO registerDTO);
+    ResponseResult checkUserIDExists(Long userID);
     ResponseResult getUserByEmailAndPassword(String email, String password);
     ResponseResult getUserByUserIdAndPassword(Long userId, String password);
     ResponseResult getUserByUsernameAndPassword(String username, String password);

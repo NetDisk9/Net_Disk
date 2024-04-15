@@ -11,5 +11,34 @@
     <select id="listRoleByUserId" resultMap="roleMap">
         select sys_user_role.role_id,role_name,role_code,role_rank from sys_user_role join sys_role on sys_user_role.user_id = #{userId} and sys_user_role.role_id=sys_role.role_id;
     </select>
+    <insert id="updateRoleByUserIdAndUserRank">
+        insert into sys_user_role(role_id, user_id)
+        select sys_role.role_id, #{userId} from sys_role
+            where #{userRoleRank} &lt; sys_role.role_rank and sys_role.role_rank &lt;= #{updateRoleRank};
+    </insert>
+    <delete id="deleteRoleByUserIdAndUSerRank">
+        delete from sys_user_role
+        where  user_id = #{userId} and role_id in (
+            select sys_role.role_id from sys_role
+            where #{updateRoleRank} &lt; sys_role.role_rank and sys_role.role_rank &lt;= #{userRoleRank};
+        );
+    </delete>
+    <update id="updateUserPassword">
+        update sys_user
+        set password = #{defultPassword}
+        where id = #{userId};
+    </update>
+
+    <resultMap type="com.net.user.entity.RoleSimpleEntity" id="roleSimpleMap">
+        <result property="roleId" column="role_id"/>
+        <result property="roleName" column="role_name"/>
+    </resultMap>
+
+    <select id="listSimpleRoleByBaseContextRoleRank" resultMap="roleSimpleMap">
+        SELECT role_id, role_name
+        FROM sys_role
+        WHERE role_rank &lt; #{baseContextRoleRank};
+    </select>
+
 
 </mapper>

@@ -1,16 +1,26 @@
 package com.net.user.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.net.common.context.BaseContext;
+import com.net.common.dto.ResponseResult;
+import com.net.common.enums.ResultCodeEnum;
 import com.net.common.enums.RoleEnum;
+import com.net.common.util.SHAUtil;
 import com.net.redis.constant.RedisConstants;
 import com.net.redis.utils.RedisUtil;
+import com.net.user.constant.UserConstants;
 import com.net.user.entity.RoleEntity;
+import com.net.user.entity.SysUser;
 import com.net.user.mapper.RoleMapper;
+import com.net.user.pojo.vo.UserVO;
 import com.net.user.service.RoleService;
+import com.net.user.service.SysUserRoleService;
+import com.net.user.service.SysUserService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -23,6 +33,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
     RedisUtil redisUtil;
     @Resource
     RoleMapper roleMapper;
+    @Resource
+    SysUserService sysUserService;
     ObjectMapper objectMapper=new ObjectMapper();
     public List<RoleEntity> listRoleByUserId(Long userId) {
         try {
@@ -75,5 +87,70 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
     @Override
     public RoleEntity getRoleVOByName(String name) {
         return getOne(new LambdaQueryWrapper<RoleEntity>().eq(RoleEntity::getRoleName,name));
+    }
+
+    @Override
+    public RoleEntity getRoleVOByRoleId(Long roleId) {
+        return getOne(new LambdaQueryWrapper<RoleEntity>().eq(RoleEntity::getRoleId,roleId));
+    }
+
+    @Override
+    public ResponseResult checkAuthority(Long userId, Long roleId) {
+        ResponseResult result = sysUserService.getUserInfo();
+        if (result.getCode() != 200) {
+            return result;
+        }
+        Long baseContextUserId = ((UserVO) result.getData()).getId();
+        int baseContextRoleRank = getTopRankRoleEntity(baseContextUserId).getRoleRank();
+        int userRoleRank = getTopRankRoleEntity(userId).getRoleRank();
+        int updateRoleRank = getRoleVOByRoleId(roleId).getRoleRank();
+        if (baseContextRoleRank <= userRoleRank || updateRoleRank >= baseContextRoleRank) {
+            return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
+        }
+        return ResponseResult.okResult();
+    }
+
+    @Override
+    public ResponseResult checkAuthorityForPassword(Long userId) {
+        ResponseResult result = sysUserService.getUserInfo();
+        if (result.getCode() != 200) {
+            return result;
+        }
+        Long baseContextUserId = ((UserVO) result.getData()).getId();
+        int baseContextRoleRank = getTopRankRoleEntity(baseContextUserId).getRoleRank();
+        int userRoleRank = getTopRankRoleEntity(userId).getRoleRank();
+        if (baseContextRoleRank <= userRoleRank) {
+            return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
+        }
+        return ResponseResult.okResult();
+    }
+
+    @Override
+    public ResponseResult updateUserRole(Long userId, Long roleId) {
+        int userRoleRank = getTopRankRoleEntity(userId).getRoleRank();
+        int updateRoleRank = getRoleVOByRoleId(roleId).getRoleRank();
+        if (updateRoleRank > userRoleRank) {
+            roleMapper.updateRoleByUserIdAndUserRank(userId, userRoleRank, updateRoleRank);
+        } else if (updateRoleRank < userRoleRank){
+            roleMapper.deleteRoleByUserIdAndUSerRank(userId, updateRoleRank, userRoleRank);
+        }
+        return ResponseResult.okResult();
+    }
+
+    @Override
+    public ResponseResult updateUserPassword(Long userId) {
+        roleMapper.updateUserPassword(SHAUtil.encrypt(UserConstants.DEAULT_PASSWORD), userId);
+        return ResponseResult.okResult();
+    }
+
+    @Override
+    public ResponseResult getModifiableUserRole() {
+        ResponseResult result = sysUserService.getUserInfo();
+        if (result.getCode() != 200) {
+            return result;
+        }
+        Long baseContextUserId = ((UserVO) result.getData()).getId();
+        int baseContextRoleRank = getTopRankRoleEntity(baseContextUserId).getRoleRank();
+        return ResponseResult.okResult(roleMapper.listSimpleRoleByBaseContextRoleRank(baseContextRoleRank));
     }
 }

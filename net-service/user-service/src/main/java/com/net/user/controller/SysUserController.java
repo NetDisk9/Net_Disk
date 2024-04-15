@@ -193,6 +193,15 @@ public class SysUserController {
         if (!RegexUtil.checkPasswordValid(registerDTO.getPassword())) { // 格式不正确
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
+        if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isBlank(registerDTO.getUsername()) ||
+                com.baomidou.mybatisplus.core.toolkit.StringUtils.isBlank(registerDTO.getPassword()) ||
+                !RegexUtil.checkPasswordValid(registerDTO.getPassword()))
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+
+        ResponseResult addUser = userService.addUserByAdmin(registerDTO.getUsername(),registerDTO.getPassword(),roleService.getRoleVOByName("用户").getRoleId());
+        if (addUser.getCode()!=200) {
+            return addUser;
+        }
         return userService.insertRegisterInfo(registerDTO);
     }
 
