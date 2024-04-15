@@ -48,13 +48,6 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
 //        return chain.filter(exchange);
         if (isExclude(request.getPath().toString())) {
             System.out.println("放行" + request.getPath());
-//            URI newUri = UriComponentsBuilder.newInstance()
-//                    .path("/super/mk1")
-//                    .build()
-//                    .toUri();
-//            ServerHttpRequest modifiedRequest = exchange.getRequest().mutate().uri(newUri).build();
-//            ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
-//            System.out.println(modifiedExchange.getRequest().getPath());
             return chain.filter(exchange);
         }
         List<String> list = request.getHeaders().get("authorization");
@@ -116,7 +109,6 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
     }
     private boolean canRedirect(String antPath) {
         for (String pathPattern : redirectPath) {
-            //antPathMatcher来匹配 类似/search/**
             if(antPathMatcher.match(pathPattern, antPath)){
                 return true;
             }

@@ -82,7 +82,7 @@ public class SysUserController {
         userService.deleteUserLoginCode(loginDTO.getEmail());
         SysUser user = userService.getUserByEmail(loginDTO.getEmail());
         Long userId = user.getId();
-        if(!checkLoginMethod(user,LoginMethodConstants.EMAILANDCODE)){
+        if (!checkLoginMethod(user, LoginMethodConstants.EMAILANDCODE)) {
             return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
         }
         String ip = IPUtil.getIp(request);
@@ -120,6 +120,8 @@ public class SysUserController {
         if (StringUtils.isBlank(userDTO.getNickname()) && StringUtils.isBlank(userDTO.getUsername())) { //为空
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
+        if (userService.checkUsernameExists(userDTO.getUsername()))
+            return ResponseResult.errorResult(ResultCodeEnum.USERNAME_HASUSED);
         return userService.updateUserInfo(userDTO);
     }
 
@@ -189,7 +191,6 @@ public class SysUserController {
                 StringUtil.isNullOrEmpty(registerDTO.getCode())) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
-        System.out.println("test");
         if (!RegexUtil.checkPasswordValid(registerDTO.getPassword())) { // 格式不正确
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
@@ -209,6 +210,7 @@ public class SysUserController {
     public ResponseResult getDevice() {
         return loginLogService.getDevice();
     }
+
     @PostMapping("/login")
     public ResponseResult login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
         if (loginDTO == null || StringUtil.isNullOrEmpty(loginDTO.getPassword())) {
@@ -234,7 +236,7 @@ public class SysUserController {
         }
         SysUser user = (SysUser) result.getData();
         Long userId = user.getId();
-        if(!checkLoginMethod(user,selectedMethod)){
+        if (!checkLoginMethod(user, selectedMethod)) {
             return ResponseResult.errorResult(ResultCodeEnum.LOGIN_METHOD_UNSUPPORT);
         }
         String token = JWTUtil.getJWT(userId + "");
@@ -245,26 +247,27 @@ public class SysUserController {
         loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, selectedMethod));
         return ResponseResult.okResult(token);
     }
-    public boolean checkLoginMethod(SysUser user,String method){
-        if(user.getStatus()==1){
+
+    public boolean checkLoginMethod(SysUser user, String method) {
+        if (user.getStatus() == 1) {
             return false;
         }
-        if(roleService.isSuperAdministrator(user.getId())){
+        if (roleService.isSuperAdministrator(user.getId())) {
             return method.equals("010");
         }
-        if(method.equals(LoginMethodConstants.ID)){
+        if (method.equals(LoginMethodConstants.ID)) {
             return true;
         }
-        if(method.equals(LoginMethodConstants.USERNAME)){
-            return user.getMethod().charAt(1)=='1';
+        if (method.equals(LoginMethodConstants.USERNAME)) {
+            return user.getMethod().charAt(1) == '1';
+        } else if (method.equals(LoginMethodConstants.EMAILANDPASSWORD)) {
+            return user.getMethod().charAt(0) == '1';
         }
-        else if(method.equals(LoginMethodConstants.EMAILANDPASSWORD)){
-            return user.getMethod().charAt(0)=='1';
-        }
-        return user.getMethod().charAt(2)=='1';
+        return user.getMethod().charAt(2) == '1';
     }
+
     @GetMapping("/test")
-    public void get(){
+    public void get() {
         System.out.println("test");
     }
 

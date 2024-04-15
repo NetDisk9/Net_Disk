@@ -20,17 +20,29 @@ import java.util.List;
  */
 public interface SysUserService extends IService<SysUser> {
     ResponseResult insertRegisterInfo(RegisterDTO registerDTO);
+
     ResponseResult checkUserIDExists(Long userID);
+
     ResponseResult getUserByEmailAndPassword(String email, String password);
+
     ResponseResult getUserByUserIdAndPassword(Long userId, String password);
+
     ResponseResult getUserByUsernameAndPassword(String username, String password);
+
     SysUser getUserByEmail(String email);
+
     String getUserLoginCode(String email);
+
     void deleteUserLoginCode(String email);
+
     ResponseResult updatePassword(UpdatePasswordDTO updatePasswordDTO);
+
     ResponseResult updateUserInfo(UserDTO userDTO);
+
     ResponseResult getUserInfo();
+
     ResponseResult getLoginMethod();
+
     ResponseResult updateLoginMethod(String methods);
 
     ResponseResult updateAvatar(String data);
@@ -38,6 +50,10 @@ public interface SysUserService extends IService<SysUser> {
     List<SysUser> addBatchUserByAdmin(int count, long roleId);
 
     ResponseResult addUserByAdmin(String username, String password, Long roleId);
+
+    boolean checkUsernameExists(String username);
+
+    boolean checkEmailExists(String email);
 }
 
 
