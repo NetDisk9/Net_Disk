@@ -24,6 +24,7 @@ import com.net.user.service.SysUserRoleService;
 import com.net.user.service.SysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.net.user.util.RegexUtil;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
@@ -195,6 +196,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         return ResponseResult.okResult(avatarPath);
     }
 
+    @SneakyThrows
     @Override
     public List<SysUser> addBatchUserByAdmin(int count, long roleId) {
         ArrayList<SysUser> userList = new ArrayList<>();
@@ -202,7 +204,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         for (int i = 0; i < count; i++) {
             SysUser sysUser = SysUser.builder()
                     //1768546042247323649
-                    .id(Long.valueOf("1" + RandomUtil.randomNumbers(18)))
+                    .id(Long.valueOf("2" + RandomUtil.randomNumbers(18)))
                     .username(RandomUtil.randomString(6))
                     .password(SHAUtil.encrypt(UserConstants.DEAULT_PASSWORD))
                     .avatar(UserConstants.DEAULT_AVATAR)

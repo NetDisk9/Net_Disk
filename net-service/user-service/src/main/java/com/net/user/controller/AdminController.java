@@ -47,10 +47,10 @@ public class AdminController extends BaseAdminController {
     @PostMapping("/add/user")
     public ResponseResult addUser(String username, String password, Long roleId) {
         if (StringUtils.isBlank(username) || StringUtils.isBlank(password) ||
-                roleId == null||!RegexUtil.checkPasswordValid(password))
+                roleId == null || !RegexUtil.checkPasswordValid(password))
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
 
-        return userService.addUserByAdmin(username,password,roleId);
+        return userService.addUserByAdmin(username, password, roleId);
     }
 
 }
