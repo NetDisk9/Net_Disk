@@ -189,7 +189,6 @@ public class SysUserController {
                 StringUtil.isNullOrEmpty(registerDTO.getCode())) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
-        System.out.println("test");
         if (!RegexUtil.checkPasswordValid(registerDTO.getPassword())) { // 格式不正确
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
