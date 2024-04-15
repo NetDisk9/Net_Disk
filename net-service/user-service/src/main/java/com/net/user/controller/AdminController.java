@@ -8,13 +8,11 @@ import com.net.common.exception.CustomException;
 import com.net.user.entity.SysUser;
 import com.net.user.pojo.dto.UserQueryDTO;
 import com.net.user.service.AdminService;
+import com.net.user.service.RoleService;
 import com.net.user.service.SysUserService;
 import com.net.user.util.RegexUtil;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -27,6 +25,8 @@ public class AdminController extends BaseAdminController {
     AdminService adminService;
     @Resource
     SysUserService userService;
+    @Resource
+    RoleService roleService;
 
     @PostMapping("/list")
     public ResponseResult listUser(@RequestBody UserQueryDTO userQueryDTO, int page, int pageSize) throws AuthException {
@@ -51,6 +51,43 @@ public class AdminController extends BaseAdminController {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
 
         return userService.addUserByAdmin(username, password, roleId);
+    }
+
+    @PutMapping("/role/update")
+    public ResponseResult updateUserRole(Long userId, Long roleId) {
+        if (userId == null || roleId == null) {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        ResponseResult checkUserIDResult = userService.checkUserIDExists(userId);
+        if (checkUserIDResult.getCode() != 200) {
+            return checkUserIDResult;
+        }
+        ResponseResult checkAuthorityResult = roleService.checkAuthority(userId, roleId);
+        if (checkAuthorityResult.getCode() != 200) {
+            return checkAuthorityResult;
+        }
+        return roleService.updateUserRole(userId, roleId);
+    }
+
+    @PutMapping("/update")
+    public ResponseResult updatePassword(Long userId) {
+        if (userId == null) {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        ResponseResult checkUserIDResult = userService.checkUserIDExists(userId);
+        if (checkUserIDResult.getCode() != 200) {
+            return checkUserIDResult;
+        }
+        ResponseResult checkAuthorityResult = roleService.checkAuthorityForPassword(userId);
+        if (checkAuthorityResult.getCode() != 200) {
+            return checkAuthorityResult;
+        }
+        return roleService.updateUserPassword(userId);
+    }
+
+    @GetMapping("/role/list/option")
+    public ResponseResult getModifiableUserRole() {
+        return roleService.getModifiableUserRole();
     }
 
 }

@@ -89,6 +89,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
+    public ResponseResult checkUserIDExists(Long userID) {
+        LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysUser::getId, userID).select(SysUser::getId);
+        SysUser user = this.getOne(queryWrapper);
+        if (user == null) {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        return ResponseResult.okResult();
+    }
+
+    @Override
     public ResponseResult getUserByEmailAndPassword(String email, String password) {
         return getUserByPassword(SysUser::getEmail, email, password);
     }
