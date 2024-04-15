@@ -39,19 +39,19 @@ public class UserApplicationTests {
 //    public void testPassword(){
 //        System.out.println(SHAUtil.encrypt("Baozi0318"));
 //    }
-    @Test
-    public void test() throws IOException {
-        InputStream in = this.getClass().getClassLoader().getResourceAsStream("新增用户数据模板.xlsx");
-
-        if(in==null)throw new RuntimeException("没有找到模版");
-        //基于模板文件创建一个新的Excel文件
-        XSSFWorkbook excel = new XSSFWorkbook(in);
-        //获取表格文件的Sheet页
-        XSSFSheet sheet = excel.getSheet("Sheet1");
-
-        //获得第4行
-        XSSFRow row = sheet.getRow(6);
-        System.out.println(row.getCell(1).getNumericCellValue());
-    }
+//    @Test
+//    public void test() throws IOException {
+//        InputStream in = this.getClass().getClassLoader().getResourceAsStream("新增用户数据模板.xlsx");
+//
+//        if(in==null)throw new RuntimeException("没有找到模版");
+//        //基于模板文件创建一个新的Excel文件
+//        XSSFWorkbook excel = new XSSFWorkbook(in);
+//        //获取表格文件的Sheet页
+//        XSSFSheet sheet = excel.getSheet("Sheet1");
+//
+//        //获得第4行
+//        XSSFRow row = sheet.getRow(6);
+//        System.out.println(row.getCell(1).getNumericCellValue());
+//    }
 
 }

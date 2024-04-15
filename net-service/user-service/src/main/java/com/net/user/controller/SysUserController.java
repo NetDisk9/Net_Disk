@@ -207,6 +207,7 @@ public class SysUserController {
         if (loginDTO == null || StringUtil.isNullOrEmpty(loginDTO.getPassword())) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
+        System.out.println("login");
 //        loginDTO.setPassword(SHAUtil.encrypt(loginDTO.getPassword()));
         String selectedMethod = null;
         ResponseResult result = null;

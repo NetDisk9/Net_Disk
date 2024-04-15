@@ -45,6 +45,7 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
+        System.out.println("requset");
 //        return chain.filter(exchange);
         if (isExclude(request.getPath().toString())) {
             System.out.println("放行" + request.getPath());
