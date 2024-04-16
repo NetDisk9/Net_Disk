@@ -73,7 +73,7 @@ public class AdminController extends BaseAdminController {
     }
 
     @PutMapping("/info/update")
-    public ResponseResult updatePassword(@RequestBody UserDTO userDTO) {
+    public ResponseResult updateUserInfo(@RequestBody UserDTO userDTO) {
         if (userDTO == null||userDTO.getUserId()==null) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
@@ -92,7 +92,7 @@ public class AdminController extends BaseAdminController {
     }
 
     @PutMapping("/update")
-    public ResponseResult updateUserInfo(Long userId) {
+    public ResponseResult updatePassword(Long userId) {
         if (userId == null) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
