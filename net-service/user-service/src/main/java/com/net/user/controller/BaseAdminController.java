@@ -8,8 +8,8 @@ import com.net.user.pojo.dto.UserQueryDTO;
 import java.util.Date;
 
 public class BaseAdminController {
-    public boolean initQuery(UserQueryDTO userQueryDTO, int page, int pageSize){
-        if(page<=0||pageSize<=0){
+    public boolean initQuery(UserQueryDTO userQueryDTO, Integer page,Integer pageSize){
+        if(page==null||pageSize==null||page<=0||pageSize<=0){
             return false;
         }
         userQueryDTO.setIndex((page-1)*pageSize);

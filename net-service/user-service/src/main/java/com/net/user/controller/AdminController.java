@@ -29,7 +29,7 @@ public class AdminController extends BaseAdminController {
     RoleService roleService;
 
     @PostMapping("/list")
-    public ResponseResult listUser(@RequestBody UserQueryDTO userQueryDTO, int page, int pageSize) throws AuthException {
+    public ResponseResult listUser(@RequestBody UserQueryDTO userQueryDTO, Integer page, Integer pageSize) throws AuthException {
         if (!initQuery(userQueryDTO, page, pageSize)) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
