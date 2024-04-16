@@ -1,11 +1,13 @@
 package com.net.user.controller;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
 import com.net.common.exception.AuthException;
 import com.net.common.exception.CustomException;
 import com.net.user.entity.SysUser;
+import com.net.user.pojo.dto.UserDTO;
 import com.net.user.pojo.dto.UserQueryDTO;
 import com.net.user.service.AdminService;
 import com.net.user.service.RoleService;
@@ -40,6 +42,7 @@ public class AdminController extends BaseAdminController {
     @Transactional(rollbackFor = Exception.class)
     public void addBatchUser(int count, long roleId, HttpServletResponse response) {
         if (count <= 0 || roleId < 0) throw new CustomException(ResultCodeEnum.PARAM_ERROR);
+        if (count > 40) throw new CustomException(ResultCodeEnum.PARAM_ERROR);
         List<SysUser> sysUsers = userService.addBatchUserByAdmin(count, roleId);
         adminService.exportUser(sysUsers, roleId, response);
     }
@@ -69,8 +72,27 @@ public class AdminController extends BaseAdminController {
         return roleService.updateUserRole(userId, roleId);
     }
 
+    @PutMapping("/info/update")
+    public ResponseResult updatePassword(@RequestBody UserDTO userDTO) {
+        if (userDTO == null||userDTO.getUserId()==null) {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        LambdaUpdateWrapper<SysUser> wrapper = new LambdaUpdateWrapper<>();
+        if (userDTO.getUsername() != null) {
+            if (userService.checkUsernameExists(userDTO.getUsername())) {
+                return ResponseResult.errorResult(ResultCodeEnum.USERNAME_HASUSED);
+            }
+            wrapper.set(SysUser::getUsername, userDTO.getUsername());
+        }
+        wrapper.set(userDTO.getStatus() != null, SysUser::getStatus, userDTO.getStatus());
+        wrapper.set(userDTO.getNickname() != null, SysUser::getNickname, userDTO.getNickname());
+        wrapper.eq(SysUser::getId,userDTO.getUserId());
+        userService.update(wrapper);
+        return ResponseResult.okResult(ResultCodeEnum.SUCCESS);
+    }
+
     @PutMapping("/update")
-    public ResponseResult updatePassword(Long userId) {
+    public ResponseResult updateUserInfo(Long userId) {
         if (userId == null) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }

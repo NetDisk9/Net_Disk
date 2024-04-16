@@ -22,10 +22,18 @@ public class UserDTO {
      * 用户名
      */
     private String username;
+    /**
+     * 用户Id
+     */
+    private String userId;
 
     /**
      * 昵称
      */
     private String nickname;
 
+    /**
+     * 状态 0启用 1禁用
+     */
+    private Integer status;
 }
