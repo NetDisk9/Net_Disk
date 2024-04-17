@@ -156,6 +156,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public ResponseResult getUserInfo() {
+        System.out.println(BaseContext.getCurrentId());
         LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(SysUser::getId, BaseContext.getCurrentId());
         SysUser one = this.getOne(queryWrapper);

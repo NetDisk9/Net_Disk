@@ -58,9 +58,12 @@ public class AdminController extends BaseAdminController {
 
     @PutMapping("/role/update")
     public ResponseResult updateUserRole(Long userId, Long roleId) {
+        System.out.println(userId);
+        System.out.println(roleId);
         if (userId == null || roleId == null) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
+
         ResponseResult checkUserIDResult = userService.checkUserIDExists(userId);
         if (checkUserIDResult.getCode() != 200) {
             return checkUserIDResult;

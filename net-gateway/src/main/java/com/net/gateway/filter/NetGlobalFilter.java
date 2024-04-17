@@ -57,7 +57,7 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
             token = list.get(0);
         }
         String userId;
-        System.out.println(token);
+        System.out.println(exchange.getRequest().getPath()+" "+token);
         try {
             // 从redis中获取相同的token
             String redisToken = (String) redisUtil.get(RedisConstants.LOGIN_USER_KEY + token);
@@ -91,6 +91,7 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
                 .build();
 
         System.out.println(exchange.getRequest().getPath());
+        System.out.println("放行"+request.getPath());
         return chain.filter(exchange);
     }
 

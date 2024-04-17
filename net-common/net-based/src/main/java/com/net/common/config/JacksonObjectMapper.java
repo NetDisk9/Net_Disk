@@ -37,8 +37,6 @@ public class JacksonObjectMapper extends ObjectMapper {
 
         //反序列化时，属性不存在的兼容处理
         this.getDeserializationConfig().withoutFeatures(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
-
         SimpleModule simpleModule = new SimpleModule()
                 //从JSON反序列化Java对象
                 .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT)))
@@ -47,6 +45,7 @@ public class JacksonObjectMapper extends ObjectMapper {
                 //序列化Java对象到JSON
                 .addSerializer(BigInteger.class, ToStringSerializer.instance)
                 .addSerializer(Long.class, ToStringSerializer.instance)
+                .addSerializer(Long.TYPE, ToStringSerializer.instance)
                 .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT)))
                 .addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT)))
                 .addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern(DEFAULT_TIME_FORMAT)));

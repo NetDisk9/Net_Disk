@@ -134,6 +134,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
         } else if (updateRoleRank < userRoleRank){
             roleMapper.deleteRoleByUserIdAndUSerRank(userId, updateRoleRank, userRoleRank);
         }
+        redisUtil.del(RedisConstants.USER_ROLE+userId);
+        redisUtil.del(RedisConstants.USER_PERMISSION+userId);
         return ResponseResult.okResult();
     }
 

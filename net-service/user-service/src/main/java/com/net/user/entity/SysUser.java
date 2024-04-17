@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import org.springframework.core.SpringVersion;
 
 /**
@@ -23,6 +20,7 @@ import org.springframework.core.SpringVersion;
 @Builder
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
+@NoArgsConstructor
 public class SysUser implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -5,9 +5,12 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @TableName("sys_permission")
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class PermissionEntity {
     @TableId(value = "permission_id",type = IdType.AUTO)
     private Long permissionId;
