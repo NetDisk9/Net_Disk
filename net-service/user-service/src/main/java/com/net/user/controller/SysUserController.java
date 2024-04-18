@@ -29,7 +29,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -212,7 +214,7 @@ public class SysUserController {
     }
 
     @PostMapping("/login")
-    public ResponseResult login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
+    public ResponseResult login(@RequestBody LoginDTO loginDTO, HttpServletRequest request, HttpServletResponse response) {
         if (loginDTO == null || StringUtil.isNullOrEmpty(loginDTO.getPassword())) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
@@ -243,6 +245,8 @@ public class SysUserController {
         String token = JWTUtil.getJWT(userId + "");
         // 存到redis
         redisUtil.set(RedisConstants.LOGIN_USER_KEY + token, token, RedisConstants.LOGIN_USER_TTL);
+        System.out.println(token);
+        System.out.println(new String(token.getBytes(), StandardCharsets.UTF_8));
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
         loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, selectedMethod));
