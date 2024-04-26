@@ -34,8 +34,8 @@ public class EmailServiceImpl implements EmailService {
         if(!set.containsKey(type)){
             return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR);
         }
-        int code=RandomUtils.nextInt((int)1e5,(int)1e6-1);
         String key=set.get(type);
+        int code=RandomUtils.nextInt((int)1e5,(int)1e6-1);
         Long expire=redisUtil.getExpire(key+email);
         if(expire>0&&RedisConstants.CODE_TTL-expire<=60){
             return ResponseResult.errorResult(442,"请求次数超限");
@@ -53,6 +53,16 @@ public class EmailServiceImpl implements EmailService {
             return ResponseResult.errorResult(422,"参数错误");
         }
         return ResponseResult.okResult(200,"响应成功");
+    }
+
+    @Override
+    public boolean checkCode(String email, String code, String type) {
+        if(!set.containsKey(type)){
+            return false;
+        }
+        String key=set.get(type);
+        String value =  redisUtil.get(key + email).toString();
+        return code.equals(value);
     }
 
     public void setSet(Map<String, String> set) {
