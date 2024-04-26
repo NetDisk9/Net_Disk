@@ -4,9 +4,12 @@ package com.net.common.exception;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.validation.ConstraintViolationException;
 
 /**
  * <p>
@@ -49,5 +52,26 @@ public class GlobalExceptionHandler {
     public ResponseResult exception(AuthException e){
         log.error("捕获异常 exception:{}",e.getMessage());
         return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    public ResponseResult exception(MethodArgumentNotValidException e){
+        log.error("捕获异常 exception:{}",e.getMessage());
+        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+    }
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseBody
+    public ResponseResult exception(ConstraintViolationException e){
+        e.printStackTrace();
+        log.error("捕获异常 ConstraintViolationException:{}",e.getMessage());
+        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+    }
+    @ExceptionHandler(ParameterException.class)
+    @ResponseBody
+    public ResponseResult exception(ParameterException e){
+        e.printStackTrace();
+        log.error("捕获异常 ConstraintViolationException:{}",e.getMessage());
+        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
     }
 }

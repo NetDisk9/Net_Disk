@@ -66,7 +66,6 @@ public class AdminServiceImpl implements AdminService {
             BeanUtil.copyProperties(roleEntity, roleVO);
             temp.setRoleVO(roleVO);
         }
-        System.out.println(list);
         return pageVO;
     }
 

@@ -34,6 +34,6 @@ public class DateFormatUtil {
      */
     public static String getNow(){
         LocalDateTime localDateTime=LocalDateTime.now();
-        return localDateTime.getYear()+"-"+localDateTime.getMonthValue()+"-"+localDateTime.getDayOfMonth()+" "+localDateTime.getHour()+":"+localDateTime.getMinute()+":"+localDateTime.getSecond();
+        return format(localDateTime);
     }
 }

@@ -1,7 +1,96 @@
 package com.net.common.context;
 
 
-public class BaseContext {
+public class
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BaseContext {
     private static ThreadLocal<Long>threadLocal=new ThreadLocal<>();
     public static void setCurrentId(Long id){
         threadLocal.set(id);

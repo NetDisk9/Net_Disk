@@ -23,6 +23,8 @@ public enum ResultCodeEnum {
     TOKEN_ERROR(442,"token错误"),
     EMAIL_HASUSED(453,"邮箱已被注册"),
     UNAUTHORIZED(401,"权限不足"),
+    FILE_NAME_REPEAT(444,"文件名重复"),
+
     SERVER_ERROR(500,"服务器内部错误"),
     ;
 

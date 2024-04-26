@@ -79,8 +79,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
     @Override
     public RoleEntity getTopRankRoleEntity(Long userId) {
         List<RoleEntity> list=listRoleByUserId(userId);
-        System.out.println(userId);
-        System.out.println(list);
         return list.stream().max(RoleEntity.RoleEntityComparator.getInstance()).get();
     }
 

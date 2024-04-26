@@ -71,8 +71,6 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
             System.out.println(userId);
         } catch (Exception e) {
             e.printStackTrace();
-//                response.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
-//                response.getHeaders().setLocation(URI.create(RedirectConstants.TOKEN_ERROR_REDIRECT_URL));
             return finishResponse(exchange.getResponse(),ResponseResult.errorResult(ResultCodeEnum.TOKEN_ERROR));
         }
         String path=request.getPath().toString();
