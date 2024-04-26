@@ -40,7 +40,7 @@ public class FileController {
         tree.reAssignUserFileIdExceptRoot();
 //        System.out.println(tree.collect());
         fileService.insertBatch(tree.collect());
-        return ResponseResult.okResult(list.stream().map(UserFileEntity::getUserFileId).collect(Collectors.toList()));
+        return ResponseResult.okResult(list);
     }
     @PostMapping("/dir/create")
     public ResponseResult insertDir(String pid,
