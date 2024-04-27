@@ -50,6 +50,7 @@ public class EmailServiceImpl implements EmailService {
             javaMailSender.send(simpleMailMessage);
         }
         catch (Exception e){
+            e.printStackTrace();
             return ResponseResult.errorResult(422,"参数错误");
         }
         return ResponseResult.okResult(200,"响应成功");
