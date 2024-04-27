@@ -60,13 +60,13 @@ public class FileServiceImpl extends ServiceImpl< FileMapper,UserFileEntity> imp
     }
 
     @Override
-    public UserFileEntity getUserFileByPath(String path) {
-        return getOne(new LambdaQueryWrapper<UserFileEntity>().eq(UserFileEntity::getFilePath,path));
+    public UserFileEntity getNormalUserFileByPath(String path) {
+        return getOne(new LambdaQueryWrapper<UserFileEntity>().eq(UserFileEntity::getFilePath,path).eq(UserFileEntity::getStatus,FileStatusConstants.NORMAL));
     }
 
     @Override
     public boolean isExist(String path) {
-        return getUserFileByPath(path)!=null;
+        return getNormalUserFileByPath(path)!=null;
     }
 
     @Override
@@ -127,7 +127,7 @@ public class FileServiceImpl extends ServiceImpl< FileMapper,UserFileEntity> imp
                 }
                 else{
                     List<UserFileEntity> temp = listUserFileByPidAndPath(parentFile.getUserFileId(),parentFile.getFilePath(),FileStatusConstants.NORMAL);
-                    UsefulNameUtil usefulNameUtil = new UsefulNameUtil(userFileEntities, entity.getFileName());
+                    UsefulNameUtil usefulNameUtil = new UsefulNameUtil(temp, entity.getFileName());
                     entity.setFileName(usefulNameUtil.getNextName());
                 }
             }

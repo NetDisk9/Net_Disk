@@ -16,7 +16,9 @@ public interface FileService extends IService<UserFileEntity> {
     void updateFile(UserFileEntity userFile);
     List<UserFileEntity> listUserFileByPath(String path,Integer status);
     void insertBatch(List<UserFileEntity> list);
-    UserFileEntity getUserFileByPath(String path);
+
+    UserFileEntity getNormalUserFileByPath(String path);
+
     boolean isExist(String path);
 
     UserFileEntity getFile(Long userFileId, Long userId) throws ParameterException, AuthException;
