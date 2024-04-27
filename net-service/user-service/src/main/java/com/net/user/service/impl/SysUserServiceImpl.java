@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.net.common.constant.EmailKeyConstants;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
@@ -139,7 +140,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public String getUserLoginCode(String email) {
-        Object code = redisUtil.get(RedisConstants.EMAIL_CODE_LOGIN + email);
+        Object code = redisUtil.get(EmailKeyConstants.LOGIN_KEY + email);
         return code == null ? null : code.toString();
     }
 
