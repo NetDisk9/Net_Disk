@@ -1,7 +1,6 @@
 package com.net.user.service;
 
 import com.net.common.dto.ResponseResult;
-import com.net.common.enums.ResultCodeEnum;
 import com.net.user.entity.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.net.user.pojo.dto.RegisterDTO;
@@ -54,6 +53,8 @@ public interface SysUserService extends IService<SysUser> {
     boolean checkUsernameExists(String username);
 
     boolean checkEmailExists(String email);
+
+    ResponseResult forgetPassword(String email, String newPassword);
 }
 
 

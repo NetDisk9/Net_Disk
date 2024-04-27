@@ -12,10 +12,7 @@ import com.net.redis.utils.RedisUtil;
 import com.net.user.constant.LoginMethodConstants;
 import com.net.user.entity.LoginLog;
 import com.net.user.entity.SysUser;
-import com.net.user.pojo.dto.LoginDTO;
-import com.net.user.pojo.dto.RegisterDTO;
-import com.net.user.pojo.dto.UpdatePasswordDTO;
-import com.net.user.pojo.dto.UserDTO;
+import com.net.user.pojo.dto.*;
 import com.net.user.service.LoginLogService;
 import com.net.user.service.RoleService;
 import com.net.user.service.SysUserService;
@@ -201,8 +198,8 @@ public class SysUserController {
                 !RegexUtil.checkPasswordValid(registerDTO.getPassword()))
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
 
-        ResponseResult addUser = userService.addUserByAdmin(registerDTO.getUsername(),registerDTO.getPassword(),roleService.getRoleVOByName("用户").getRoleId());
-        if (addUser.getCode()!=200) {
+        ResponseResult addUser = userService.addUserByAdmin(registerDTO.getUsername(), registerDTO.getPassword(), roleService.getRoleVOByName("用户").getRoleId());
+        if (addUser.getCode() != 200) {
             return addUser;
         }
         return userService.insertRegisterInfo(registerDTO);
@@ -276,4 +273,22 @@ public class SysUserController {
         System.out.println("test");
     }
 
+
+    @PostMapping("/forget/password")
+    public ResponseResult forget(@RequestBody ForgetPasswordDTO forgetPasswordDTO) {
+        if (StringUtils.isBlank(forgetPasswordDTO.getEmail())
+                || StringUtils.isBlank(forgetPasswordDTO.getCode())
+                || StringUtils.isBlank(forgetPasswordDTO.getNewPassword())) { //为空
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        String redisCode = (String) redisUtil.get(RedisConstants.EMAIL_CODE_RESET + forgetPasswordDTO.getEmail());
+        if (!redisCode.equals(forgetPasswordDTO.getCode())) { // 验证码错误
+            return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR);
+        }
+        if (!RegexUtil.checkPasswordValid(forgetPasswordDTO.getNewPassword())) { // 格式不正确
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+
+        return userService.forgetPassword(forgetPasswordDTO.getEmail(), forgetPasswordDTO.getNewPassword());
+    }
 }
