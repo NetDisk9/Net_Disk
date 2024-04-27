@@ -11,10 +11,17 @@ import java.util.List;
 
 public interface FileService extends IService<UserFileEntity> {
     UserFileEntity getUserFileByUserFileId(Long userFileId);
+
+
+
+    List<UserFileEntity> listUserFileByPidAndPath(Long pid, String path, Integer status, Long userId);
+
+    List<UserFileEntity> listUserFileByPidAndPathInDir(Long pid, String path, Integer status, Long userId);
+
+    List<UserFileEntity> listUserFileInDir(String path, Integer status, Long userId);
+
     void insertFile(UserFileEntity userFile);
-    List<UserFileEntity> listUserFileByPidAndPath(Long pid, String path,Integer status);
     void updateFile(UserFileEntity userFile);
-    List<UserFileEntity> listUserFileByPath(String path,Integer status);
     void insertBatch(List<UserFileEntity> list);
 
     UserFileEntity getNormalUserFileByPath(String path);

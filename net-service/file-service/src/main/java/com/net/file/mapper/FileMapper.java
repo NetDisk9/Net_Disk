@@ -8,5 +8,5 @@ import java.util.List;
 
 @Mapper
 public interface FileMapper extends BaseMapper<UserFileEntity> {
-    List<UserFileEntity> listUserFileByPidAndPath(Long pid,String path,Integer status);
+    List<UserFileEntity> listUserFileByPidAndPath(Long pid,String path,Integer status,Long userId);
 }

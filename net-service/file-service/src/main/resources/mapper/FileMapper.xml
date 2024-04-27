@@ -17,7 +17,14 @@
     <select id="listUserFileByPidAndPath" resultMap="userFileMap">
         select user_file_id,user_id,pid,file_id,file_name,file_path,create_time,update_time,status,is_dir
         from user_file
-        where status = #{status} and pid = #{pid} and file_path like concat(#{path},'%');
+        where status = #{status} and
+              <if test="pid != null">
+                  pid = #{pid}
+              </if>
+              <if test="pid == null">
+                  pid is null
+              </if>
+          and file_path like concat(#{path},'%') and user_id = #{userId};
     </select>
 
 </mapper>

@@ -62,7 +62,9 @@ public class FileController {
             throw new ParameterException();
         }
         UserFileEntity userFile=UserFileEntity.UserFileEntityFactory.createDirEntity(parentFile,name,userId);
-        List<UserFileEntity> userFileEntities = fileService.listUserFileByPidAndPath(userFile.getPid(), userFile.getFilePath(),FileStatusConstants.NORMAL);
+        System.out.println(userFile.getFilePath());
+        List<UserFileEntity> userFileEntities = fileService.listUserFileByPidAndPath(userFile.getPid(), userFile.getFilePath(),FileStatusConstants.NORMAL,userId);
+        System.out.println(userFileEntities.size());
         UsefulNameUtil usefulNameUtil = new UsefulNameUtil(userFileEntities, userFile.getFileName());
         if(!usefulNameUtil.isUseful(userFile.getFileName())){
             return ResponseResult.errorResult(ResultCodeEnum.FILE_NAME_REPEAT.getCode(),"文件名重复",usefulNameUtil.getNextName());
@@ -92,7 +94,7 @@ public class FileController {
         userFile.setFileName(name);
         userFile.setFilePath(PathUtil.replaceLastPath(userFile.getFilePath(),name));
         System.out.println(userFile.getFilePath());
-        List<UserFileEntity> userFileEntities = fileService.listUserFileByPidAndPath(userFile.getPid(), userFile.getFilePath(),FileStatusConstants.NORMAL);
+        List<UserFileEntity> userFileEntities = fileService.listUserFileByPidAndPath(userFile.getPid(), userFile.getFilePath(),FileStatusConstants.NORMAL,userId);
         System.out.println(userFileEntities);
         UsefulNameUtil usefulNameUtil = new UsefulNameUtil(userFileEntities, userFile.getFileName());
         if(!usefulNameUtil.isUseful(userFile.getFileName())){

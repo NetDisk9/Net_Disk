@@ -16,7 +16,7 @@ public class PathUtil {
             if(!DirConstants.IS_DIR.equals(userFile.getIsDir()))
                 continue;
             String childPath=userFile.getFilePath()+"/";
-            if(childPath.startsWith(parentPath)){
+            if(parentPath.startsWith(childPath)){
                 return false;
             }
         }

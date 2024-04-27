@@ -32,10 +32,20 @@ public class FileServiceImpl extends ServiceImpl< FileMapper,UserFileEntity> imp
         return getById(userFileId);
     }
 
+
     @Override
-    public List<UserFileEntity> listUserFileByPidAndPath(Long pid, String path,Integer status){
+    public List<UserFileEntity> listUserFileByPidAndPath(Long pid, String path, Integer status, Long userId){
+        return fileMapper.listUserFileByPidAndPath(pid,path,status,userId);
+    }
+    @Override
+    public List<UserFileEntity> listUserFileByPidAndPathInDir(Long pid, String path, Integer status, Long userId){
         path+="/";
-        return fileMapper.listUserFileByPidAndPath(pid,path,status);
+        return fileMapper.listUserFileByPidAndPath(pid,path,status,userId);
+    }
+    @Override
+    public List<UserFileEntity> listUserFileInDir(String path, Integer status, Long userId) {
+        path+="/";
+        return list(new LambdaQueryWrapper<UserFileEntity>().likeRight(UserFileEntity::getFilePath,path).eq(UserFileEntity::getStatus,status).eq(UserFileEntity::getUserId,userId));
     }
 
     @Override
@@ -48,11 +58,7 @@ public class FileServiceImpl extends ServiceImpl< FileMapper,UserFileEntity> imp
         updateById(userFile);
     }
 
-    @Override
-    public List<UserFileEntity> listUserFileByPath(String path,Integer status) {
-        path+="/";
-        return list(new LambdaQueryWrapper<UserFileEntity>().likeRight(UserFileEntity::getFilePath,path).eq(UserFileEntity::getStatus,status));
-    }
+
 
     @Override
     public void insertBatch(List<UserFileEntity> list) {
@@ -115,6 +121,7 @@ public class FileServiceImpl extends ServiceImpl< FileMapper,UserFileEntity> imp
                 throw new RuntimeException(e);
             }
         }).collect(Collectors.toList());
+        System.out.println(parentFile+" "+userFileEntities);
         if(!PathUtil.checkPath(parentFile,userFileEntities)){
             throw new ParameterException();
         }
@@ -126,13 +133,13 @@ public class FileServiceImpl extends ServiceImpl< FileMapper,UserFileEntity> imp
                     continue;
                 }
                 else{
-                    List<UserFileEntity> temp = listUserFileByPidAndPath(parentFile.getUserFileId(),parentFile.getFilePath(),FileStatusConstants.NORMAL);
+                    List<UserFileEntity> temp = listUserFileByPidAndPath(parentFile.getUserFileId(),parentFile.getFilePath(),FileStatusConstants.NORMAL,userId);
                     UsefulNameUtil usefulNameUtil = new UsefulNameUtil(temp, entity.getFileName());
                     entity.setFileName(usefulNameUtil.getNextName());
                 }
             }
             if(DirConstants.IS_DIR.equals(entity.getIsDir())){
-                List<UserFileEntity> temp=listUserFileByPath(entity.getFilePath(),FileStatusConstants.NORMAL);
+                List<UserFileEntity> temp=listUserFileInDir(entity.getFilePath(),FileStatusConstants.NORMAL,userId);
                 list.addAll(temp);
             }
             list.add(entity);
