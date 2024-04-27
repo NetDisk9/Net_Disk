@@ -129,7 +129,6 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
             }
         }).collect(Collectors.toList());
         System.out.println(parentFile+" "+userFileEntities);
-        if(!PathUtil.checkPath(parentFile,userFileEntities)){
         // 移动到当前文件夹
         if (!PathUtil.checkPath(parentFile, userFileEntities)) {
             throw new ParameterException();
@@ -161,51 +160,51 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         return tree;
     }
 
-    @SneakyThrows
-    @Override
-    public void removeFile2Recycle(List<Long> fileIds) {
-        // 查询待删除的文件或文件夹
-        LambdaQueryWrapper<UserFileEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(UserFileEntity::getUserId, BaseContext.getCurrentId())
-                .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL)
-                .in(UserFileEntity::getUserFileId, fileIds);
-        List<UserFileEntity> deleteFiles = fileMapper.selectList(queryWrapper);
-        if (deleteFiles.isEmpty()) {
-            throw new ParameterException();
+        @SneakyThrows
+        @Override
+        public void removeFile2Recycle(List<Long> fileIds) {
+            // 查询待删除的文件或文件夹
+            LambdaQueryWrapper<UserFileEntity> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(UserFileEntity::getUserId, BaseContext.getCurrentId())
+                    .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL)
+                    .in(UserFileEntity::getUserFileId, fileIds);
+            List<UserFileEntity> deleteFiles = fileMapper.selectList(queryWrapper);
+            if (deleteFiles.isEmpty()) {
+                throw new ParameterException();
+            }
+            // 递归查询待删除文件的所有子级
+            List<Long> deleteFilesAndChildren = new ArrayList<>();
+            for (UserFileEntity deleteFile : deleteFiles) {
+                if (DirConstants.IS_DIR.equals(deleteFile.getIsDir())) {
+                    findAllFileList(deleteFilesAndChildren, deleteFile.getUserFileId(),
+                            BaseContext.getCurrentId(), FileStatusConstants.NORMAL);
+                }else {
+                    deleteFilesAndChildren.add(deleteFile.getUserFileId());
+                }
+            }
+            // 将待删除文件状态改为回收站
+            LambdaUpdateWrapper<UserFileEntity> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.set(UserFileEntity::getRecycleTime, DateFormatUtil.format(LocalDateTime.now()))
+                    .set(UserFileEntity::getStatus, FileStatusConstants.RECYCLED)
+                    .in(UserFileEntity::getUserFileId, deleteFilesAndChildren);
+            this.update(updateWrapper);
         }
-        // 递归查询待删除文件的所有子级
-        List<Long> deleteFilesAndChildren = new ArrayList<>();
-        for (UserFileEntity deleteFile : deleteFiles) {
-            if (DirConstants.IS_DIR.equals(deleteFile.getIsDir())) {
-                findAllFileList(deleteFilesAndChildren, deleteFile.getUserFileId(),
-                        BaseContext.getCurrentId(), FileStatusConstants.NORMAL);
-            }else {
-                deleteFilesAndChildren.add(deleteFile.getUserFileId());
+
+        /**
+         * 查询所有文件及其子级（递归）
+         */
+        private void findAllFileList(List<Long> fileIdList, Long parentFileId, Long userId, Integer delFlag) {
+            fileIdList.add(parentFileId);
+
+            // 查询文件是否有子级
+            LambdaQueryWrapper<UserFileEntity> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(UserFileEntity::getUserId, userId)
+                    .eq(UserFileEntity::getStatus, delFlag)
+                    .eq(UserFileEntity::getPid, parentFileId);
+            List<UserFileEntity> files = fileMapper.selectList(wrapper);
+            // 递归调用，查询所有文件和目录
+            for (UserFileEntity file : files) {
+                findAllFileList(fileIdList, file.getUserFileId(), userId, delFlag);
             }
         }
-        // 将待删除文件状态改为回收站
-        LambdaUpdateWrapper<UserFileEntity> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(UserFileEntity::getRecycleTime, DateFormatUtil.format(LocalDateTime.now()))
-                .set(UserFileEntity::getStatus, FileStatusConstants.RECYCLED)
-                .in(UserFileEntity::getUserFileId, deleteFilesAndChildren);
-        this.update(updateWrapper);
-    }
-
-    /**
-     * 查询所有文件及其子级（递归）
-     */
-    private void findAllFileList(List<Long> fileIdList, Long parentFileId, Long userId, Integer delFlag) {
-        fileIdList.add(parentFileId);
-
-        // 查询文件是否有子级
-        LambdaQueryWrapper<UserFileEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(UserFileEntity::getUserId, userId)
-                .eq(UserFileEntity::getStatus, delFlag)
-                .eq(UserFileEntity::getPid, parentFileId);
-        List<UserFileEntity> files = fileMapper.selectList(wrapper);
-        // 递归调用，查询所有文件和目录
-        for (UserFileEntity file : files) {
-            findAllFileList(fileIdList, file.getUserFileId(), userId, delFlag);
-        }
-    }
 }
