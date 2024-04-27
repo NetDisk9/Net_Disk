@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.api.R;
 import com.example.emailservice.service.EmailService;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
+import com.net.common.exception.ParameterException;
 import com.net.redis.constant.RedisConstants;
 import com.net.redis.utils.RedisUtil;
 import org.apache.commons.lang3.RandomUtils;
@@ -64,6 +65,15 @@ public class EmailServiceImpl implements EmailService {
         String key=set.get(type);
         String value =  redisUtil.get(key + email).toString();
         return code.equals(value);
+    }
+
+    @Override
+    public void saveRes(String email, String code, String type) throws ParameterException {
+        if(!set.containsKey(type)){
+            throw  new ParameterException();
+        }
+        String key=set.get(type);
+        redisUtil.set(key+"res:"+email,1,RedisConstants.LOGIN_USER_TTL);
     }
 
     public void setSet(Map<String, String> set) {

@@ -3,6 +3,7 @@ package com.example.emailservice.controller;
 import com.example.emailservice.service.EmailService;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
+import com.net.common.exception.ParameterException;
 import com.net.common.util.MatchUtil;
 import io.netty.util.internal.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +31,19 @@ public class CodeController {
         return emailService.sendCode(email,type);
     }
     @GetMapping("/code/check")
-    public ResponseResult checkCode(@Valid @NotBlank String email,@Valid @NotBlank String code,@Valid @NotBlank String type){
+    public ResponseResult checkCode(@Valid @NotBlank String email,@Valid @NotBlank String code,@Valid @NotBlank String type)  {
         if(!new MatchUtil(EMAIL_SUFFIX).match(email)){
             return ResponseResult.errorResult(422,"参数错误");
         }
         boolean res= emailService.checkCode(email,code,type);
         if(!res)
             return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR);
+        try{
+            emailService.saveRes(email,code,type);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
         return ResponseResult.okResult();
     }
 }
