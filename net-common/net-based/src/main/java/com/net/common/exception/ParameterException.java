@@ -1,4 +1,18 @@
 package com.net.common.exception;
 
-public class ParameterException extends Exception{
+import com.net.common.enums.ResultCodeEnum;
+
+public class ParameterException extends RuntimeException {
+
+    private ResultCodeEnum resultCodeEnum;
+
+    public ParameterException(ResultCodeEnum resultCodeEnum){
+        this.resultCodeEnum = resultCodeEnum;
+    }
+    public ParameterException(){}
+
+
+    public ResultCodeEnum getResultCodeEnum() {
+        return resultCodeEnum;
+    }
 }

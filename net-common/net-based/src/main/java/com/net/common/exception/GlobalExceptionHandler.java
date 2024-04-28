@@ -44,34 +44,32 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomException.class)
     @ResponseBody
     public ResponseResult exception(CustomException e){
-        log.error("捕获异常 exception:{}",e.getMessage());
+        log.error("捕获异常 CustomException:{}",e.getMessage());
         return ResponseResult.errorResult(e.getResultCodeEnum());
     }
     @ExceptionHandler(AuthException.class)
     @ResponseBody
     public ResponseResult exception(AuthException e){
-        log.error("捕获异常 exception:{}",e.getMessage());
+        log.error("捕获异常 AuthException:{}",e.getMessage());
         return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
     public ResponseResult exception(MethodArgumentNotValidException e){
-        log.error("捕获异常 exception:{}",e.getMessage());
+        log.error("捕获异常 MethodArgumentNotValidException:{}",e.getMessage());
         return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
     }
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseBody
     public ResponseResult exception(ConstraintViolationException e){
-        e.printStackTrace();
         log.error("捕获异常 ConstraintViolationException:{}",e.getMessage());
         return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
     }
     @ExceptionHandler(ParameterException.class)
     @ResponseBody
     public ResponseResult exception(ParameterException e){
-        e.printStackTrace();
-        log.error("捕获异常 ConstraintViolationException:{}",e.getMessage());
+        log.error("捕获异常 ParameterException:{}",e.getMessage());
         return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
     }
 }
