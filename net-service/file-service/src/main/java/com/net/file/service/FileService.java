@@ -34,7 +34,7 @@ public interface FileService extends IService<UserFileEntity> {
 
     UserFileEntity getFileWithoutCheck(Long userFileId) throws ParameterException;
 
-    UserFileTree buildUserFileTree(FileMoveDTO fileMoveDTO, List<UserFileEntity> failCollector,Integer mode) throws AuthException, ParameterException;
+    UserFileTree buildUserFileTree(FileMoveDTO fileMoveDTO, List<UserFileEntity> failCollector,Integer mode) throws Throwable;
 
     void removeFile2Recycle(List<Long> fileIds);
 }

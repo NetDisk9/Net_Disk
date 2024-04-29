@@ -3,6 +3,7 @@ package com.net.common.util;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 public class SHAUtil {
     public static String encrypt(String plainText){

@@ -36,7 +36,7 @@ public class FileController {
     FileService fileService;
 
     @PostMapping("/copy")
-    public ResponseResult copyFile(@Valid @RequestBody FileMoveDTO fileMoveDTO, @Valid @NotNull Integer mode) throws AuthException, ParameterException {
+    public ResponseResult copyFile(@Valid @RequestBody FileMoveDTO fileMoveDTO, @Valid @NotNull Integer mode) throws Throwable {
         if (fileMoveDTO.getUserFileId().length == 0) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }

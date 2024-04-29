@@ -19,6 +19,7 @@ import com.net.file.pojo.dto.FileMoveDTO;
 import com.net.file.service.FileService;
 import com.net.file.util.PathUtil;
 import com.net.file.util.UsefulNameUtil;
+import com.net.file.wrapper.LambdaFunctionWrapper;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
@@ -110,7 +111,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
     }
 
     @Override
-    public UserFileTree buildUserFileTree(FileMoveDTO fileMoveDTO, List<UserFileEntity> failCollector, Integer mode) throws AuthException, ParameterException {
+    public UserFileTree buildUserFileTree(FileMoveDTO fileMoveDTO, List<UserFileEntity> failCollector, Integer mode) throws Throwable {
         Long userId = BaseContext.getCurrentId();
         // 判断传入的pid对应的文件是否为正常的文件夹
         UserFileEntity parentFile = getNormalFile(fileMoveDTO.getPid(), userId);
@@ -119,15 +120,19 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         }
         List<UserFileEntity> userFileEntities;
         // 移动文件，修改文件的所属的文件夹
-        userFileEntities = Arrays.stream(fileMoveDTO.getUserFileId()).map(fileId -> {
-            try {
-                UserFileEntity userFile = getNormalFile(fileId, userId);
-                userFile.setPid(parentFile.getUserFileId());
-                return userFile;
-            } catch (ParameterException | AuthException e) {
-                throw new RuntimeException(e);
-            }
-        }).collect(Collectors.toList());
+        try{
+            userFileEntities = Arrays.stream(fileMoveDTO.getUserFileId()).map(
+                LambdaFunctionWrapper.wrap(fileId -> {
+                    UserFileEntity userFile = getNormalFile(fileId, userId);
+                    userFile.setPid(parentFile.getUserFileId());
+                    return userFile;
+                })
+            ).collect(Collectors.toList());
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e.getCause();
+        }
+
         System.out.println(parentFile+" "+userFileEntities);
         // 移动到当前文件夹
         if (!PathUtil.checkPath(parentFile, userFileEntities)) {
