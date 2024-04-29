@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author sloth
+ * @date 2024/04/29
+ */
 public class UsefulNameUtil {
     private int nameLen;
     private List<Integer> list;
@@ -14,6 +18,10 @@ public class UsefulNameUtil {
     private int nameNumber;
     private final static String REGEX_SUFFIX="^(?:\\(\\d+\\))?$";
 
+    /**
+     * @param list
+     * @param name
+     */
     public UsefulNameUtil(List<UserFileEntity> list,String name) {
         this.name=new String(name);
         this.nameNumber=0;
@@ -48,6 +56,11 @@ public class UsefulNameUtil {
             return name;
         return name+"("+nameNumber+")";
     }
+
+    /**
+     * @param name
+     * @return {@link Integer }
+     */
     private Integer solve(String name){
         int begPos=name.indexOf("(",nameLen),endPos=name.indexOf(")",nameLen);
         if(begPos==-1&&endPos==-1){

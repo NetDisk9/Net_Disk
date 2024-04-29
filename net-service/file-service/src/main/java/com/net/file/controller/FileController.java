@@ -9,6 +9,7 @@ import com.net.common.enums.ResultCodeEnum;
 import com.net.common.exception.AuthException;
 import com.net.common.exception.ParameterException;
 import com.net.common.vo.PageResultVO;
+import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.entity.UserFileEntity;
 import com.net.file.support.UserFileTree;
@@ -122,6 +123,25 @@ public class FileController {
         pageResultVO.setLen((int) pageInfo.getSize());
         pageResultVO.setTot((int) pageInfo.getTotal());
         return ResponseResult.okResult(pageResultVO);
+    }
+    @GetMapping("/list/path")
+    public ResponseResult listFileByPath(String path, Integer page, Integer pageSize) {
+        if (page == null || pageSize == null) return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        Long userId=BaseContext.getCurrentId();
+        Long pid=null;
+        if(!path.equals("/")){
+            UserFileEntity parentFile = fileService.getOne(
+                    new LambdaQueryWrapper<UserFileEntity>()
+                            .eq(UserFileEntity::getFilePath, path)
+                            .eq(UserFileEntity::getUserId, userId)
+                            .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL));
+            if(parentFile==null|| DirConstants.NOT_DIR.equals(parentFile.getIsDir())){
+                return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+            }
+            pid=parentFile.getUserFileId();
+        }
+
+        return listFile(pid.toString(),page,pageSize);
     }
 
     @DeleteMapping("/delete")
