@@ -162,32 +162,35 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         return tree;
     }
 
-        @SneakyThrows
-        @Override
-        public void removeFile2Recycle(List<Long> fileIds) {
-            // 查询待删除的文件或文件夹
-            LambdaQueryWrapper<UserFileEntity> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(UserFileEntity::getUserId, BaseContext.getCurrentId())
-                    .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL)
-                    .in(UserFileEntity::getUserFileId, fileIds);
-            List<UserFileEntity> deleteFiles = fileMapper.selectList(queryWrapper);
-            if (deleteFiles.isEmpty()) {
-                throw new ParameterException();
-            }
-            // 删除文件的子级
-            for (UserFileEntity deleteFile : deleteFiles) {
-                LambdaUpdateWrapper<UserFileEntity> updateWrapper = new LambdaUpdateWrapper<>();
-                updateWrapper.set(UserFileEntity::getRecycleTime, DateFormatUtil.format(LocalDateTime.now()))
-                        .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL)
-                        .set(UserFileEntity::getStatus, FileStatusConstants.RECYCLED);
-                if (DirConstants.IS_DIR.equals(deleteFile.getIsDir())) {
-                    // 匹配子文件的路径
-                    updateWrapper.likeRight(UserFileEntity::getFilePath, deleteFile.getFilePath());
-                } else {
-                    updateWrapper.eq(UserFileEntity::getUserFileId,deleteFile.getUserFileId());
-                }
-                this.update(updateWrapper);
-            }
+    @SneakyThrows
+    @Override
+    public void updateFileFoldStatus(List<Long> fileIds, Integer BEFORE_MODE, Integer AFTER_MODE) {
+        // 查询待修改状态的文件或文件夹
+        LambdaQueryWrapper<UserFileEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserFileEntity::getUserId, BaseContext.getCurrentId())
+                .eq(UserFileEntity::getStatus, BEFORE_MODE)
+                .in(UserFileEntity::getUserFileId, fileIds);
+        List<UserFileEntity> updateFiles = fileMapper.selectList(queryWrapper);
+        if (updateFiles.isEmpty()) {
+            throw new ParameterException();
         }
+        // 修改文件的子级
+        for (UserFileEntity updateFile : updateFiles) {
+            LambdaUpdateWrapper<UserFileEntity> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.set(UserFileEntity::getRecycleTime, DateFormatUtil.format(LocalDateTime.now()))
+                    .eq(UserFileEntity::getStatus, BEFORE_MODE)
+                    .eq(UserFileEntity::getUserFileId, updateFile.getUserFileId())
+                    .set(UserFileEntity::getStatus, AFTER_MODE);
+            if (DirConstants.IS_DIR.equals(updateFile.getIsDir())) {
+                // 匹配子文件的路径
+                updateWrapper.likeRight(UserFileEntity::getFilePath, updateFile.getFilePath());
+            } else {
+                updateWrapper.eq(UserFileEntity::getUserFileId,updateFile.getUserFileId());
+            }
+            this.update(updateWrapper);
+        }
+    }
+
+
 
 }

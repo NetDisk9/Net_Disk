@@ -3,7 +3,8 @@ package com.net.common.enums;
 public enum RoleEnum {
     USER("user"),
     ADMIN("administrator"),
-    SUPER("super");
+    SUPER("super"),
+    VIP("vip");
 
 
 

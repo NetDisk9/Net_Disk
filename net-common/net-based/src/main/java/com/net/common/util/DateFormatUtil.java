@@ -36,4 +36,18 @@ public class DateFormatUtil {
         LocalDateTime localDateTime=LocalDateTime.now();
         return format(localDateTime);
     }
+
+    /**
+     *
+     * @Author:CheeseLongan
+     * 在当前日期加上一个持续时间得到的结束时间
+     */
+    public static String addDays(String currentDateString, int durationDays) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime currentDateTime = LocalDateTime.parse(currentDateString, formatter);
+
+        LocalDateTime futureDateTime = currentDateTime.plusDays(durationDays);
+
+        return futureDateTime.format(formatter);
+    }
 }

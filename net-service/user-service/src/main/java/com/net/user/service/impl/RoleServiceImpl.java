@@ -77,6 +77,15 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
     }
 
     @Override
+    public Boolean isVIP(Long userId) {
+        List<RoleEntity> list=listRoleByUserId(userId);
+        String superName= RoleEnum.VIP.getName();
+        return list.stream().map(RoleEntity::getRoleName).filter(name -> {
+            return superName.equals(name);
+        }).count()==1;
+    }
+
+    @Override
     public RoleEntity getTopRankRoleEntity(Long userId) {
         List<RoleEntity> list=listRoleByUserId(userId);
         return list.stream().max(RoleEntity.RoleEntityComparator.getInstance()).get();

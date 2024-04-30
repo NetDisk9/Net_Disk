@@ -55,6 +55,8 @@ public interface SysUserService extends IService<SysUser> {
     boolean checkEmailExists(String email);
 
     ResponseResult forgetPassword(String email, String newPassword);
+
+    ResponseResult updateVIPDuration(Long userId, int duration, boolean isRenew);
 }
 
 

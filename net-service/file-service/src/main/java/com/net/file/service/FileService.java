@@ -36,5 +36,5 @@ public interface FileService extends IService<UserFileEntity> {
 
     UserFileTree buildUserFileTree(FileMoveDTO fileMoveDTO, List<UserFileEntity> failCollector,Integer mode) throws Throwable;
 
-    void removeFile2Recycle(List<Long> fileIds);
+    void updateFileFoldStatus(List<Long> fileIds, Integer BEFORE_MODE, Integer AFTER_MODE);
 }

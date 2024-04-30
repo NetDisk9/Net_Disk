@@ -50,6 +50,35 @@ public class FileController {
         return ResponseResult.okResult(list);
     }
 
+    @PutMapping("/move")
+    public ResponseResult moveFile(@Valid @RequestBody FileMoveDTO fileMoveDTO, @Valid @NotNull Integer mode) throws Throwable {
+        ResponseResult result = copyFile(fileMoveDTO, mode);
+        if (result.getCode() != 200) {
+            return result;
+        }
+        fileService.updateFileFoldStatus(List.of(fileMoveDTO.getUserFileId()), FileStatusConstants.NORMAL, FileStatusConstants.DELETED);
+        List<?> dataList = (List<?>) result.getData();
+        List<UserFileEntity> list = new ArrayList<>();
+        for (Object item : dataList) {
+            if (item instanceof UserFileEntity) {
+                list.add((UserFileEntity) item);
+            }
+        }
+        List<Long> userFileIdList = new ArrayList<>();
+        for (UserFileEntity entity : list) {
+            userFileIdList.add(entity.getUserFileId());
+        }
+        if (!list.isEmpty()) {
+            fileService.updateFileFoldStatus(userFileIdList, FileStatusConstants.DELETED, FileStatusConstants.NORMAL);
+        }
+        return ResponseResult.okResult(list);
+    }
+
+    @GetMapping("/info")
+    public ResponseResult showInfo(@Valid @NotBlank String userFileId) {
+        return ResponseResult.okResult(fileService.getFile(Long.parseLong(userFileId), BaseContext.getCurrentId()));
+    }
+
     @PostMapping("/dir/create")
     public ResponseResult insertDir(String pid,
                                     @Valid @NotBlank String name) throws Exception {
@@ -146,7 +175,7 @@ public class FileController {
 
     @DeleteMapping("/delete")
     public ResponseResult removeFile2Recycle(@Valid @NotEmpty @RequestParam("fileIds") List<Long> fileIds) {
-        fileService.removeFile2Recycle(fileIds);
+        fileService.updateFileFoldStatus(fileIds, FileStatusConstants.NORMAL, FileStatusConstants.RECYCLED);
         return ResponseResult.okResult();
     }
 }

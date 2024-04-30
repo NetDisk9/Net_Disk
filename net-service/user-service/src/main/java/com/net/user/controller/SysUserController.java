@@ -198,7 +198,7 @@ public class SysUserController {
                 !RegexUtil.checkPasswordValid(registerDTO.getPassword()))
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
 
-        ResponseResult addUser = userService.addUserByAdmin(registerDTO.getUsername(), registerDTO.getPassword(), roleService.getRoleVOByName("用户").getRoleId());
+        ResponseResult addUser = userService.addUserByAdmin(registerDTO.getUsername(), registerDTO.getPassword(), roleService.getRoleVOByName("user").getRoleId());
         if (addUser.getCode() != 200) {
             return addUser;
         }
@@ -290,5 +290,23 @@ public class SysUserController {
         }
 
         return userService.forgetPassword(forgetPasswordDTO.getEmail(), forgetPasswordDTO.getNewPassword());
+    }
+
+    @PutMapping("/vip")
+    public ResponseResult getVIP(@RequestBody VIPDTO vipdto) {
+        if (vipdto.getUserId() == null || userService.checkUserIDExists(vipdto.getUserId()).getCode() != 200) {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        if ((vipdto.getMoney() == 360 && vipdto.getDuration() == 365) ||
+                (vipdto.getMoney() == 120 && vipdto.getDuration() == 90) ||
+                (vipdto.getMoney() == 40 && vipdto.getDuration() == 30)) {
+            if (!roleService.isVIP(vipdto.getUserId())) {
+                Long roleId = roleService.getRoleVOByName("vip").getRoleId();
+                roleService.updateUserRole(vipdto.getUserId(), roleId);
+            }
+             return userService.updateVIPDuration(vipdto.getUserId(), vipdto.getDuration(), roleService.isVIP(vipdto.getUserId()));
+        } else {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
     }
 }

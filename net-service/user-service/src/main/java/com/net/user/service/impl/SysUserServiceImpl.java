@@ -21,9 +21,11 @@ import com.net.user.pojo.dto.RegisterDTO;
 import com.net.user.pojo.dto.UpdatePasswordDTO;
 import com.net.user.pojo.dto.UserDTO;
 import com.net.user.pojo.vo.UserVO;
+import com.net.user.service.RoleService;
 import com.net.user.service.SysUserRoleService;
 import com.net.user.service.SysUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.net.user.service.SysVIPService;
 import com.net.user.util.RegexUtil;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     RedisUtil redisUtil;
     @Resource
     SysUserRoleService userRoleService;
+    @Resource
+    SysVIPService sysVIPService;
 
     @Override
     public ResponseResult insertRegisterInfo(@RequestBody RegisterDTO registerDTO) {
@@ -270,5 +274,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         userRoleService.save(sysUserRole);
 
         return ResponseResult.okResult(sysUser.getId());
+    }
+
+    @Override
+    public ResponseResult updateVIPDuration(Long userId, int duration, boolean isRenew) {
+        if (!isRenew) {
+            return sysVIPService.insertVIPinfo(userId, duration);
+        } else {
+            return sysVIPService.updateVIPDurationTime(userId, duration);
+        }
     }
 }
