@@ -36,6 +36,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
     @Resource
     SysUserService sysUserService;
     ObjectMapper objectMapper=new ObjectMapper();
+
+    @Override
     public List<RoleEntity> listRoleByUserId(Long userId) {
         try {
             if (redisUtil.hasKey(RedisConstants.USER_ROLE + userId)) {

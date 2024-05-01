@@ -134,24 +134,24 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         }
 
         System.out.println(parentFile+" "+userFileEntities);
-        // 移动到当前文件夹
+        // 移动根文件夹
         if (!PathUtil.checkPath(parentFile, userFileEntities)) {
             throw new ParameterException();
         }
         List<UserFileEntity> list = new ArrayList<>();
         for (var entity : userFileEntities) {
             if (isExist(parentFile.getFilePath() + "/" + entity.getFileName())) {// 存在同名文件
-                if (FileOperationModeConstants.DEFAULT.equals(mode)) {
+                if (FileOperationModeConstants.DEFAULT.equals(mode)) {// 跳过则返回重名的文件列表
                     failCollector.add(entity);
                     continue;
                 }
-                else{
+                else{ // 生成新的文件名
                     List<UserFileEntity> temp = listUserFileByPidAndPath(parentFile.getUserFileId(),parentFile.getFilePath(),FileStatusConstants.NORMAL,userId);
                     UsefulNameUtil usefulNameUtil = new UsefulNameUtil(temp, entity.getFileName());
                     entity.setFileName(usefulNameUtil.getNextName());
                 }
             }
-            if(DirConstants.IS_DIR.equals(entity.getIsDir())){
+            if(DirConstants.IS_DIR.equals(entity.getIsDir())){// 如果是文件夹，则拷贝子文件
                 List<UserFileEntity> temp=listUserFileInDir(entity.getFilePath(),FileStatusConstants.NORMAL,userId);
                 list.addAll(temp);
             }

@@ -2,36 +2,38 @@ package com.net.user.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.net.common.constant.EmailKeyConstants;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.net.common.enums.RoleEnum;
 import com.net.common.util.SHAUtil;
 import com.net.redis.constant.RedisConstants;
 import com.net.redis.utils.RedisUtil;
 import com.net.user.constant.UserConstants;
+import com.net.user.entity.RoleEntity;
 import com.net.user.entity.SysUser;
 import com.net.user.entity.SysUserRole;
+import com.net.user.entity.SysVIPEntity;
 import com.net.user.mapper.SysUserMapper;
 import com.net.user.pojo.dto.RegisterDTO;
 import com.net.user.pojo.dto.UpdatePasswordDTO;
 import com.net.user.pojo.dto.UserDTO;
-import com.net.user.pojo.vo.UserVO;
+import com.net.user.pojo.vo.RoleVO;
+import com.net.user.pojo.vo.UserInfoVO;
+import com.net.user.pojo.vo.VIPVO;
 import com.net.user.service.RoleService;
 import com.net.user.service.SysUserRoleService;
 import com.net.user.service.SysUserService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.net.user.service.SysVIPService;
-import com.net.user.util.RegexUtil;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.annotation.Resource;
@@ -49,6 +51,9 @@ import java.util.*;
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements SysUserService {
     @Resource
     RedisUtil redisUtil;
+    @Resource
+    @Lazy
+    RoleService roleService;
     @Resource
     SysUserRoleService userRoleService;
     @Resource
@@ -77,6 +82,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         this.save(sysUser); // 使用MyBatis-Plus的save方法
         return ResponseResult.okResult(sysUser.getId().toString()); // 插入成功，返回新用户的ID
     }
+
     @Override
     public boolean checkUsernameExists(String username) {
         LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
@@ -95,10 +101,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public ResponseResult forgetPassword(String email, String newPassword) {
-        if (checkEmailExists(email))return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"当前邮箱未注册");
-        LambdaUpdateWrapper<SysUser>updateWrapper =new LambdaUpdateWrapper<>();
-        updateWrapper.eq(SysUser::getEmail,email)
-                .set(SysUser::getPassword,SHAUtil.encrypt(newPassword));
+        if (checkEmailExists(email)) return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "当前邮箱未注册");
+        LambdaUpdateWrapper<SysUser> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(SysUser::getEmail, email)
+                .set(SysUser::getPassword, SHAUtil.encrypt(newPassword));
         this.update(updateWrapper);
         return ResponseResult.okResult();
     }
@@ -172,11 +178,22 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     public ResponseResult getUserInfo() {
         System.out.println(BaseContext.getCurrentId());
-        LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(SysUser::getId, BaseContext.getCurrentId());
-        SysUser one = this.getOne(queryWrapper);
-        UserVO userVO = BeanUtil.copyProperties(one, UserVO.class);
-        return ResponseResult.okResult(userVO);
+        // 获取当前用户基本信息
+        SysUser user = this.getOne(Wrappers.<SysUser>lambdaQuery().eq(SysUser::getId, BaseContext.getCurrentId()));
+        UserInfoVO userInfoVO = BeanUtil.copyProperties(user, UserInfoVO.class);
+        userInfoVO.setUserId(BaseContext.getCurrentId());
+        // 获取用户最高级角色
+        RoleEntity topRole = roleService.getTopRankRoleEntity(BaseContext.getCurrentId());
+        userInfoVO.setRoleVO(BeanUtil.copyProperties(topRole, RoleVO.class));
+        // 获取当前用户的角色列表
+        List<RoleEntity> roleEntities = roleService.listRoleByUserId(BaseContext.getCurrentId());
+        long count = roleEntities.stream().filter(roleEntity -> roleEntity.getRoleName().equals(RoleEnum.VIP.getName())).count();
+        // 如果是VIP则添加对应的信息
+        if (count > 0){
+            SysVIPEntity vip = sysVIPService.getOne(Wrappers.<SysVIPEntity>lambdaQuery().eq(SysVIPEntity::getUserId, BaseContext.getCurrentId()));
+            userInfoVO.setVipVO(BeanUtil.copyProperties(vip, VIPVO.class));
+        }
+        return ResponseResult.okResult(userInfoVO);
     }
 
 

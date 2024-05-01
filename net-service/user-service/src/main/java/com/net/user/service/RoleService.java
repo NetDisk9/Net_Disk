@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.net.common.dto.ResponseResult;
 import com.net.user.entity.RoleEntity;
 
+import java.util.List;
+
 public interface RoleService extends IService<RoleEntity> {
     public Boolean isSuperAdministrator(Long userId);
     public Boolean isAdministrator(Long userId);
@@ -16,4 +18,5 @@ public interface RoleService extends IService<RoleEntity> {
     public ResponseResult updateUserRole(Long userId, Long roleId);
     public ResponseResult updateUserPassword(Long userId);
     public ResponseResult getModifiableUserRole();
+    public List<RoleEntity> listRoleByUserId(Long userId);
 }
