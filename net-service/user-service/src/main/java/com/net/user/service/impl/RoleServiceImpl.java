@@ -17,6 +17,7 @@ import com.net.user.constant.UserConstants;
 import com.net.user.entity.RoleEntity;
 import com.net.user.entity.SysUser;
 import com.net.user.mapper.RoleMapper;
+import com.net.user.pojo.vo.UserInfoVO;
 import com.net.user.pojo.vo.UserVO;
 import com.net.user.service.RoleService;
 import com.net.user.service.SysUserRoleService;
@@ -109,7 +110,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
         if (result.getCode() != 200) {
             return result;
         }
-        Long baseContextUserId = ((UserVO) result.getData()).getId();
+        Long baseContextUserId = ((UserInfoVO) result.getData()).getUserId();
         int baseContextRoleRank = getTopRankRoleEntity(baseContextUserId).getRoleRank();
         int userRoleRank = getTopRankRoleEntity(userId).getRoleRank();
         int updateRoleRank = getRoleVOByRoleId(roleId).getRoleRank();
@@ -125,7 +126,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
         if (result.getCode() != 200) {
             return result;
         }
-        Long baseContextUserId = ((UserVO) result.getData()).getId();
+        Long baseContextUserId = ((UserInfoVO) result.getData()).getUserId();
         int baseContextRoleRank = getTopRankRoleEntity(baseContextUserId).getRoleRank();
         int userRoleRank = getTopRankRoleEntity(userId).getRoleRank();
         if (baseContextRoleRank <= userRoleRank) {
@@ -160,7 +161,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
         if (result.getCode() != 200) {
             return result;
         }
-        Long baseContextUserId = ((UserVO) result.getData()).getId();
+        Long baseContextUserId = ((UserInfoVO) result.getData()).getUserId();
         int baseContextRoleRank = getTopRankRoleEntity(baseContextUserId).getRoleRank();
         return ResponseResult.okResult(roleMapper.listSimpleRoleByBaseContextRoleRank(baseContextRoleRank));
     }
