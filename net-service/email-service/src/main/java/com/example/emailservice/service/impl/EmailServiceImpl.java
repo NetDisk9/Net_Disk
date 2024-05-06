@@ -76,6 +76,15 @@ public class EmailServiceImpl implements EmailService {
         redisUtil.set(key+"res:"+email,1,RedisConstants.LOGIN_USER_TTL);
     }
 
+    @Override
+    public void deleteCode(String email, String type) {
+        if(!set.containsKey(type)){
+            throw  new ParameterException();
+        }
+        String key=set.get(type);
+        redisUtil.del(key+email);
+    }
+
     public void setSet(Map<String, String> set) {
         this.set = set;
     }

@@ -26,8 +26,11 @@ import com.net.user.service.SysUserService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> implements RoleService {
@@ -64,9 +67,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
         List<RoleEntity> list=listRoleByUserId(userId);
         System.out.println(list);
         String superName= RoleEnum.SUPER.getName();
-        return list.stream().map(RoleEntity::getRoleName).filter(name -> {
-            return superName.equals(name);
-        }).count()==1;
+        return list.stream().map(RoleEntity::getRoleName).anyMatch(superName::equals);
     }
     @Override
     public Boolean isAdministrator(Long userId) {
@@ -74,10 +75,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
             return false;
         }
         List<RoleEntity> list=listRoleByUserId(userId);
-        String superName= RoleEnum.ADMIN.getName();
-        return list.stream().map(RoleEntity::getRoleName).filter(name -> {
-            return superName.equals(name);
-        }).count()==1;
+        String adminName= RoleEnum.ADMIN.getName();
+        return list.stream().map(RoleEntity::getRoleName).anyMatch(adminName::equals);
     }
 
     @Override
