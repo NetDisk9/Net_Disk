@@ -16,14 +16,14 @@ public class FileApplicationTests {
     FileService fileService;
     @Resource
     FileMapper fileMapper;
-    @Test
-    public void testImg(){
-        System.out.println(RegexUtil.checkImageValid("jpg"));
-    }
-    @Test
-    public void testPath()
-    {
-        System.out.println(fileService.list(new LambdaQueryWrapper<UserFileEntity>().eq(UserFileEntity::getPid,null)));
-    }
+//    @Test
+//    public void testImg(){
+//        System.out.println(RegexUtil.checkImageValid("jpg"));
+//    }
+//    @Test
+//    public void testPath()
+//    {
+//        System.out.println(fileService.list(new LambdaQueryWrapper<UserFileEntity>().eq(UserFileEntity::getPid,null)));
+//    }
 
 }

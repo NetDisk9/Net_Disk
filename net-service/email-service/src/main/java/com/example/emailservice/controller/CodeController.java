@@ -40,6 +40,7 @@ public class CodeController {
             return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR);
         try{
             emailService.saveRes(email,code,type);
+            emailService.deleteCode(email,type);
         }catch (Exception e){
             e.printStackTrace();
             throw new RuntimeException();

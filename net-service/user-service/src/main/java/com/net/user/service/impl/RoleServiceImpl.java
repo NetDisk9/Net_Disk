@@ -3,6 +3,7 @@ package com.net.user.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import com.net.user.constant.UserConstants;
 import com.net.user.entity.RoleEntity;
 import com.net.user.entity.SysUser;
 import com.net.user.mapper.RoleMapper;
+import com.net.user.pojo.vo.UserInfoVO;
 import com.net.user.pojo.vo.UserVO;
 import com.net.user.service.RoleService;
 import com.net.user.service.SysUserRoleService;
@@ -24,8 +26,11 @@ import com.net.user.service.SysUserService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> implements RoleService {
@@ -62,9 +67,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
         List<RoleEntity> list=listRoleByUserId(userId);
         System.out.println(list);
         String superName= RoleEnum.SUPER.getName();
-        return list.stream().map(RoleEntity::getRoleName).filter(name -> {
-            return superName.equals(name);
-        }).count()==1;
+        return list.stream().map(RoleEntity::getRoleName).anyMatch(superName::equals);
     }
     @Override
     public Boolean isAdministrator(Long userId) {
@@ -72,10 +75,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
             return false;
         }
         List<RoleEntity> list=listRoleByUserId(userId);
-        String superName= RoleEnum.ADMIN.getName();
-        return list.stream().map(RoleEntity::getRoleName).filter(name -> {
-            return superName.equals(name);
-        }).count()==1;
+        String adminName= RoleEnum.ADMIN.getName();
+        return list.stream().map(RoleEntity::getRoleName).anyMatch(adminName::equals);
     }
 
     @Override
@@ -109,7 +110,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
         if (result.getCode() != 200) {
             return result;
         }
-        Long baseContextUserId = ((UserVO) result.getData()).getId();
+        Long baseContextUserId = ((UserInfoVO) result.getData()).getUserId();
         int baseContextRoleRank = getTopRankRoleEntity(baseContextUserId).getRoleRank();
         int userRoleRank = getTopRankRoleEntity(userId).getRoleRank();
         int updateRoleRank = getRoleVOByRoleId(roleId).getRoleRank();
@@ -125,7 +126,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
         if (result.getCode() != 200) {
             return result;
         }
-        Long baseContextUserId = ((UserVO) result.getData()).getId();
+        Long baseContextUserId = ((UserInfoVO) result.getData()).getUserId();
         int baseContextRoleRank = getTopRankRoleEntity(baseContextUserId).getRoleRank();
         int userRoleRank = getTopRankRoleEntity(userId).getRoleRank();
         if (baseContextRoleRank <= userRoleRank) {
@@ -160,7 +161,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, RoleEntity> impleme
         if (result.getCode() != 200) {
             return result;
         }
-        Long baseContextUserId = ((UserVO) result.getData()).getId();
+        Long baseContextUserId = ((UserInfoVO) result.getData()).getUserId();
         int baseContextRoleRank = getTopRankRoleEntity(baseContextUserId).getRoleRank();
         return ResponseResult.okResult(roleMapper.listSimpleRoleByBaseContextRoleRank(baseContextRoleRank));
     }
