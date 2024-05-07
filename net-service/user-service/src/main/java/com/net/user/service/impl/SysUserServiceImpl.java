@@ -106,6 +106,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         updateWrapper.eq(SysUser::getEmail, email)
                 .set(SysUser::getPassword, SHAUtil.encrypt(newPassword));
         this.update(updateWrapper);
+        redisUtil.del(EmailKeyConstants.RESET_PASSWORD_RES_KEY + email);
         return ResponseResult.okResult();
     }
 
