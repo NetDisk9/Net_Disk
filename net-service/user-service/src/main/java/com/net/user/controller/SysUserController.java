@@ -1,7 +1,9 @@
 package com.net.user.controller;
 
 
+import cn.hutool.core.util.StrUtil;
 import com.net.api.client.FileClient;
+import com.net.common.constant.EmailKeyConstants;
 import com.net.redis.constant.RedisConstants;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
@@ -277,13 +279,12 @@ public class SysUserController {
     @PostMapping("/forget/password")
     public ResponseResult forget(@RequestBody ForgetPasswordDTO forgetPasswordDTO) {
         if (StringUtils.isBlank(forgetPasswordDTO.getEmail())
-                || StringUtils.isBlank(forgetPasswordDTO.getCode())
                 || StringUtils.isBlank(forgetPasswordDTO.getNewPassword())) { //为空
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
-        String redisCode = (String) redisUtil.get(RedisConstants.EMAIL_CODE_RESET + forgetPasswordDTO.getEmail());
-        if (!redisCode.equals(forgetPasswordDTO.getCode())) { // 验证码错误
-            return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR);
+        String redisCode = (String) redisUtil.get(EmailKeyConstants.RESET_PASSWORD_RES_KEY + forgetPasswordDTO.getEmail());
+        if (StrUtil.isBlank(redisCode)) { // 未校验
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
         if (!RegexUtil.checkPasswordValid(forgetPasswordDTO.getNewPassword())) { // 格式不正确
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
