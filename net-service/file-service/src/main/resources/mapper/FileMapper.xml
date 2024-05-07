@@ -13,10 +13,15 @@
         <result property="recycleTime" column="recycle_time"/>
         <result property="status" column="status"/>
         <result property="isDir" column="is_dir"/>
+        <result property="fileCategory" column="file_category"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="fileCover" column="file_cover"/>
     </resultMap>
     <select id="listUserFileByPidAndPath" resultMap="userFileMap">
-        select user_file_id,user_id,pid,file_id,file_name,file_path,create_time,update_time,status,is_dir
-        from user_file
+        select u.user_file_id,u.user_id,u.pid,u.file_id,u.file_name,u.file_path,u.create_time,u.update_time,u.status,u.is_dir,file_category,file_size,file_cover
+        from user_file u
+        left join file
+        on u.file_id = file.file_id
         where status = #{status} and
               <if test="pid != null">
                   pid = #{pid}
@@ -26,5 +31,11 @@
               </if>
           and file_path like concat(#{path},'%') and user_id = #{userId};
     </select>
-
+    <select id="getUserFileByUserFileId" resultMap="userFileMap">
+        select u.user_file_id,u.user_id,u.pid,u.file_id,u.file_name,u.file_path,u.create_time,u.update_time,u.status,u.is_dir,file_category,file_size,file_cover
+        from user_file u
+        left join file
+        on u.file_id = file.file_id
+        where u.user_file_id = #{id}
+    </select>
 </mapper>

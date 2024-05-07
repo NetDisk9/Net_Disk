@@ -1,5 +1,6 @@
 package com.net.file.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -12,12 +13,14 @@ import com.net.common.vo.PageResultVO;
 import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.entity.UserFileEntity;
+import com.net.file.pojo.vo.FileVO;
 import com.net.file.support.UserFileTree;
 import com.net.file.pojo.dto.FileMoveDTO;
 import com.net.file.service.FileService;
 import com.net.file.util.PathUtil;
 import com.net.file.util.UsefulNameUtil;
 import lombok.SneakyThrows;
+import org.springframework.beans.BeanUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +29,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +51,8 @@ public class FileController {
         tree.reAssignUserFileIdExceptRoot();
 //        System.out.println(tree.collect());
         fileService.insertBatch(tree.collect());
-        return ResponseResult.okResult(list);
+        List<FileVO> fileVOS = BeanUtil.copyToList(list, FileVO.class);
+        return ResponseResult.okResult(fileVOS);
     }
 
     @PutMapping("/move")
@@ -71,12 +76,16 @@ public class FileController {
         if (!list.isEmpty()) {
             fileService.updateFileFoldStatus(userFileIdList, FileStatusConstants.DELETED, FileStatusConstants.NORMAL);
         }
-        return ResponseResult.okResult(list);
+        List<FileVO> fileVOS = BeanUtil.copyToList(list, FileVO.class);
+        return ResponseResult.okResult(fileVOS);
     }
 
     @GetMapping("/info")
     public ResponseResult showInfo(@Valid @NotBlank String userFileId) {
-        return ResponseResult.okResult(fileService.getFile(Long.parseLong(userFileId), BaseContext.getCurrentId()));
+        UserFileEntity userFile = fileService.getFile(Long.parseLong(userFileId), BaseContext.getCurrentId());
+        FileVO fileVO=new FileVO();
+        BeanUtils.copyProperties(userFile,fileVO);
+        return ResponseResult.okResult(fileVO);
     }
 
     @PostMapping("/dir/create")
@@ -102,7 +111,9 @@ public class FileController {
             return ResponseResult.errorResult(ResultCodeEnum.FILE_NAME_REPEAT.getCode(), "文件名重复", usefulNameUtil.getNextName());
         }
         fileService.insertFile(userFile);
-        return ResponseResult.okResult(userFile);
+        FileVO fileVO=new FileVO();
+        BeanUtils.copyProperties(userFile,fileVO);
+        return ResponseResult.okResult(fileVO);
     }
 
     @PutMapping("/rename")
@@ -147,8 +158,9 @@ public class FileController {
                 .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL);
         //分页查询
         fileService.page(pageInfo, queryWrapper);
-        PageResultVO<UserFileEntity> pageResultVO = new PageResultVO<>();
-        pageResultVO.setList(pageInfo.getRecords());
+        PageResultVO<FileVO> pageResultVO = new PageResultVO<>();
+        List<FileVO> fileVOS = BeanUtil.copyToList(pageInfo.getRecords(), FileVO.class);
+        pageResultVO.setList(fileVOS);
         pageResultVO.setLen((int) pageInfo.getSize());
         pageResultVO.setTot((int) pageInfo.getTotal());
         return ResponseResult.okResult(pageResultVO);

@@ -1,6 +1,7 @@
 package com.net.file.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.net.common.util.DateFormatUtil;
@@ -34,6 +35,12 @@ public class UserFileEntity {
     String recycleTime;
     Integer status;
     Integer isDir;
+    @TableField(exist = false)
+    Long fileSize;
+    @TableField(exist = false)
+    Integer fileCategory;
+    @TableField(exist = false)
+    String fileCover;
 
     @Override
     public boolean equals(Object object) {

@@ -37,10 +37,8 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
 
     @Override
     public UserFileEntity getUserFileByUserFileId(Long userFileId) {
-        return getById(userFileId);
+        return fileMapper.getUserFileByUserFileId(userFileId);
     }
-
-
     @Override
     public List<UserFileEntity> listUserFileByPidAndPath(Long pid, String path, Integer status, Long userId){
         return fileMapper.listUserFileByPidAndPath(pid,path,status,userId);
