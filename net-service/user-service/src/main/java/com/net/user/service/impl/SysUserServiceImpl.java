@@ -75,11 +75,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .username(registerDTO.getUsername())
                 .email(registerDTO.getEmail())
                 .password(SHAUtil.encrypt(registerDTO.getPassword()))
-                .avatar("https://wangluodapangzi.oss-cn-shenzhen.aliyuncs.com/595d009f-bffc-4efd-b7cf-24262a323ceb.png")
-                .status(0)
-                .method("111") // 默认111，三种方式全开，即ID/用户名/邮箱登录
+                .avatar(UserConstants.DEAULT_AVATAR)
+                .status(UserConstants.DEAULT_STATUS)
+                .method(UserConstants.DEAULT_METHOD) // 默认111，三种方式全开，即ID/用户名/邮箱登录
                 .build();
         this.save(sysUser); // 使用MyBatis-Plus的save方法
+        SysUserRole sysUserRole = SysUserRole
+                .builder()
+                .userId(sysUser.getId())
+                .roleId(roleService.getRoleVOByName("user").getRoleId())
+                .build();
+        userRoleService.save(sysUserRole);
         return ResponseResult.okResult(sysUser.getId().toString()); // 插入成功，返回新用户的ID
     }
 

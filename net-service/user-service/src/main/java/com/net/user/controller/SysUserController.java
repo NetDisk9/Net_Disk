@@ -199,11 +199,6 @@ public class SysUserController {
                 com.baomidou.mybatisplus.core.toolkit.StringUtils.isBlank(registerDTO.getPassword()) ||
                 !RegexUtil.checkPasswordValid(registerDTO.getPassword()))
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
-
-        ResponseResult addUser = userService.addUserByAdmin(registerDTO.getUsername(), registerDTO.getPassword(), roleService.getRoleVOByName("user").getRoleId());
-        if (addUser.getCode() != 200) {
-            return addUser;
-        }
         return userService.insertRegisterInfo(registerDTO);
     }
 
