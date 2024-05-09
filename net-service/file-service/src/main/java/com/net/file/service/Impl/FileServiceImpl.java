@@ -107,54 +107,14 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         }
         return userFile;
     }
+    @Override
+    public UserFileEntity getFileIdByPath(String path,Long userId){
+        UserFileEntity userFileEntity = fileMapper.getUserFileByPath(userId, FileStatusConstants.NORMAL, path);
+        return userFileEntity;
+    }
 
     @Override
-    public UserFileTree buildUserFileTree(FileMoveDTO fileMoveDTO, List<UserFileEntity> failCollector, Integer mode) throws Throwable {
-        Long userId = BaseContext.getCurrentId();
-        // 判断传入的pid对应的文件是否为正常的文件夹
-        UserFileEntity parentFile = getNormalFile(fileMoveDTO.getPid(), userId);
-        if (DirConstants.NOT_DIR.equals(parentFile.getIsDir())) {
-            throw new ParameterException();
-        }
-        List<UserFileEntity> userFileEntities;
-        // 移动文件，修改文件的所属的文件夹
-        try{
-            userFileEntities = Arrays.stream(fileMoveDTO.getUserFileId()).map(
-                LambdaFunctionWrapper.wrap(fileId -> {
-                    UserFileEntity userFile = getNormalFile(fileId, userId);
-                    userFile.setPid(parentFile.getUserFileId());
-                    return userFile;
-                })
-            ).collect(Collectors.toList());
-        }catch (Exception e){
-            e.printStackTrace();
-            throw e.getCause();
-        }
-
-        System.out.println(parentFile+" "+userFileEntities);
-        // 移动根文件夹
-        if (!PathUtil.checkPath(parentFile, userFileEntities)) {
-            throw new ParameterException();
-        }
-        List<UserFileEntity> list = new ArrayList<>();
-        for (var entity : userFileEntities) {
-            if (isExist(parentFile.getFilePath() + "/" + entity.getFileName())) {// 存在同名文件
-                if (FileOperationModeConstants.DEFAULT.equals(mode)) {// 跳过则返回重名的文件列表
-                    failCollector.add(entity);
-                    continue;
-                }
-                else{ // 生成新的文件名
-                    List<UserFileEntity> temp = listUserFileByPidAndPath(parentFile.getUserFileId(),parentFile.getFilePath(),FileStatusConstants.NORMAL,userId);
-                    UsefulNameUtil usefulNameUtil = new UsefulNameUtil(temp, entity.getFileName());
-                    entity.setFileName(usefulNameUtil.getNextName());
-                }
-            }
-            if(DirConstants.IS_DIR.equals(entity.getIsDir())){// 如果是文件夹，则拷贝子文件
-                List<UserFileEntity> temp=listUserFileInDir(entity.getFilePath(),FileStatusConstants.NORMAL,userId);
-                list.addAll(temp);
-            }
-            list.add(entity);
-        }
+    public UserFileTree buildUserFileTree(UserFileEntity parentFile,List<UserFileEntity> list)  {
         UserFileTree tree = new UserFileTree(new UserFileTree.UserFileTreeNode(parentFile));
         tree.buildTree(list);
         return tree;
@@ -189,6 +149,59 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         }
     }
 
+    @Override
+    public List<UserFileEntity> copyFile(FileMoveDTO fileMoveDTO, Integer mode) throws Throwable {
+        List<UserFileEntity> failCollector = new ArrayList<>();
+        Long userId = BaseContext.getCurrentId();
+        // 判断传入的pid对应的文件是否为正常的文件夹
+        UserFileEntity parentFile = getNormalFile(fileMoveDTO.getPid(), userId);
+        if (DirConstants.NOT_DIR.equals(parentFile.getIsDir())) {
+            throw new ParameterException();
+        }
+        List<UserFileEntity> userFileEntities;
+        // 移动文件，修改文件的所属的文件夹
+        try{
+            userFileEntities = Arrays.stream(fileMoveDTO.getUserFileId()).map(
+                    LambdaFunctionWrapper.wrap(fileId -> {
+                        UserFileEntity userFile = getNormalFile(fileId, userId);
+                        userFile.setPid(parentFile.getUserFileId());
+                        return userFile;
+                    })
+            ).collect(Collectors.toList());
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e.getCause();
+        }
 
-
+        System.out.println(parentFile+" "+userFileEntities);
+        // 移动根文件夹
+        if (!PathUtil.checkPath(parentFile, userFileEntities)) {
+            throw new ParameterException();
+        }
+        List<UserFileEntity> list = new ArrayList<>();
+        for (var entity : userFileEntities) {
+            if (isExist(parentFile.getFilePath() + "/" + entity.getFileName())) {// 存在同名文件
+                if (FileOperationModeConstants.DEFAULT.equals(mode)) {// 跳过则返回重名的文件列表
+                    failCollector.add(entity);
+                    continue;
+                }
+                else{ // 生成新的文件名
+                    List<UserFileEntity> temp = listUserFileByPidAndPath(parentFile.getUserFileId(),parentFile.getFilePath(),FileStatusConstants.NORMAL,userId);
+                    UsefulNameUtil usefulNameUtil = new UsefulNameUtil(temp, entity.getFileName());
+                    entity.setFileName(usefulNameUtil.getNextName());
+                }
+            }
+            if(DirConstants.IS_DIR.equals(entity.getIsDir())){// 如果是文件夹，则拷贝子文件
+                List<UserFileEntity> temp=listUserFileInDir(entity.getFilePath(),FileStatusConstants.NORMAL,userId);
+                list.addAll(temp);
+            }
+            list.add(entity);
+        }
+        UserFileTree tree = buildUserFileTree(parentFile,list);
+        tree.rebuildPathByRootPath();
+        tree.reAssignUserFileIdExceptRoot();
+//        System.out.println(tree.collect());
+        insertBatch(tree.collect());
+        return failCollector;
+    }
 }

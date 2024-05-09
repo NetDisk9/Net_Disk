@@ -34,7 +34,9 @@ public interface FileService extends IService<UserFileEntity> {
 
     UserFileEntity getFileWithoutCheck(Long userFileId) throws ParameterException;
 
-    UserFileTree buildUserFileTree(FileMoveDTO fileMoveDTO, List<UserFileEntity> failCollector,Integer mode) throws Throwable;
+    UserFileTree buildUserFileTree(UserFileEntity parentFile,List<UserFileEntity> list);
+    List<UserFileEntity> copyFile(FileMoveDTO fileMoveDTO,Integer mode) throws Throwable;
 
     void updateFileFoldStatus(List<Long> fileIds, Integer BEFORE_MODE, Integer AFTER_MODE);
+    UserFileEntity getFileIdByPath(String path,Long userId);
 }

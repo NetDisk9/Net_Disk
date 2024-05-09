@@ -38,4 +38,11 @@
         on u.file_id = file.file_id
         where u.user_file_id = #{id}
     </select>
+    <select id="getUserFileByPath" resultMap="userFileMap">
+        select u.user_file_id,u.user_id,u.pid,u.file_id,u.file_name,u.file_path,u.create_time,u.update_time,u.status,u.is_dir,file_category,file_size,file_cover
+        from user_file u
+                 left join file
+                           on u.file_id = file.file_id
+        where u.file_path = #{path} and status = #{status} and u.user_id = #{userId}
+    </select>
 </mapper>

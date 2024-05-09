@@ -11,6 +11,7 @@ import com.net.common.exception.AuthException;
 import com.net.common.exception.ParameterException;
 import com.net.common.vo.PageResultVO;
 import com.net.file.constant.DirConstants;
+import com.net.file.constant.FileOperationModeConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.entity.UserFileEntity;
 import com.net.file.pojo.vo.FileVO;
@@ -19,6 +20,7 @@ import com.net.file.pojo.dto.FileMoveDTO;
 import com.net.file.service.FileService;
 import com.net.file.util.PathUtil;
 import com.net.file.util.UsefulNameUtil;
+import com.net.file.wrapper.LambdaFunctionWrapper;
 import lombok.SneakyThrows;
 import org.springframework.beans.BeanUtils;
 import org.springframework.validation.annotation.Validated;
@@ -31,7 +33,9 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/file")
@@ -45,13 +49,8 @@ public class FileController {
         if (fileMoveDTO.getUserFileId().length == 0) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
-        List<UserFileEntity> list = new ArrayList<>();
-        UserFileTree tree = fileService.buildUserFileTree(fileMoveDTO, list, mode);
-        tree.rebuildPathByRootPath();
-        tree.reAssignUserFileIdExceptRoot();
-//        System.out.println(tree.collect());
-        fileService.insertBatch(tree.collect());
-        List<FileVO> fileVOS = BeanUtil.copyToList(list, FileVO.class);
+        List<UserFileEntity> failCollector = fileService.copyFile(fileMoveDTO, mode);
+        List<FileVO> fileVOS = BeanUtil.copyToList(failCollector, FileVO.class);
         return ResponseResult.okResult(fileVOS);
     }
 
@@ -132,6 +131,7 @@ public class FileController {
         if (userFile.getFileName().equals(name)) {
             return ResponseResult.okResult();
         }
+        String oldPath=userFile.getFilePath();
         userFile.setFileName(name);
         userFile.setFilePath(PathUtil.replaceLastPath(userFile.getFilePath(), name));
         System.out.println(userFile.getFilePath());
@@ -141,7 +141,17 @@ public class FileController {
         if (!usefulNameUtil.isUseful(userFile.getFileName())) {
             return ResponseResult.errorResult(ResultCodeEnum.FILE_NAME_REPEAT.getCode(), "文件名重复", usefulNameUtil.getNextName());
         }
-        fileService.updateFile(userFile);
+        if(DirConstants.IS_DIR.equals(userFile.getIsDir())){
+            List<UserFileEntity> list = fileService.listUserFileInDir(oldPath, FileStatusConstants.NORMAL, userId);
+            UserFileTree tree = fileService.buildUserFileTree(userFile, list);
+            tree.rebuildPathByRootPath();
+            List<UserFileEntity> collect = tree.collect();
+            collect.add(userFile);
+            fileService.updateBatchById(collect);
+        }
+        else{
+            fileService.updateById(userFile);
+        }
         return ResponseResult.okResult();
     }
 
@@ -183,6 +193,14 @@ public class FileController {
         }
 
         return listFile(pid.toString(),page,pageSize);
+    }
+    @GetMapping("/get/path")
+    public ResponseResult getFileIdByPath(String path){
+        Long userId=BaseContext.getCurrentId();
+        UserFileEntity userFileEntity = fileService.getFileIdByPath(path, userId);
+        FileVO fileVO=new FileVO();
+        BeanUtils.copyProperties(userFileEntity,fileVO);
+        return ResponseResult.okResult(fileVO);
     }
 
     @DeleteMapping("/delete")

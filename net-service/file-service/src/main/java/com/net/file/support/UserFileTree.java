@@ -64,7 +64,7 @@ public class UserFileTree {
         for(var child:node.children){
             UserFileEntity userFile = child.val;
             userFile.setPid(parent.getUserFileId());
-            userFile.setUserFileId(LongIdUtil.createLongId());
+            userFile.setUserFileId(LongIdUtil.createLongId(userFile));
             userFile.setCreateTime(DateFormatUtil.getNow());
             userFile.setUpdateTime(userFile.getCreateTime());
             reAssignUserFileId(child);
