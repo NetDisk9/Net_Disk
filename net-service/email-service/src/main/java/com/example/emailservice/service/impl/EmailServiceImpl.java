@@ -54,7 +54,7 @@ public class EmailServiceImpl implements EmailService {
             e.printStackTrace();
             return ResponseResult.errorResult(422,"参数错误");
         }
-        return ResponseResult.okResult(200,"响应成功");
+        return ResponseResult.okResult(code);
     }
 
     @Override
