@@ -282,8 +282,8 @@ public class SysUserController {
                 || StringUtils.isBlank(forgetPasswordDTO.getNewPassword())) { //为空
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
-        String redisCode = (String) redisUtil.get(EmailKeyConstants.RESET_PASSWORD_RES_KEY + forgetPasswordDTO.getEmail());
-        if (StrUtil.isBlank(redisCode)) { // 未校验
+        Object redisCode = redisUtil.get(EmailKeyConstants.RESET_PASSWORD_RES_KEY + forgetPasswordDTO.getEmail());
+        if (redisCode==null) { // 未校验
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
         if (!RegexUtil.checkPasswordValid(forgetPasswordDTO.getNewPassword())) { // 格式不正确

@@ -1,5 +1,6 @@
 package com.example.emailservice.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.example.emailservice.service.EmailService;
 import com.net.common.dto.ResponseResult;
@@ -63,8 +64,11 @@ public class EmailServiceImpl implements EmailService {
             return false;
         }
         String key=set.get(type);
-        String value =  redisUtil.get(key + email).toString();
-        return code.equals(value);
+        Object object= redisUtil.get(key + email);
+        if(object==null){
+            return false;
+        }
+        return code.equals(object.toString());
     }
 
     @Override

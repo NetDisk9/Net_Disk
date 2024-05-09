@@ -101,7 +101,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public ResponseResult forgetPassword(String email, String newPassword) {
-        if (checkEmailExists(email)) return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "当前邮箱未注册");
+        if (!checkEmailExists(email)) return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "当前邮箱未注册");
         LambdaUpdateWrapper<SysUser> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(SysUser::getEmail, email)
                 .set(SysUser::getPassword, SHAUtil.encrypt(newPassword));
