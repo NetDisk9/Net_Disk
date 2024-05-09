@@ -39,4 +39,6 @@ public interface FileService extends IService<UserFileEntity> {
 
     void updateFileFoldStatus(List<Long> fileIds, Integer BEFORE_MODE, Integer AFTER_MODE);
     UserFileEntity getFileIdByPath(String path,Long userId);
+    void restoreParent(UserFileEntity file);
+
 }

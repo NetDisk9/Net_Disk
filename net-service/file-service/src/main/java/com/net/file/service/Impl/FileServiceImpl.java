@@ -7,6 +7,7 @@ import com.net.common.context.BaseContext;
 import com.net.common.exception.AuthException;
 import com.net.common.exception.ParameterException;
 import com.net.common.util.DateFormatUtil;
+import com.net.common.util.LongIdUtil;
 import com.net.common.vo.PageResultVO;
 import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileOperationModeConstants;
@@ -20,6 +21,7 @@ import com.net.file.service.FileService;
 import com.net.file.util.PathUtil;
 import com.net.file.util.UsefulNameUtil;
 import com.net.file.wrapper.LambdaFunctionWrapper;
+import io.lettuce.core.ScriptOutputType;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -148,7 +151,11 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
             this.update(updateWrapper);
         }
     }
-
+    @Override
+    public void restoreParent(UserFileEntity file){
+        UserFileEntity parent = doRestoreParent(file);
+        file.setPid(parent.getUserFileId());
+    }
     @Override
     public List<UserFileEntity> copyFile(FileMoveDTO fileMoveDTO, Integer mode) throws Throwable {
         List<UserFileEntity> failCollector = new ArrayList<>();
@@ -204,4 +211,24 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         insertBatch(tree.collect());
         return failCollector;
     }
+    private UserFileEntity doRestoreParent(UserFileEntity file){
+        if(file==null){
+            return null;
+        }
+        String parentPath = file.getParentPath();
+        System.out.println(parentPath);
+        if(parentPath==null){
+            return null;
+        }
+        UserFileEntity parentFile = fileMapper.getUserFileByPath(file.getUserId(), file.getStatus(), parentPath);
+        if(parentFile==null){
+            parentFile = UserFileEntity.UserFileEntityFactory.createDirEntity(parentPath, file.getStatus(), file.getUserId());
+            parentFile.setUserFileId(LongIdUtil.createLongId(parentFile));
+            UserFileEntity temp = doRestoreParent(parentFile);
+            parentFile.setPid(temp==null?null:temp.getUserFileId());
+            save(parentFile);
+        }
+        return parentFile;
+    }
+
 }

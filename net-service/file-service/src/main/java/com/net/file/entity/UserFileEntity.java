@@ -8,6 +8,7 @@ import com.net.common.util.DateFormatUtil;
 import com.net.common.util.LongIdUtil;
 import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileStatusConstants;
+import com.net.file.util.PathUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,6 +42,24 @@ public class UserFileEntity {
     Integer fileCategory;
     @TableField(exist = false)
     String fileCover;
+    public boolean hasParent(){
+        return filePath.lastIndexOf("/")!=0;
+    }
+    public String getParentPath(){
+        int pos = filePath.lastIndexOf("/");
+        if(pos<=0){
+            return null;
+        }
+        return filePath.substring(0,pos);
+    }
+    public String getExtName(){
+        int pos=fileName.lastIndexOf(".");
+        if(pos==-1){
+            return null;
+        }
+        return filePath.substring(pos+1);
+
+    }
 
     @Override
     public boolean equals(Object object) {
@@ -75,6 +94,22 @@ public class UserFileEntity {
                     .isDir(DirConstants.IS_DIR)
                     .pid(parent == null ? null : parent.getUserFileId())
                     .status(FileStatusConstants.NORMAL)
+                    .createTime(dateTime)
+                    .updateTime(dateTime)
+                    .recycleTime(null)
+                    .build();
+            return userFile;
+        }
+        public static UserFileEntity createDirEntity(String path,Integer status,Long userId){
+            String dateTime= DateFormatUtil.format(LocalDateTime.now());
+            String name= PathUtil.getNameFromPath(path);
+            UserFileEntity userFile = UserFileEntity.builder()
+                    .filePath(path)
+                    .fileName(name)
+                    .userId(userId)
+                    .isDir(DirConstants.IS_DIR)
+                    .pid(null)
+                    .status(status)
                     .createTime(dateTime)
                     .updateTime(dateTime)
                     .recycleTime(null)
