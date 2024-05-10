@@ -117,5 +117,13 @@ public class UserFileEntity {
                     .build();
             return userFile;
         }
+        public static UserFileEntity createRootDirEntity(Long userId){
+            UserFileEntity root=UserFileEntity.builder()
+                    .filePath("")
+                    .isDir(DirConstants.IS_DIR)
+                    .status(FileStatusConstants.NORMAL)
+                    .userId(userId).build();
+            return root;
+        }
     }
 }

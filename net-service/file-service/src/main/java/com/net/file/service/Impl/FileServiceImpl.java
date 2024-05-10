@@ -162,7 +162,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         List<UserFileEntity> failCollector = new ArrayList<>();
         Long userId = BaseContext.getCurrentId();
         // 判断传入的pid对应的文件是否为正常的文件夹
-        UserFileEntity parentFile = getNormalFile(fileMoveDTO.getPid(), userId);
+        UserFileEntity parentFile = (fileMoveDTO.getPid()!=null)?getNormalFile(fileMoveDTO.getPid(), userId):UserFileEntity.UserFileEntityFactory.createRootDirEntity(userId);
         if (DirConstants.NOT_DIR.equals(parentFile.getIsDir())) {
             throw new ParameterException("目的文件不是文件夹");
         }

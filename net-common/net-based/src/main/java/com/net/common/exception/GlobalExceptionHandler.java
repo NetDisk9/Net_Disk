@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.validation.ConstraintViolationException;
 
@@ -71,6 +72,13 @@ public class GlobalExceptionHandler {
     public ResponseResult exception(ParameterException e){
         log.error("捕获异常 ParameterException:{}",e.getMessage());
         return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,getMessage(e,ResultCodeEnum.PARAM_ERROR.getMessage()));
+    }
+    @ExceptionHandler(ParameterException.class)
+    @ResponseBody
+    public ResponseResult exception(MethodArgumentTypeMismatchException e){
+        log.error("捕获异常 MethodArgumentTypeMismatchException:{}",e.getMessage());
+        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"参数类型不匹配");
+
     }
     private String getMessage(Exception e,String defaultMessage){
         if(e.getMessage()!=null&&e.getMessage().length()!=0){

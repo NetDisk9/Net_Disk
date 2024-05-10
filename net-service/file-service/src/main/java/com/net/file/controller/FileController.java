@@ -193,10 +193,13 @@ public class FileController {
             pid=parentFile.getUserFileId();
         }
 
-        return listFile(pid.toString(),page,pageSize);
+        return listFile(pid==null?null:pid.toString(),page,pageSize);
     }
     @GetMapping("/get/path")
     public ResponseResult getFileIdByPath(String path){
+        if(path.equals("/")){
+            return ResponseResult.okResult();
+        }
         Long userId=BaseContext.getCurrentId();
         UserFileEntity userFileEntity = fileService.getFileIdByPath(path, userId);
         FileVO fileVO=new FileVO();

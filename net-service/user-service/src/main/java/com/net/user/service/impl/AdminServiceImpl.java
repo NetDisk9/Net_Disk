@@ -1,21 +1,26 @@
 package com.net.user.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
+import com.net.common.enums.RoleEnum;
 import com.net.common.exception.AuthException;
 import com.net.common.exception.CustomException;
 import com.net.user.constant.UserConstants;
 import com.net.user.entity.RoleEntity;
 import com.net.user.entity.SysUser;
+import com.net.user.entity.SysVIPEntity;
 import com.net.user.mapper.AdminMapper;
 import com.net.user.pojo.dto.UserQueryDTO;
 import com.net.user.pojo.vo.PageVO;
 import com.net.user.pojo.vo.RoleVO;
 import com.net.user.pojo.vo.UserInfoVO;
+import com.net.user.pojo.vo.VIPVO;
 import com.net.user.service.AdminService;
 import com.net.user.service.RoleService;
+import com.net.user.service.SysVIPService;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -41,6 +46,8 @@ public class AdminServiceImpl implements AdminService {
     AdminMapper adminMapper;
     @Resource
     RoleService roleService;
+    @Resource
+    SysVIPService vipService;
 
     @Override
     public PageVO listUser(UserQueryDTO userQueryDTO) throws AuthException {
@@ -62,6 +69,10 @@ public class AdminServiceImpl implements AdminService {
         pageVO.setTot(getTotal(userQueryDTO));
         for (var temp : list) {
             RoleEntity roleEntity = roleService.getTopRankRoleEntity(temp.getUserId());
+            if(!RoleEnum.USER.getName().equals(roleEntity.getRoleName())){
+                SysVIPEntity vip = vipService.getOne(Wrappers.<SysVIPEntity>lambdaQuery().eq(SysVIPEntity::getUserId, temp.getUserId()));
+                temp.setVipVO(BeanUtil.copyProperties(vip, VIPVO.class));
+            }
             RoleVO roleVO = new RoleVO();
             BeanUtil.copyProperties(roleEntity, roleVO);
             temp.setRoleVO(roleVO);
