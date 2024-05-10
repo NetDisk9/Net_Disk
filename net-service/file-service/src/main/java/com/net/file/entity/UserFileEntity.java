@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.net.common.util.DateFormatUtil;
 import com.net.common.util.LongIdUtil;
+import com.net.common.wrapper.LocalDateTimeWrapper;
 import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.util.PathUtil;
@@ -86,7 +87,7 @@ public class UserFileEntity {
 
     public static class UserFileEntityFactory{
         public static UserFileEntity createDirEntity(UserFileEntity parent,String name,Long userId){
-            String dateTime= DateFormatUtil.format(LocalDateTime.now());
+            String dateTime= DateFormatUtil.format(LocalDateTimeWrapper.now());
             UserFileEntity userFile = UserFileEntity.builder()
                     .filePath(parent == null ? "/"+name : parent.getFilePath() + "/" + name)
                     .fileName(name)
@@ -101,7 +102,7 @@ public class UserFileEntity {
             return userFile;
         }
         public static UserFileEntity createDirEntity(String path,Integer status,Long userId){
-            String dateTime= DateFormatUtil.format(LocalDateTime.now());
+            String dateTime= DateFormatUtil.format(LocalDateTimeWrapper.now());
             String name= PathUtil.getNameFromPath(path);
             UserFileEntity userFile = UserFileEntity.builder()
                     .filePath(path)

@@ -1,9 +1,11 @@
 package com.net.user.controller;
 
 
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import com.net.api.client.FileClient;
 import com.net.common.constant.EmailKeyConstants;
+import com.net.common.wrapper.LocalDateTimeWrapper;
 import com.net.redis.constant.RedisConstants;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
@@ -243,7 +245,10 @@ public class SysUserController {
         System.out.println(new String(token.getBytes(), StandardCharsets.UTF_8));
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
-        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, selectedMethod));
+        String finalSelectedMethod = selectedMethod;
+        ThreadUtil.execute(()->{
+            loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTimeWrapper.now(), address, ip, finalSelectedMethod));
+        });
         return ResponseResult.okResult(token);
     }
 
