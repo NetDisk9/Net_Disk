@@ -9,6 +9,9 @@ public class AuthException extends RuntimeException {
     public AuthException(ResultCodeEnum resultCodeEnum){
         this.resultCodeEnum = resultCodeEnum;
     }
+    public AuthException(String message){
+        super(message);
+    }
     public AuthException(){}
 
 

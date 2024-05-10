@@ -89,7 +89,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
     public UserFileEntity getFile(Long userFileId, Long userId) throws ParameterException, AuthException {
         UserFileEntity userFile = getFileWithoutCheck(userFileId);
         if (!userId.equals(userFile.getUserId())) {
-            throw new AuthException();
+            throw new AuthException("没有查看该文件的权限");
         }
         return userFile;
     }
@@ -98,7 +98,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
     public UserFileEntity getNormalFile(Long userFileId, Long userId) throws AuthException, ParameterException {
         UserFileEntity userFile = getFile(userFileId, userId);
         if (!FileStatusConstants.NORMAL.equals(userFile.getStatus())) {
-            throw new ParameterException();
+            throw new ParameterException("目的文件状态错误");
         }
         return userFile;
     }
@@ -107,7 +107,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
     public UserFileEntity getFileWithoutCheck(Long userFileId) throws ParameterException {
         UserFileEntity userFile = getUserFileByUserFileId(userFileId);
         if (userFile == null) {
-            throw new ParameterException();
+            throw new ParameterException("不存在该文件");
         }
         return userFile;
     }
@@ -164,7 +164,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         // 判断传入的pid对应的文件是否为正常的文件夹
         UserFileEntity parentFile = getNormalFile(fileMoveDTO.getPid(), userId);
         if (DirConstants.NOT_DIR.equals(parentFile.getIsDir())) {
-            throw new ParameterException();
+            throw new ParameterException("目的文件不是文件夹");
         }
         List<UserFileEntity> userFileEntities;
         // 移动文件，修改文件的所属的文件夹
@@ -184,7 +184,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         System.out.println(parentFile+" "+userFileEntities);
         // 移动根文件夹
         if (!PathUtil.checkPath(parentFile, userFileEntities)) {
-            throw new ParameterException();
+            throw new ParameterException("目的文件夹不能是子文件夹");
         }
         List<UserFileEntity> list = new ArrayList<>();
         for (var entity : userFileEntities) {

@@ -9,6 +9,10 @@ public class ParameterException extends RuntimeException {
     public ParameterException(ResultCodeEnum resultCodeEnum){
         this.resultCodeEnum = resultCodeEnum;
     }
+    public ParameterException(String message){
+        super(message);
+    }
+
     public ParameterException(){}
 
 

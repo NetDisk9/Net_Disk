@@ -48,7 +48,7 @@ public class FileController {
     @PostMapping("/copy")
     public ResponseResult copyFile(@Valid @RequestBody FileMoveDTO fileMoveDTO, @Valid @NotNull Integer mode) throws Throwable {
         if (fileMoveDTO.getUserFileId().length == 0) {
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"必要参数为空");
         }
         List<UserFileEntity> failCollector = fileService.copyFile(fileMoveDTO, mode);
         List<FileVO> fileVOS = BeanUtil.copyToList(failCollector, FileVO.class);
@@ -102,7 +102,7 @@ public class FileController {
         } catch (ParameterException | AuthException e) {
             throw e;
         } catch (Exception e) {
-            throw new ParameterException();
+            throw new ParameterException("id格式错误");
         }
         UserFileEntity userFile = UserFileEntity.UserFileEntityFactory.createDirEntity(parentFile, name, userId);
         List<UserFileEntity> userFileEntities = fileService.listUserFileByPidAndPath(userFile.getPid(), userFile.getFilePath(), FileStatusConstants.NORMAL,userId);
@@ -127,7 +127,7 @@ public class FileController {
         } catch (ParameterException | AuthException e) {
             throw e;
         } catch (Exception e) {
-            throw new ParameterException();
+            throw new ParameterException("id格式错误");
         }
         if (userFile.getFileName().equals(name)) {
             return ResponseResult.okResult();

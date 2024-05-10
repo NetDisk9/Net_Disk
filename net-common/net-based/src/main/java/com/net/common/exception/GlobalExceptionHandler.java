@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseResult exception(AuthException e){
         log.error("捕获异常 AuthException:{}",e.getMessage());
-        return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
+        return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED,getMessage(e,ResultCodeEnum.UNAUTHORIZED.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -64,12 +64,18 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseResult exception(ConstraintViolationException e){
         log.error("捕获异常 ConstraintViolationException:{}",e.getMessage());
-        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"必要参数为空");
     }
     @ExceptionHandler(ParameterException.class)
     @ResponseBody
     public ResponseResult exception(ParameterException e){
         log.error("捕获异常 ParameterException:{}",e.getMessage());
-        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,getMessage(e,ResultCodeEnum.PARAM_ERROR.getMessage()));
+    }
+    private String getMessage(Exception e,String defaultMessage){
+        if(e.getMessage()!=null&&e.getMessage().length()!=0){
+            return e.getMessage();
+        }
+        return defaultMessage;
     }
 }
