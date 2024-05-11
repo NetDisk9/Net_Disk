@@ -13,6 +13,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class SysVIPServiceImpl extends ServiceImpl<SysVIPMapper, SysVIPEntity> implements SysVIPService {
     @Override
+    public int isVip(Long userId) {
+        LambdaQueryWrapper<SysVIPEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysVIPEntity::getUserId, userId);
+        if (this.count(queryWrapper)==0) {
+            return 0;
+        } else {
+            SysVIPEntity sysVIPEntity = this.getOne(queryWrapper);
+            if (!DateFormatUtil.isBefore(sysVIPEntity.getEndTime(), DateFormatUtil.getNow())) {
+                return 1;
+            } else {
+                return 2;
+            }
+        }
+    }
+
+    @Override
     public ResponseResult getVIPinfo(Long userId) {
         LambdaQueryWrapper<SysVIPEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(SysVIPEntity::getUserId, userId);
@@ -33,12 +49,25 @@ public class SysVIPServiceImpl extends ServiceImpl<SysVIPMapper, SysVIPEntity> i
     }
 
     @Override
-    public ResponseResult updateVIPDurationTime(Long userId, int duration) {
+    public ResponseResult updateVIPDurationTime(Long userId, int duration, boolean updateNowOrEnd) {
         SysVIPEntity currentVIPEntity = (SysVIPEntity) getVIPinfo(userId).getData();
-        String updatedTime = DateFormatUtil.addDays(currentVIPEntity.getEndTime(), duration);
         LambdaUpdateWrapper<SysVIPEntity>updateWrapper = new LambdaUpdateWrapper<>();
+        String updatedTime;
+        String NowTime = DateFormatUtil.getNow();
+        if (updateNowOrEnd) {
+            updatedTime = DateFormatUtil.addDays(NowTime, duration);
+            updateWrapper.eq(SysVIPEntity::getUserId, userId)
+                .set(SysVIPEntity::getEndTime, DateFormatUtil.addDays(NowTime, duration));
+            this.update(updateWrapper);
+        } else {
+            updatedTime = DateFormatUtil.addDays(currentVIPEntity.getEndTime(), duration);
+            updateWrapper.eq(SysVIPEntity::getUserId, userId)
+                    .set(SysVIPEntity::getEndTime, updatedTime);
+            this.update(updateWrapper);
+        }
+        updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(SysVIPEntity::getUserId, userId)
-                .set(SysVIPEntity::getEndTime, updatedTime);
+                .set(SysVIPEntity::getUpdateTime, NowTime);
         this.update(updateWrapper);
         return ResponseResult.okResult(updatedTime);
     }

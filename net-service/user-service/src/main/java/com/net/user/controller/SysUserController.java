@@ -20,6 +20,7 @@ import com.net.user.pojo.dto.*;
 import com.net.user.service.LoginLogService;
 import com.net.user.service.RoleService;
 import com.net.user.service.SysUserService;
+import com.net.user.service.SysVIPService;
 import com.net.user.util.IPUtil;
 import com.net.user.util.RegexUtil;
 import io.netty.util.internal.StringUtil;
@@ -58,6 +59,7 @@ public class SysUserController {
     private final FileClient fileClient;
     private final RedisUtil redisUtil;
     private final RoleService roleService;
+    private final SysVIPService sysVIPService;
 
 
     @GetMapping("/login/method")
@@ -299,11 +301,19 @@ public class SysUserController {
         if ((vipdto.getMoney() == 360 && vipdto.getDuration() == 365) ||
                 (vipdto.getMoney() == 120 && vipdto.getDuration() == 90) ||
                 (vipdto.getMoney() == 40 && vipdto.getDuration() == 30)) {
-            if (!roleService.isVIP(vipdto.getUserId())) {
+            int isvipRet = sysVIPService.isVip(vipdto.getUserId());
+            boolean goupdate = true;
+            if (isvipRet == 0) {
                 Long roleId = roleService.getRoleVOByName("vip").getRoleId();
                 roleService.updateUserRole(vipdto.getUserId(), roleId);
+                goupdate = false;
+            } else if (isvipRet == 2) {
+                if (!roleService.isAdministrator(vipdto.getUserId()) && !roleService.isSuperAdministrator(vipdto.getUserId())) {
+                    Long roleId = roleService.getRoleVOByName("vip").getRoleId();
+                    roleService.updateUserRole(vipdto.getUserId(), roleId);
+                }
             }
-             return userService.updateVIPDuration(vipdto.getUserId(), vipdto.getDuration(), roleService.isVIP(vipdto.getUserId()));
+            return userService.updateVIPDuration(vipdto.getUserId(), vipdto.getDuration(), goupdate, isvipRet==2);
         } else {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
