@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
         log.error("捕获异常 ParameterException:{}",e.getMessage());
         return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,getMessage(e,ResultCodeEnum.PARAM_ERROR.getMessage()));
     }
-    @ExceptionHandler(ParameterException.class)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseBody
     public ResponseResult exception(MethodArgumentTypeMismatchException e){
         log.error("捕获异常 MethodArgumentTypeMismatchException:{}",e.getMessage());

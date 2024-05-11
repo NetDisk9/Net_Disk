@@ -17,8 +17,9 @@
         <result property="fileSize" column="file_size"/>
         <result property="fileCover" column="file_cover"/>
     </resultMap>
+    <sql id="file_select_sql">select u.user_file_id,u.user_id,u.pid,u.file_id,u.file_name,u.file_path,u.create_time,u.update_time,u.status,u.is_dir,file_category,file_size,file_cover</sql>
     <select id="listUserFileByPidAndPath" resultMap="userFileMap">
-        select u.user_file_id,u.user_id,u.pid,u.file_id,u.file_name,u.file_path,u.create_time,u.update_time,u.status,u.is_dir,file_category,file_size,file_cover
+        <include refid="file_select_sql"></include>
         from user_file u
         left join file
         on u.file_id = file.file_id
@@ -32,14 +33,14 @@
           and file_path like concat(#{path},'%') and user_id = #{userId};
     </select>
     <select id="getUserFileByUserFileId" resultMap="userFileMap">
-        select u.user_file_id,u.user_id,u.pid,u.file_id,u.file_name,u.file_path,u.create_time,u.update_time,u.status,u.is_dir,file_category,file_size,file_cover
+        <include refid="file_select_sql"></include>
         from user_file u
         left join file
         on u.file_id = file.file_id
         where u.user_file_id = #{id}
     </select>
     <select id="getUserFileByPath" resultMap="userFileMap">
-        select u.user_file_id,u.user_id,u.pid,u.file_id,u.file_name,u.file_path,u.create_time,u.update_time,u.status,u.is_dir,file_category,file_size,file_cover
+        <include refid="file_select_sql"></include>
         from user_file u
                  left join file
                            on u.file_id = file.file_id

@@ -13,6 +13,7 @@ import com.net.user.mapper.SysUserMapper;
 import com.net.user.pojo.vo.DeviceVO;
 import com.net.user.service.LoginLogService;
 import com.net.user.service.SysUserService;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -46,6 +47,13 @@ public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLog> i
         }
         return ResponseResult.okResult(devices);
     }
+
+    @Override
+    @Async
+    public void saveLog(LoginLog loginLog) {
+        save(loginLog);
+    }
+
     public LocalDateTime max(LocalDateTime x, LocalDateTime y) {
         return x.isAfter(y) ? x : y;
     }

@@ -7,4 +7,5 @@ import com.net.user.entity.SysUser;
 
 public interface LoginLogService extends IService<LoginLog> {
     ResponseResult getDevice();
+    void saveLog(LoginLog loginLog);
 }

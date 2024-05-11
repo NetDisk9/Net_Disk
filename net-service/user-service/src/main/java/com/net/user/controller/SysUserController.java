@@ -90,7 +90,7 @@ public class SysUserController {
         }
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
-        loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, "001"));
+        loginLogService.saveLog(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, "001"));
 
         String token = JWTUtil.getJWT(userId + "");
         // 存到redis
@@ -246,9 +246,7 @@ public class SysUserController {
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
         String finalSelectedMethod = selectedMethod;
-        ThreadUtil.execute(()->{
-            loginLogService.save(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTimeWrapper.now(), address, ip, finalSelectedMethod));
-        });
+        loginLogService.saveLog(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTimeWrapper.now(), address, ip, finalSelectedMethod));
         return ResponseResult.okResult(token);
     }
 
