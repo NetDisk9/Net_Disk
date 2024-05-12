@@ -14,6 +14,7 @@ import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileOperationModeConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.entity.UserFileEntity;
+import com.net.file.pojo.dto.FileQueryDTO;
 import com.net.file.pojo.vo.FileVO;
 import com.net.file.service.Impl.FileServiceImpl;
 import com.net.file.support.UserFileTree;
@@ -48,7 +49,7 @@ public class FileController {
     @PostMapping("/copy")
     public ResponseResult copyFile(@Valid @RequestBody FileMoveDTO fileMoveDTO, @Valid @NotNull Integer mode) throws Throwable {
         if (fileMoveDTO.getUserFileId().length == 0) {
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"必要参数为空");
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "必要参数为空");
         }
         List<UserFileEntity> failCollector = fileService.copyFile(fileMoveDTO, mode);
         List<FileVO> fileVOS = BeanUtil.copyToList(failCollector, FileVO.class);
@@ -83,8 +84,8 @@ public class FileController {
     @GetMapping("/info")
     public ResponseResult showInfo(@Valid @NotBlank String userFileId) {
         UserFileEntity userFile = fileService.getFile(Long.parseLong(userFileId), BaseContext.getCurrentId());
-        FileVO fileVO=new FileVO();
-        BeanUtils.copyProperties(userFile,fileVO);
+        FileVO fileVO = new FileVO();
+        BeanUtils.copyProperties(userFile, fileVO);
         return ResponseResult.okResult(fileVO);
     }
 
@@ -105,14 +106,14 @@ public class FileController {
             throw new ParameterException("id格式错误");
         }
         UserFileEntity userFile = UserFileEntity.UserFileEntityFactory.createDirEntity(parentFile, name, userId);
-        List<UserFileEntity> userFileEntities = fileService.listUserFileByPidAndPath(userFile.getPid(), userFile.getFilePath(), FileStatusConstants.NORMAL,userId);
+        List<UserFileEntity> userFileEntities = fileService.listUserFileByPidAndPath(userFile.getPid(), userFile.getFilePath(), FileStatusConstants.NORMAL, userId);
         UsefulNameUtil usefulNameUtil = new UsefulNameUtil(userFileEntities, userFile.getFileName());
         if (!usefulNameUtil.isUseful(userFile.getFileName())) {
             return ResponseResult.errorResult(ResultCodeEnum.FILE_NAME_REPEAT.getCode(), "文件名重复", usefulNameUtil.getNextName());
         }
         fileService.insertFile(userFile);
-        FileVO fileVO=new FileVO();
-        BeanUtils.copyProperties(userFile,fileVO);
+        FileVO fileVO = new FileVO();
+        BeanUtils.copyProperties(userFile, fileVO);
         return ResponseResult.okResult(fileVO);
     }
 
@@ -132,43 +133,38 @@ public class FileController {
         if (userFile.getFileName().equals(name)) {
             return ResponseResult.okResult();
         }
-        String oldPath=userFile.getFilePath();
+        String oldPath = userFile.getFilePath();
         userFile.setFileName(name);
         userFile.setFilePath(PathUtil.replaceLastPath(userFile.getFilePath(), name));
         System.out.println(userFile.getFilePath());
-        List<UserFileEntity> userFileEntities = fileService.listUserFileByPidAndPath(userFile.getPid(), userFile.getFilePath(), FileStatusConstants.NORMAL,userId);
+        List<UserFileEntity> userFileEntities = fileService.listUserFileByPidAndPath(userFile.getPid(), userFile.getFilePath(), FileStatusConstants.NORMAL, userId);
         System.out.println(userFileEntities);
         UsefulNameUtil usefulNameUtil = new UsefulNameUtil(userFileEntities, userFile.getFileName());
         if (!usefulNameUtil.isUseful(userFile.getFileName())) {
             return ResponseResult.errorResult(ResultCodeEnum.FILE_NAME_REPEAT.getCode(), "文件名重复", usefulNameUtil.getNextName());
         }
-        if(DirConstants.IS_DIR.equals(userFile.getIsDir())){
+        if (DirConstants.IS_DIR.equals(userFile.getIsDir())) {
             List<UserFileEntity> list = fileService.listUserFileInDir(oldPath, FileStatusConstants.NORMAL, userId);
             UserFileTree tree = fileService.buildUserFileTree(userFile, list);
             tree.rebuildPathByRootPath();
             List<UserFileEntity> collect = tree.collect();
             collect.add(userFile);
             fileService.updateBatchById(collect);
-        }
-        else{
+        } else {
             fileService.updateById(userFile);
         }
         return ResponseResult.okResult();
     }
 
     @GetMapping("/list")
-    public ResponseResult listFile(String pid, Integer page, Integer pageSize) {
+    public ResponseResult listFile(Integer page, Integer pageSize, FileQueryDTO fileQueryDTO) {
         if (page == null || pageSize == null) return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
-        //构造分页构造器
+        // 构造分页构造器
         Page<UserFileEntity> pageInfo = new Page<>(page, pageSize);
-        //构造条件构造器
-        LambdaQueryWrapper<UserFileEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.isNull(StrUtil.isBlank(pid), UserFileEntity::getPid)
-                .eq(StrUtil.isNotBlank(pid), UserFileEntity::getPid, pid)
-                .eq(UserFileEntity::getUserId, BaseContext.getCurrentId())
-                .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL);
-        //分页查询
-        fileService.page(pageInfo, queryWrapper);
+        // 查询当前用户
+        fileQueryDTO.setCurrentUserId(BaseContext.getCurrentId());
+        // 分页查询
+        fileService.selectPageVO(pageInfo, fileQueryDTO);
         PageResultVO<FileVO> pageResultVO = new PageResultVO<>();
         List<FileVO> fileVOS = BeanUtil.copyToList(pageInfo.getRecords(), FileVO.class);
         pageResultVO.setList(fileVOS);
@@ -176,34 +172,35 @@ public class FileController {
         pageResultVO.setTot((int) pageInfo.getTotal());
         return ResponseResult.okResult(pageResultVO);
     }
+
     @GetMapping("/list/path")
-    public ResponseResult listFileByPath(String path, Integer page, Integer pageSize) {
+    public ResponseResult listFileByPath(Integer page, Integer pageSize, FileQueryDTO fileQueryDTO) {
         if (page == null || pageSize == null) return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
-        Long userId=BaseContext.getCurrentId();
-        Long pid=null;
-        if(!path.equals("/")){
+        Long userId = BaseContext.getCurrentId();
+        if (!fileQueryDTO.getPath().equals("/")) {
             UserFileEntity parentFile = fileService.getOne(
                     new LambdaQueryWrapper<UserFileEntity>()
-                            .eq(UserFileEntity::getFilePath, path)
+                            .eq(UserFileEntity::getFilePath, fileQueryDTO.getPath())
                             .eq(UserFileEntity::getUserId, userId)
                             .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL));
-            if(parentFile==null|| DirConstants.NOT_DIR.equals(parentFile.getIsDir())){
+            if (parentFile == null || DirConstants.NOT_DIR.equals(parentFile.getIsDir())) {
                 return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
             }
-            pid=parentFile.getUserFileId();
+            fileQueryDTO.setPid(parentFile.getUserFileId());
         }
 
-        return listFile(pid==null?null:pid.toString(),page,pageSize);
+        return listFile(page, pageSize, fileQueryDTO);
     }
+
     @GetMapping("/get/path")
-    public ResponseResult getFileIdByPath(String path){
-        if(path.equals("/")){
+    public ResponseResult getFileIdByPath(String path) {
+        if (path.equals("/")) {
             return ResponseResult.okResult();
         }
-        Long userId=BaseContext.getCurrentId();
+        Long userId = BaseContext.getCurrentId();
         UserFileEntity userFileEntity = fileService.getFileIdByPath(path, userId);
-        FileVO fileVO=new FileVO();
-        BeanUtils.copyProperties(userFileEntity,fileVO);
+        FileVO fileVO = new FileVO();
+        BeanUtils.copyProperties(userFileEntity, fileVO);
         return ResponseResult.okResult(fileVO);
     }
 

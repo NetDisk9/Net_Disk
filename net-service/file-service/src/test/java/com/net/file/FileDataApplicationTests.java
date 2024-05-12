@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import javax.annotation.Resource;
 
 @SpringBootTest
-public class FileApplicationTests {
+public class FileDataApplicationTests {
     @Resource
     FileService fileService;
     @Resource

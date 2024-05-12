@@ -299,11 +299,12 @@ public class SysUserController {
         if ((vipdto.getMoney() == 360 && vipdto.getDuration() == 365) ||
                 (vipdto.getMoney() == 120 && vipdto.getDuration() == 90) ||
                 (vipdto.getMoney() == 40 && vipdto.getDuration() == 30)) {
-            if (!roleService.isVIP(vipdto.getUserId())) {
+            Boolean isVip = roleService.isVIP(vipdto.getUserId());
+            if (!isVip) {
                 Long roleId = roleService.getRoleVOByName("vip").getRoleId();
                 roleService.updateUserRole(vipdto.getUserId(), roleId);
             }
-             return userService.updateVIPDuration(vipdto.getUserId(), vipdto.getDuration(), roleService.isVIP(vipdto.getUserId()));
+             return userService.updateVIPDuration(vipdto.getUserId(), vipdto.getDuration(), isVip);
         } else {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }

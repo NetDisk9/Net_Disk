@@ -2,19 +2,20 @@ package com.net.file.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.net.common.context.BaseContext;
 import com.net.common.exception.AuthException;
 import com.net.common.exception.ParameterException;
 import com.net.common.util.DateFormatUtil;
 import com.net.common.util.LongIdUtil;
-import com.net.common.vo.PageResultVO;
 import com.net.common.wrapper.LocalDateTimeWrapper;
 import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileOperationModeConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.entity.UserFileEntity;
-import com.net.file.pojo.dto.FileDTO;
+import com.net.file.pojo.dto.FileQueryDTO;
 import com.net.file.support.UserFileTree;
 import com.net.file.mapper.FileMapper;
 import com.net.file.pojo.dto.FileMoveDTO;
@@ -22,16 +23,13 @@ import com.net.file.service.FileService;
 import com.net.file.util.PathUtil;
 import com.net.file.util.UsefulNameUtil;
 import com.net.file.wrapper.LambdaFunctionWrapper;
-import io.lettuce.core.ScriptOutputType;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -157,6 +155,12 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         UserFileEntity parent = doRestoreParent(file);
         file.setPid(parent.getUserFileId());
     }
+
+    @Override
+    public IPage selectPageVO(Page<UserFileEntity> pageInfo, FileQueryDTO fileQueryDTO) {
+        return fileMapper.selectPageVO(pageInfo,fileQueryDTO);
+    }
+
     @Override
     public List<UserFileEntity> copyFile(FileMoveDTO fileMoveDTO, Integer mode) throws Throwable {
         List<UserFileEntity> failCollector = new ArrayList<>();

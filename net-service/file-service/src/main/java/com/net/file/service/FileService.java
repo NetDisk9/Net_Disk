@@ -1,9 +1,12 @@
 package com.net.file.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.net.common.exception.AuthException;
 import com.net.common.exception.ParameterException;
 import com.net.file.entity.UserFileEntity;
+import com.net.file.pojo.dto.FileQueryDTO;
 import com.net.file.support.UserFileTree;
 import com.net.file.pojo.dto.FileMoveDTO;
 
@@ -11,8 +14,6 @@ import java.util.List;
 
 public interface FileService extends IService<UserFileEntity> {
     UserFileEntity getUserFileByUserFileId(Long userFileId);
-
-
 
     List<UserFileEntity> listUserFileByPidAndPath(Long pid, String path, Integer status, Long userId);
 
@@ -41,4 +42,5 @@ public interface FileService extends IService<UserFileEntity> {
     UserFileEntity getFileIdByPath(String path,Long userId);
     void restoreParent(UserFileEntity file);
 
+    IPage selectPageVO(Page<UserFileEntity> pageInfo, FileQueryDTO fileQueryDTO);
 }
