@@ -46,4 +46,26 @@
                            on u.file_id = file.file_id
         where u.file_path = #{path} and status = #{status} and u.user_id = #{userId}
     </select>
+
+
+    <select id="selectPageVO" resultMap="userFileMap">
+        <include refid="file_select_sql"></include>
+        from user_file u
+        left join file
+        on u.file_id = file.file_id
+        <where>
+            <if test="param.currentUserId != null">
+                user_id = #{param.currentUserId}
+            </if>
+            <if test="param.status != null">
+               and status = #{param.status}
+            </if>
+            <if test="param.pid != null">
+               and pid = #{param.pid}
+            </if>
+            <if test="param.pid == null">
+               and pid is null
+            </if>
+        </where>
+    </select>
 </mapper>

@@ -16,7 +16,7 @@ import org.springframework.util.AntPathMatcher;
 import javax.annotation.Resource;
 
 @SpringBootTest
-public class FileApplicationTests {
+public class FileDataApplicationTests {
     @Resource
     FileService fileService;
     @Resource
