@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.SplittableRandom;
 
 /**
  * @Author:chenjunjie
@@ -49,5 +50,19 @@ public class DateFormatUtil {
         LocalDateTime currentDateTime = LocalDateTime.parse(currentDateString, formatter);
         LocalDateTime futureDateTime = currentDateTime.plusDays(durationDays);
         return futureDateTime.format(formatter);
+    }
+    /**
+     *
+     * @Author:CheeseLongan
+     * 比较前者的日期是否小于后者
+     *
+     */
+    public static boolean isBefore(String date1, String date2) {
+        try {
+            return trans(date1).before(trans(date2));
+        } catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 }

@@ -301,11 +301,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public ResponseResult updateVIPDuration(Long userId, int duration, boolean isRenew) {
+    public ResponseResult updateVIPDuration(Long userId, int duration, boolean isRenew, boolean updateNowOrEnd) {
         if (!isRenew) {
             return sysVIPService.insertVIPinfo(userId, duration);
         } else {
-            return sysVIPService.updateVIPDurationTime(userId, duration);
+            return sysVIPService.updateVIPDurationTime(userId, duration, updateNowOrEnd);
         }
     }
 }
