@@ -11,6 +11,7 @@ import com.net.file.service.Impl.FileServiceImpl;
 import com.net.file.util.RegexUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.AntPathMatcher;
 
 import javax.annotation.Resource;
 
@@ -30,5 +31,10 @@ public class FileApplicationTests {
 //        UserFileEntity userFileEntity = fileService.getFileIdByPath("/test", 1768546042247323649L);
 //        System.out.println(userFileEntity);
 //    }
+    @Test
+    public void testPath(){
+        AntPathMatcher antPathMatcher=new AntPathMatcher();
+        System.out.println(antPathMatcher.match("/username/{username}/aaa", "/username/555/aaa"));
+    }
 
 }
