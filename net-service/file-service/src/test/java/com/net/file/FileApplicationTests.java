@@ -30,9 +30,5 @@ public class FileApplicationTests {
 //        UserFileEntity userFileEntity = fileService.getFileIdByPath("/test", 1768546042247323649L);
 //        System.out.println(userFileEntity);
 //    }
-    @Test
-    public void testSelect(){
-        System.out.println(fileMapper.getUserFileByUserFileId(1784617459011162113L));
-    }
 
 }

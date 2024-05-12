@@ -47,9 +47,7 @@ public class DateFormatUtil {
     public static String addDays(String currentDateString, int durationDays) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime currentDateTime = LocalDateTime.parse(currentDateString, formatter);
-
         LocalDateTime futureDateTime = currentDateTime.plusDays(durationDays);
-
         return futureDateTime.format(formatter);
     }
 }
