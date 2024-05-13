@@ -1,6 +1,5 @@
 package com.net.common.util;
 
-import com.net.common.wrapper.LocalDateTimeWrapper;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -36,7 +35,7 @@ public class DateFormatUtil {
      * 得到当前日期的字符串的方法
      */
     public static String getNow(){
-        LocalDateTime localDateTime= LocalDateTimeWrapper.now();
+        LocalDateTime localDateTime= LocalDateTime.now();
         return format(localDateTime);
     }
 

@@ -5,7 +5,6 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import com.net.api.client.FileClient;
 import com.net.common.constant.EmailKeyConstants;
-import com.net.common.wrapper.LocalDateTimeWrapper;
 import com.net.redis.constant.RedisConstants;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
@@ -92,7 +91,7 @@ public class SysUserController {
         }
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
-        loginLogService.saveLog(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(ZoneId.of("Asia/Shanghai")), address, ip, "001"));
+        loginLogService.saveLog(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(), address, ip, "001"));
 
         String token = JWTUtil.getJWT(userId + "");
         // 存到redis
@@ -248,7 +247,7 @@ public class SysUserController {
         String ip = IPUtil.getIp(request);
         String address = IPUtil.getIpAddress(ip);
         String finalSelectedMethod = selectedMethod;
-        loginLogService.saveLog(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTimeWrapper.now(), address, ip, finalSelectedMethod));
+        loginLogService.saveLog(new LoginLog(userId, loginDTO.getDeviceName(), loginDTO.getDeviceOS(), LocalDateTime.now(), address, ip, finalSelectedMethod));
         return ResponseResult.okResult(token);
     }
 
@@ -269,12 +268,6 @@ public class SysUserController {
         }
         return user.getMethod().charAt(2) == '1';
     }
-
-    @GetMapping("/test")
-    public void get() {
-        System.out.println("test");
-    }
-
 
     @PostMapping("/forget/password")
     public ResponseResult forget(@RequestBody ForgetPasswordDTO forgetPasswordDTO) {

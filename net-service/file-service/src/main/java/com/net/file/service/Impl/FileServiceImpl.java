@@ -10,7 +10,6 @@ import com.net.common.exception.AuthException;
 import com.net.common.exception.ParameterException;
 import com.net.common.util.DateFormatUtil;
 import com.net.common.util.LongIdUtil;
-import com.net.common.wrapper.LocalDateTimeWrapper;
 import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileOperationModeConstants;
 import com.net.file.constant.FileStatusConstants;
@@ -27,6 +26,7 @@ import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -137,7 +137,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         // 修改文件的子级
         for (UserFileEntity updateFile : updateFiles) {
             LambdaUpdateWrapper<UserFileEntity> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.set(UserFileEntity::getRecycleTime, DateFormatUtil.format(LocalDateTimeWrapper.now()))
+            updateWrapper.set(UserFileEntity::getRecycleTime, DateFormatUtil.format(LocalDateTime.now()))
                     .eq(UserFileEntity::getStatus, BEFORE_MODE)
                     .eq(UserFileEntity::getUserFileId, updateFile.getUserFileId())
                     .set(UserFileEntity::getStatus, AFTER_MODE);
