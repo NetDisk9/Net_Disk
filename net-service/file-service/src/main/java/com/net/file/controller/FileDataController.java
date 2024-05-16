@@ -1,19 +1,18 @@
 package com.net.file.controller;
 
 
-import com.net.file.pojo.vo.FileInfo;
-import com.net.file.service.StorageService;
-import lombok.SneakyThrows;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.net.common.dto.ResponseResult;
+import com.net.file.util.MinioUtil;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author 倪圳褒
@@ -24,32 +23,15 @@ import java.util.List;
 public class FileDataController {
 
     @Resource
-    private StorageService storageService;
+    private MinioUtil minioUtil;
 
-    @SneakyThrows
-    @RequestMapping("/testGetAllBuckets")
-    public int testGetAllBuckets() {
-        List<String> allBucket = storageService.getAllBucket();
-        return allBucket.size();
+    @PostMapping(value = "/upload",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseResult upload(
+            @RequestPart("chunk") MultipartFile chunk,
+            @RequestParam("fileMd5") String fileMd5,
+            @RequestParam("chunkIndex") Integer chunkIndex) {
+        minioUtil.uploadFileChunk(chunk, fileMd5, chunkIndex);
+        return ResponseResult.okResult();
     }
 
-    @RequestMapping("/uploadFile")
-    void uploadFile(MultipartFile uploadFile, String bucket, String objectName) {
-        storageService.uploadFile(uploadFile, bucket, objectName);
-    }
-
-    @RequestMapping("/getAllFile")
-    List<FileInfo> getAllFile(String bucket) {
-        return storageService.getAllFile(bucket);
-    }
-
-    @RequestMapping("/getUrl")
-    String getUrl(String bucket, String objectName) {
-        return storageService.getUrl(bucket, objectName);
-    }
-
-    @RequestMapping("/getPreviewFileUrl")
-    String getPreviewFileUrl(String bucket, String objectName) {
-        return storageService.getPreviewFileUrl(bucket, objectName);
-    }
 }

@@ -1,6 +1,7 @@
 package com.net.file.config;
 
 import com.net.file.util.AliOssUtil;
+import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -15,11 +16,23 @@ public class OssConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public AliOssUtil aliOssUtil(AliOssProperties aliOssProperties){
-        log.info("开始创建阿里云文件上传工具类对象：{}",aliOssProperties);
-        return new AliOssUtil(aliOssProperties.getEndpoint(),
-                aliOssProperties.getAccessKeyId(),
-                aliOssProperties.getAccessKeySecret(),
-                aliOssProperties.getBucketName());
+    public AliOssUtil aliOssUtil(AliOssConfig aliOssConfig) {
+        log.info("开始创建阿里云文件上传工具类对象：{}", aliOssConfig);
+        return new AliOssUtil(aliOssConfig.getEndpoint(),
+                aliOssConfig.getAccessKeyId(),
+                aliOssConfig.getAccessKeySecret(),
+                aliOssConfig.getBucketName());
+    }
+
+    /**
+     * 构造minioClient
+     */
+    @Bean
+    public MinioClient getMinioClient(MinioConfig minioConfig) {
+        log.info("开始创建minio文件上传工具类对象：{}", minioConfig);
+        return MinioClient.builder()
+                .endpoint(minioConfig.getUrl())
+                .credentials(minioConfig.getAccessKey(), minioConfig.getSecretKey())
+                .build();
     }
 }
