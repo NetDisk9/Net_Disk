@@ -1,40 +1,19 @@
 package com.net.file.config;
 
-import io.minio.MinioClient;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * minio配置管理
  */
-@Configuration
+
+@Component
+@ConfigurationProperties(prefix = "net.minio")
+@Data
 public class MinioConfig {
-
-    /**
-     * minioUrl
-     */
-    @Value("${minio.url}")
     private String url;
-
-    /**
-     * minio账户
-     */
-    @Value("${minio.accessKey}")
     private String accessKey;
-
-    /**
-     * minio密码
-     */
-    @Value("${minio.secretKey}")
     private String secretKey;
-
-    /**
-     * 构造minioClient
-     */
-    @Bean
-    public MinioClient getMinioClient() {
-        return MinioClient.builder().endpoint(url).credentials(accessKey, secretKey).build();
-    }
-
+    private String defaultBucket;
 }
