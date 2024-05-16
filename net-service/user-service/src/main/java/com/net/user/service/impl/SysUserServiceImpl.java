@@ -52,7 +52,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Resource
     RedisUtil redisUtil;
     @Resource
-    @Lazy
     RoleService roleService;
     @Resource
     SysUserRoleService userRoleService;

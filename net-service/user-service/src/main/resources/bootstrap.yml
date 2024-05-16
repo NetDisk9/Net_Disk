@@ -1,6 +1,8 @@
 server:
   port: 8081
 spring:
+  main:
+    allow-circular-references: true
   application:
     name: user-service # 服务名称
   profiles:
@@ -16,4 +18,5 @@ spring:
           - dataId: shared-jdbc.yaml
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
+
 
