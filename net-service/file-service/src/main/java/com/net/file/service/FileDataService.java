@@ -12,5 +12,5 @@ import com.net.file.entity.FileData;
  * @since 2024-05-11
  */
 public interface FileDataService extends IService<FileData> {
-
+    public FileData getFIleDataByMd5(String md5);
 }

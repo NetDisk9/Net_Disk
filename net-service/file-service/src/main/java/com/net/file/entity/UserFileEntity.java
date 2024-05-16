@@ -84,45 +84,5 @@ public class UserFileEntity {
                 '}';
     }
 
-    public static class UserFileEntityFactory{
-        public static UserFileEntity createDirEntity(UserFileEntity parent,String name,Long userId){
-            String dateTime= DateFormatUtil.format(LocalDateTime.now());
-            UserFileEntity userFile = UserFileEntity.builder()
-                    .filePath(parent == null ? "/"+name : parent.getFilePath() + "/" + name)
-                    .fileName(name)
-                    .userId(userId)
-                    .isDir(DirConstants.IS_DIR)
-                    .pid(parent == null ? null : parent.getUserFileId())
-                    .status(FileStatusConstants.NORMAL)
-                    .createTime(dateTime)
-                    .updateTime(dateTime)
-                    .recycleTime(null)
-                    .build();
-            return userFile;
-        }
-        public static UserFileEntity createDirEntity(String path,Integer status,Long userId){
-            String dateTime= DateFormatUtil.format(LocalDateTime.now());
-            String name= PathUtil.getNameFromPath(path);
-            UserFileEntity userFile = UserFileEntity.builder()
-                    .filePath(path)
-                    .fileName(name)
-                    .userId(userId)
-                    .isDir(DirConstants.IS_DIR)
-                    .pid(null)
-                    .status(status)
-                    .createTime(dateTime)
-                    .updateTime(dateTime)
-                    .recycleTime(null)
-                    .build();
-            return userFile;
-        }
-        public static UserFileEntity createRootDirEntity(Long userId){
-            UserFileEntity root=UserFileEntity.builder()
-                    .filePath("")
-                    .isDir(DirConstants.IS_DIR)
-                    .status(FileStatusConstants.NORMAL)
-                    .userId(userId).build();
-            return root;
-        }
-    }
+
 }

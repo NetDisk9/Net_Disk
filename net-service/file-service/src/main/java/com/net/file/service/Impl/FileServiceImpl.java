@@ -14,6 +14,7 @@ import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileOperationModeConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.entity.UserFileEntity;
+import com.net.file.factory.UserFileEntityFactory;
 import com.net.file.pojo.dto.FileQueryDTO;
 import com.net.file.support.UserFileTree;
 import com.net.file.mapper.FileMapper;
@@ -57,7 +58,20 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
     }
 
     @Override
+    public void insertDirFile(UserFileEntity userFile) {
+        save(userFile);
+    }
+
+    @Override
     public void insertFile(UserFileEntity userFile) {
+        restoreParent(userFile);
+        if(isExist(userFile.getFilePath())){
+            List<UserFileEntity> temp = listUserFileByPidAndPathInDir(userFile.getPid(), userFile.getFilePath(), FileStatusConstants.NORMAL, userFile.getUserId());
+            UsefulNameUtil usefulNameUtil=new UsefulNameUtil(temp,userFile.getFileName());
+            System.out.println(userFile.getFileName()+" asdasd");
+            userFile.setFileName(usefulNameUtil.getNextName());
+            System.out.println(userFile.getFileName()+" asdasd");
+        }
         save(userFile);
     }
 
@@ -153,7 +167,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
     @Override
     public void restoreParent(UserFileEntity file){
         UserFileEntity parent = doRestoreParent(file);
-        file.setPid(parent.getUserFileId());
+        file.setPid(file==null?null:file.getUserFileId());
     }
 
     @Override
@@ -166,7 +180,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         List<UserFileEntity> failCollector = new ArrayList<>();
         Long userId = BaseContext.getCurrentId();
         // 判断传入的pid对应的文件是否为正常的文件夹
-        UserFileEntity parentFile = (fileMoveDTO.getPid()!=null)?getNormalFile(fileMoveDTO.getPid(), userId):UserFileEntity.UserFileEntityFactory.createRootDirEntity(userId);
+        UserFileEntity parentFile = (fileMoveDTO.getPid()!=null)?getNormalFile(fileMoveDTO.getPid(), userId):UserFileEntityFactory.createRootDirEntity(userId);
         if (DirConstants.NOT_DIR.equals(parentFile.getIsDir())) {
             throw new ParameterException("目的文件不是文件夹");
         }
@@ -227,7 +241,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         }
         UserFileEntity parentFile = fileMapper.getUserFileByPath(file.getUserId(), file.getStatus(), parentPath);
         if(parentFile==null){
-            parentFile = UserFileEntity.UserFileEntityFactory.createDirEntity(parentPath, file.getStatus(), file.getUserId());
+            parentFile = UserFileEntityFactory.createDirEntity(parentPath, file.getStatus(), file.getUserId());
             parentFile.setUserFileId(LongIdUtil.createLongId(parentFile));
             UserFileEntity temp = doRestoreParent(parentFile);
             parentFile.setPid(temp==null?null:temp.getUserFileId());

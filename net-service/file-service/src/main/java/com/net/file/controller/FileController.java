@@ -1,7 +1,6 @@
 package com.net.file.controller;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.net.common.context.BaseContext;
@@ -11,19 +10,16 @@ import com.net.common.exception.AuthException;
 import com.net.common.exception.ParameterException;
 import com.net.common.vo.PageResultVO;
 import com.net.file.constant.DirConstants;
-import com.net.file.constant.FileOperationModeConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.entity.UserFileEntity;
+import com.net.file.factory.UserFileEntityFactory;
 import com.net.file.pojo.dto.FileQueryDTO;
 import com.net.file.pojo.vo.FileVO;
-import com.net.file.service.Impl.FileServiceImpl;
 import com.net.file.support.UserFileTree;
 import com.net.file.pojo.dto.FileMoveDTO;
 import com.net.file.service.FileService;
 import com.net.file.util.PathUtil;
 import com.net.file.util.UsefulNameUtil;
-import com.net.file.wrapper.LambdaFunctionWrapper;
-import lombok.SneakyThrows;
 import org.springframework.beans.BeanUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,11 +29,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/file")
@@ -105,13 +98,13 @@ public class FileController {
         } catch (Exception e) {
             throw new ParameterException("id格式错误");
         }
-        UserFileEntity userFile = UserFileEntity.UserFileEntityFactory.createDirEntity(parentFile, name, userId);
+        UserFileEntity userFile = UserFileEntityFactory.createDirEntity(parentFile, name, userId);
         List<UserFileEntity> userFileEntities = fileService.listUserFileByPidAndPath(userFile.getPid(), userFile.getFilePath(), FileStatusConstants.NORMAL, userId);
         UsefulNameUtil usefulNameUtil = new UsefulNameUtil(userFileEntities, userFile.getFileName());
         if (!usefulNameUtil.isUseful(userFile.getFileName())) {
             return ResponseResult.errorResult(ResultCodeEnum.FILE_NAME_REPEAT.getCode(), "文件名重复", usefulNameUtil.getNextName());
         }
-        fileService.insertFile(userFile);
+        fileService.insertDirFile(userFile);
         FileVO fileVO = new FileVO();
         BeanUtils.copyProperties(userFile, fileVO);
         return ResponseResult.okResult(fileVO);
@@ -209,4 +202,5 @@ public class FileController {
         fileService.updateFileFoldStatus(fileIds, FileStatusConstants.NORMAL, FileStatusConstants.RECYCLED);
         return ResponseResult.okResult();
     }
+
 }

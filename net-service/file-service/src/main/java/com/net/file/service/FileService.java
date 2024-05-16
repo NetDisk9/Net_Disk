@@ -21,6 +21,7 @@ public interface FileService extends IService<UserFileEntity> {
 
     List<UserFileEntity> listUserFileInDir(String path, Integer status, Long userId);
 
+    void insertDirFile(UserFileEntity userFile);
     void insertFile(UserFileEntity userFile);
     void updateFile(UserFileEntity userFile);
     void insertBatch(List<UserFileEntity> list);

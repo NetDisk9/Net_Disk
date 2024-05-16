@@ -29,6 +29,7 @@ public class UsefulNameUtil {
         this.nameNumber=0;
         this.nameLen=plainName.length();
         this.extName=PathUtil.getExtName(name);
+        System.out.println(extName+"asdsadasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd");
         if(list==null||list.size()==0){
             this.list=new ArrayList<>();
             return;
