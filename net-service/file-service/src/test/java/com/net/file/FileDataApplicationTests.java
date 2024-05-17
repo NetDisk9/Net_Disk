@@ -3,6 +3,7 @@ package com.net.file;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.net.common.context.BaseContext;
 import com.net.common.util.LongIdUtil;
+import com.net.file.config.MinioConfig;
 import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.controller.FileController;
@@ -15,6 +16,7 @@ import com.net.file.service.FileService;
 import com.net.file.service.Impl.FileServiceImpl;
 import com.net.file.util.RegexUtil;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RedissonClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.AntPathMatcher;
 
@@ -28,6 +30,8 @@ public class FileDataApplicationTests {
     FileDataService fileDataService;
     @Resource
     FileMapper fileMapper;
+    @Resource
+    MinioConfig minioConfig;
     @Resource
     FileDataController fileDataController;
 //    @Test
@@ -55,6 +59,16 @@ public class FileDataApplicationTests {
         fileDataController.uploadFast(fileUploadDTO);
 //        fileDataController.uploadFast(fileUploadDTO);
 
+    }
+    @Test
+    public void uploadCompleteTest() throws Exception {
+        FileUploadDTO fileUploadDTO=new FileUploadDTO();
+        fileUploadDTO.setFileName("Anno.mp4");
+        fileUploadDTO.setFileMd5("77777777888qwe");
+        fileUploadDTO.setFilePath("/video/Anno.mp4");
+        fileUploadDTO.setTotalChunk(3);
+        BaseContext.setCurrentId(1L);
+        fileDataController.completeUpload(fileUploadDTO);
     }
 
 }

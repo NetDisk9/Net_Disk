@@ -19,7 +19,7 @@ public class ImgTools {
      * @return {@link InputStream }
      * @throws Exception
      */
-    public InputStream randomGrabberFFmpegVideoImage(InputStream inputStream) throws Exception {
+    public static InputStream randomGrabberFFmpegVideoImage(InputStream inputStream) throws Exception {
         String targetFilePath = "";
         FFmpegFrameGrabber ff =new FFmpegFrameGrabber(inputStream);
         ff.start();
@@ -28,7 +28,7 @@ public class ImgTools {
         int ffLength = ff.getLengthInFrames();
         Frame f;
         int i = 0;
-        int index = 1;//截取图片第几帧
+        int index = 5;//截取图片第几帧
         while (i < ffLength) {
             f = ff.grabImage();
             if (i == index) {
@@ -45,25 +45,33 @@ public class ImgTools {
 
     /**
      * 生成图片缩略图
-     * @param inputStream
-     * @param outputStream
+     * @param inputStream 图片流
+     * @return {@link OutputStream }
      * @throws IOException
      */
-    public void generateSmallerImage(InputStream inputStream,OutputStream outputStream) throws IOException {
+    public static ByteArrayOutputStream generateSmallerImage(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
         BufferedImage image = ImageIO.read(inputStream);
         int[] scaleSize = getScaleSize(new int[]{image.getHeight(), image.getWidth()});
         Thumbnails.of(image)
                 .size(scaleSize[0],scaleSize[1])
                 .outputFormat("jpg")
-                .toOutputStream(outputStream);
+                .toOutputStream(byteArrayOutputStream);
+        return byteArrayOutputStream;
     }
-    private int[] getScaleSize(int[] size){
+
+    /**
+     * 获得压缩后的大小
+     * @param size
+     * @return {@link int[] }
+     */
+    private static int[] getScaleSize(int[] size){
         double scale=1;
         scale=Math.max(size[0]*1.0/MAX_IMAGE_HEIGHT,size[1]*1.0/MAX_IMAGE_WIDTH);
         return new int[]{(int) (size[0]/scale), (int) (size[1]/scale)};
     }
 
-    public InputStream getImageInputStream(Frame f, boolean bool) throws Exception {
+    public static InputStream getImageInputStream(Frame f, boolean bool) throws Exception {
         if (null == f || null == f.image) {
             return null;
         }

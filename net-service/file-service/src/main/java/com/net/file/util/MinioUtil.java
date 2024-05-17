@@ -50,11 +50,19 @@ public class MinioUtil {
                 .stream(inputStream, -1, 5242889L).build());
     }
 
+    /**
+     * 合并分片
+     * @param fileMd5
+     * @param totalChunk
+     * @param userId
+     * @param filePath
+     * @throws Exception
+     */
     public void composeChunk(String fileMd5,int totalChunk,Long userId,String filePath) throws Exception{
         List<ComposeSource> sources = Stream.iterate(0, num -> ++num).limit(totalChunk).map(num -> {
             return ComposeSource.builder()
                     .bucket(minioConfig.getDefaultBucket())
-                    .object(String.valueOf(num))
+                    .object(generateName(fileMd5,userId,num))
                     .build();
         }).collect(Collectors.toList());
         ComposeObjectArgs args= ComposeObjectArgs.builder()
@@ -64,6 +72,13 @@ public class MinioUtil {
                 .build();
         minioClient.composeObject(args);
     }
+
+    /**
+     * 取文件输入流
+     * @param filePath
+     * @return {@link InputStream }
+     * @throws Exception
+     */
     public InputStream getFileInputStream(String filePath) throws Exception{
         GetObjectArgs args= GetObjectArgs.builder()
                 .object(filePath)
@@ -71,19 +86,38 @@ public class MinioUtil {
                 .build();
         return minioClient.getObject(args);
     }
+
+    /**
+     * 取分片输入流
+     * @param fileMd5
+     * @param userId
+     * @param chunkIndex
+     * @return {@link InputStream }
+     * @throws Exception
+     */
     public InputStream getChunkInputStream(String fileMd5,Long userId,int chunkIndex) throws Exception{
         return getFileInputStream(generateName(fileMd5,userId,chunkIndex));
     }
+
+    /**
+     * 删除分片
+     * @param fileMd5
+     * @param totalChunk
+     * @param userId
+     * @throws Exception
+     */
     public void deleteChunk(String fileMd5,int totalChunk,Long userId)  throws Exception{
         List<DeleteObject> list = Stream.iterate(0, num -> ++num).limit(totalChunk).map(num -> {
             return new DeleteObject(generateName(fileMd5,userId,num));
         }).collect(Collectors.toList());
+        System.out.println(list.size());
         RemoveObjectsArgs args= RemoveObjectsArgs.builder()
                 .bucket(minioConfig.getDefaultBucket())
                 .objects(list)
                 .build();
         Iterable<Result<DeleteError>> results = minioClient.removeObjects(args);
         for (Result<DeleteError> result : results) {
+            System.out.println("delete");
             result.get();
         }
     }

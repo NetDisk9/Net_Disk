@@ -29,7 +29,7 @@ public class PathUtil {
     }
 
     /**
-     * 返回扩展名 .txt
+     * 返回扩展名 带. .txt
      * @param name
      * @return {@link String }
      */
@@ -39,6 +39,18 @@ public class PathUtil {
             return null;
         }
         return name.substring(pos);
+    }
+    /**
+     * 返回扩展名 不带. txt
+     * @param name
+     * @return {@link String }
+     */
+    public static String getPlainExtName(String name){
+        int pos=name.lastIndexOf(".");
+        if(pos==-1){
+            return null;
+        }
+        return name.substring(pos+1);
     }
 
     /**

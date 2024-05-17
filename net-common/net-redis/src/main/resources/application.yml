@@ -3,3 +3,7 @@ spring:
     host: 118.178.185.226
     port: 6379
     password: Baozi0318
+    redisson :
+      password : Baozi0318
+      address : "redis://118.178.185.226:6379"
+      database: 1

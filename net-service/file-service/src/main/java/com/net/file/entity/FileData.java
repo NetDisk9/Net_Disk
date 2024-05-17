@@ -3,6 +3,7 @@ package com.net.file.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,6 +17,7 @@ import java.io.Serializable;
  * @author 倪圳褒
  * @since 2024-05-11
  */
+@Builder
 @TableName("file")
 @Data
 @EqualsAndHashCode(callSuper = false)

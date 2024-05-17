@@ -65,7 +65,9 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
 
     @Override
     public void insertFile(UserFileEntity userFile) {
+        //恢复路径中的文件夹
         restoreParent(userFile);
+        //重名处理
         if(isExist(userFile.getFilePath())){
             List<UserFileEntity> temp = listUserFileByPidAndPath(userFile.getPid(),PathUtil.getPlainName(userFile.getFilePath()),FileStatusConstants.NORMAL, userFile.getUserId());
             UsefulNameUtil usefulNameUtil=new UsefulNameUtil(temp,userFile.getFileName());
@@ -235,14 +237,15 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
             return null;
         }
         String parentPath = file.getParentPath();
-        System.out.println(parentPath);
         if(parentPath==null){
             return null;
         }
         UserFileEntity parentFile = fileMapper.getUserFileByPath(file.getUserId(), file.getStatus(), parentPath);
+        //如果父文件夹不存在，创建父文件夹
         if(parentFile==null){
             parentFile = UserFileEntityFactory.createDirEntity(parentPath, file.getStatus(), file.getUserId());
             parentFile.setUserFileId(LongIdUtil.createLongId(parentFile));
+            //检查父文件夹的父文件夹是否存在
             UserFileEntity temp = doRestoreParent(parentFile);
             parentFile.setPid(temp==null?null:temp.getUserFileId());
             save(parentFile);
