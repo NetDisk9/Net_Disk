@@ -1,6 +1,5 @@
 package com.net.file.util;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import com.net.common.context.BaseContext;
 import com.net.file.config.MinioConfig;
@@ -9,7 +8,6 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 

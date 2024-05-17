@@ -7,18 +7,15 @@ import com.net.file.entity.FileData;
 import com.net.file.entity.UserFileEntity;
 import com.net.file.factory.UserFileEntityFactory;
 import com.net.file.pojo.dto.FileUploadDTO;
-import com.net.file.pojo.vo.FileInfo;
 import com.net.file.service.FileDataService;
 import com.net.file.service.FileService;
 import com.net.file.util.MinioUtil;
-import lombok.SneakyThrows;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
-import java.util.List;
 
 /**
  * <p>
