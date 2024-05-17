@@ -4,17 +4,23 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import com.net.common.context.BaseContext;
 import com.net.file.config.MinioConfig;
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
+import io.minio.*;
+import io.minio.errors.*;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * minio文件操作工具
@@ -46,6 +52,44 @@ public class MinioUtil {
                 .stream(inputStream, -1, 5242889L).build());
     }
 
+    public void composeChunk(String fileMd5,int totalChunk,Long userId,String filePath) throws Exception{
+        List<ComposeSource> sources = Stream.iterate(0, num -> ++num).limit(totalChunk).map(num -> {
+            return ComposeSource.builder()
+                    .bucket(minioConfig.getDefaultBucket())
+                    .object(String.valueOf(num))
+                    .build();
+        }).collect(Collectors.toList());
+        ComposeObjectArgs args= ComposeObjectArgs.builder()
+                .sources(sources)
+                .bucket(minioConfig.getDefaultBucket())
+                .object(filePath)
+                .build();
+        minioClient.composeObject(args);
+    }
+    public InputStream getFileInputStream(String filePath) throws Exception{
+        GetObjectArgs args= GetObjectArgs.builder()
+                .object(filePath)
+                .bucket(minioConfig.getDefaultBucket())
+                .build();
+        return minioClient.getObject(args);
+    }
+    public InputStream getChunkInputStream(String fileMd5,Long userId,int chunkIndex) throws Exception{
+        return getFileInputStream(generateName(fileMd5,userId,chunkIndex));
+    }
+    public void deleteChunk(String fileMd5,int totalChunk,Long userId)  throws Exception{
+        List<DeleteObject> list = Stream.iterate(0, num -> ++num).limit(totalChunk).map(num -> {
+            return new DeleteObject(generateName(fileMd5,userId,num));
+        }).collect(Collectors.toList());
+        RemoveObjectsArgs args= RemoveObjectsArgs.builder()
+                .bucket(minioConfig.getDefaultBucket())
+                .objects(list)
+                .build();
+        Iterable<Result<DeleteError>> results = minioClient.removeObjects(args);
+        for (Result<DeleteError> result : results) {
+            result.get();
+        }
+    }
+
     /**
      * 分片上传
      */
@@ -57,7 +101,6 @@ public class MinioUtil {
         uploadFile(inputStream, minioConfig.getDefaultBucket(), objectName);
         IoUtil.close(inputStream);
     }
-
     /**
      * 生成文件存放位置 + 文件名
      */

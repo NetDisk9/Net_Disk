@@ -6,15 +6,33 @@ import com.net.file.entity.UserFileEntity;
 import java.util.List;
 
 public class PathUtil {
-    public static String replaceLastPath(String target,String replacement){
+
+    /**
+     * 替换路径中的文件名
+     * @param target
+     * @param replacement
+     * @return {@link String }
+     */
+    public static String replacePathName(String target,String replacement){
         int pos = target.lastIndexOf("/");
         return target.substring(0,pos+1)+replacement;
     }
+
+    /**
+     * 返回路径中的文件名
+     * @param path
+     * @return {@link String }
+     */
     public static String getNameFromPath(String path){
         int pos=path.lastIndexOf("/");
         return path.substring(pos+1);
     }
-    //带.
+
+    /**
+     * 返回扩展名 .txt
+     * @param name
+     * @return {@link String }
+     */
     public static String getExtName(String name){
         int pos=name.lastIndexOf(".");
         if(pos==-1){
@@ -22,6 +40,12 @@ public class PathUtil {
         }
         return name.substring(pos);
     }
+
+    /**
+     * 返回不带扩展名的文件名
+     * @param name
+     * @return {@link String }
+     */
     public static String getPlainName(String name){
         int pos=name.lastIndexOf(".");
         if(pos==-1){

@@ -20,7 +20,7 @@ import java.io.File;
 @Service
 public class FileDataServiceImpl extends ServiceImpl<FileDataMapper, FileData> implements FileDataService {
     @Override
-    public FileData getFIleDataByMd5(String md5) {
+    public FileData getFileDataByMd5(String md5) {
         LambdaQueryWrapper<FileData> queryWrapper = new LambdaQueryWrapper();
         queryWrapper.eq(FileData::getFileMd5,md5);
         return getOne(queryWrapper);

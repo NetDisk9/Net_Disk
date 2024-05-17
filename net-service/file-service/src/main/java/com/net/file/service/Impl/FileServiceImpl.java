@@ -46,6 +46,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
     public List<UserFileEntity> listUserFileByPidAndPath(Long pid, String path, Integer status, Long userId){
         return fileMapper.listUserFileByPidAndPath(pid,path,status,userId);
     }
+
     @Override
     public List<UserFileEntity> listUserFileByPidAndPathInDir(Long pid, String path, Integer status, Long userId){
         path+="/";
@@ -66,11 +67,10 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
     public void insertFile(UserFileEntity userFile) {
         restoreParent(userFile);
         if(isExist(userFile.getFilePath())){
-            List<UserFileEntity> temp = listUserFileByPidAndPathInDir(userFile.getPid(), userFile.getFilePath(), FileStatusConstants.NORMAL, userFile.getUserId());
+            List<UserFileEntity> temp = listUserFileByPidAndPath(userFile.getPid(),PathUtil.getPlainName(userFile.getFilePath()),FileStatusConstants.NORMAL, userFile.getUserId());
             UsefulNameUtil usefulNameUtil=new UsefulNameUtil(temp,userFile.getFileName());
-            System.out.println(userFile.getFileName()+" asdasd");
             userFile.setFileName(usefulNameUtil.getNextName());
-            System.out.println(userFile.getFileName()+" asdasd");
+            userFile.setFilePath(PathUtil.replacePathName(userFile.getFilePath(),userFile.getFileName()));
         }
         save(userFile);
     }
@@ -167,7 +167,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
     @Override
     public void restoreParent(UserFileEntity file){
         UserFileEntity parent = doRestoreParent(file);
-        file.setPid(file==null?null:file.getUserFileId());
+        file.setPid(parent==null?null:parent.getUserFileId());
     }
 
     @Override

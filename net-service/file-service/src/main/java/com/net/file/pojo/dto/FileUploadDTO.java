@@ -12,4 +12,5 @@ public class FileUploadDTO {
     String filePath;
     @NotBlank
     String fileName;
+    Integer totalChunk;
 }

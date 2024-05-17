@@ -60,7 +60,7 @@ public class UsefulNameUtil {
             }
         }
         if(nameNumber==0)
-            return name;
+            return name+((extName==null)?"":extName);
         return name+"("+nameNumber+")"+((extName==null)?"":extName);
     }
 
@@ -79,15 +79,15 @@ public class UsefulNameUtil {
         return Integer.parseInt(name.substring(begPos+1,endPos));
 
     }
-//    public static void main(String[] args) {
-//        UserFileEntity userFile1=new UserFileEntity();
-//        userFile1.setFileName("test(1).mp4");
-//        UserFileEntity userFile2=new UserFileEntity();
-//        userFile2.setFileName("test(1).mp3");
-//        UserFileEntity userFile3=new UserFileEntity();
-//        userFile3.setFileName("test(1)(1).mp4");
-//        List<UserFileEntity> list1 = List.of(userFile1, userFile2, userFile3);
-//        UsefulNameUtil nameUtil=new UsefulNameUtil(list1,"test(1).mp4");
-//        System.out.println(nameUtil.getNextName());
-//    }
+    public static void main(String[] args) {
+        UserFileEntity userFile1=new UserFileEntity();
+        userFile1.setFileName("test.txt");
+        UserFileEntity userFile2=new UserFileEntity();
+        userFile2.setFileName("test");
+        UserFileEntity userFile3=new UserFileEntity();
+        userFile3.setFileName("test(2).mp4");
+        List<UserFileEntity> list1 = List.of(userFile1, userFile2, userFile3);
+        UsefulNameUtil nameUtil=new UsefulNameUtil(list1,"test.txt");
+        System.out.println(nameUtil.getNextName());
+    }
 }

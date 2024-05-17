@@ -128,8 +128,7 @@ public class FileController {
         }
         String oldPath = userFile.getFilePath();
         userFile.setFileName(name);
-        userFile.setFilePath(PathUtil.replaceLastPath(userFile.getFilePath(), name));
-        System.out.println(userFile.getFilePath());
+        userFile.setFilePath(PathUtil.replacePathName(userFile.getFilePath(), name));
         List<UserFileEntity> userFileEntities = fileService.listUserFileByPidAndPath(userFile.getPid(), userFile.getFilePath(), FileStatusConstants.NORMAL, userId);
         System.out.println(userFileEntities);
         UsefulNameUtil usefulNameUtil = new UsefulNameUtil(userFileEntities, userFile.getFileName());

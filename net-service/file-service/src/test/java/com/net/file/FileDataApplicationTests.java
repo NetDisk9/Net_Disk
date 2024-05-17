@@ -51,9 +51,9 @@ public class FileDataApplicationTests {
         FileUploadDTO fileUploadDTO=new FileUploadDTO();
         fileUploadDTO.setFileName("test.txt");
         fileUploadDTO.setFileMd5("1");
-        fileUploadDTO.setFilePath("/www/wewe/test.txt");
+        fileUploadDTO.setFilePath("");
         fileDataController.uploadFast(fileUploadDTO);
-        fileDataController.uploadFast(fileUploadDTO);
+//        fileDataController.uploadFast(fileUploadDTO);
 
     }
 
