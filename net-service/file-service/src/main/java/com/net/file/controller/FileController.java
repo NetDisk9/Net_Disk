@@ -1,6 +1,7 @@
 package com.net.file.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.net.common.context.BaseContext;
@@ -8,6 +9,7 @@ import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
 import com.net.common.exception.AuthException;
 import com.net.common.exception.ParameterException;
+import com.net.common.util.SortUtils;
 import com.net.common.vo.PageResultVO;
 import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileStatusConstants;
@@ -31,6 +33,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/file")
@@ -153,10 +156,11 @@ public class FileController {
         if (page == null || pageSize == null) return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         // 构造分页构造器
         Page<UserFileEntity> pageInfo = new Page<>(page, pageSize);
-        // 查询当前用户
-        fileQueryDTO.setCurrentUserId(BaseContext.getCurrentId());
+        fileQueryDTO.setCurrentUserId(BaseContext.getCurrentId());// 查询当前用户
+        SortUtils.setOrderPage(pageInfo, fileQueryDTO.getSortField(), fileQueryDTO.getSortOrder());// 排序
         // 分页查询
         fileService.selectPageVO(pageInfo, fileQueryDTO);
+        // 转换成VO
         PageResultVO<FileVO> pageResultVO = new PageResultVO<>();
         List<FileVO> fileVOS = BeanUtil.copyToList(pageInfo.getRecords(), FileVO.class);
         pageResultVO.setList(fileVOS);
