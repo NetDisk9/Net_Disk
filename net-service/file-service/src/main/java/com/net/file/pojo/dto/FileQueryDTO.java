@@ -9,6 +9,7 @@ public class FileQueryDTO {
     Long currentUserId;
     String path;
     Integer status;
+    Integer category;
     String sortField;
     String sortOrder;
 }

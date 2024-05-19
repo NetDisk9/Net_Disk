@@ -1,7 +1,6 @@
 package com.net.file.controller;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.net.common.context.BaseContext;
@@ -15,11 +14,11 @@ import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.entity.UserFileEntity;
 import com.net.file.factory.UserFileEntityFactory;
+import com.net.file.pojo.dto.FileMoveDTO;
 import com.net.file.pojo.dto.FileQueryDTO;
 import com.net.file.pojo.vo.FileVO;
-import com.net.file.support.UserFileTree;
-import com.net.file.pojo.dto.FileMoveDTO;
 import com.net.file.service.FileService;
+import com.net.file.support.UserFileTree;
 import com.net.file.util.PathUtil;
 import com.net.file.util.UsefulNameUtil;
 import org.springframework.beans.BeanUtils;
@@ -33,7 +32,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/file")
@@ -86,8 +84,7 @@ public class FileController {
     }
 
     @PostMapping("/dir/create")
-    public ResponseResult insertDir(String pid,
-                                    @Valid @NotBlank String name) throws Exception {
+    public ResponseResult insertDir(String pid, @Valid @NotBlank String name) {
         Long userId = BaseContext.getCurrentId();
         Long longPid;
         UserFileEntity parentFile = null;
@@ -153,12 +150,16 @@ public class FileController {
 
     @GetMapping("/list")
     public ResponseResult listFile(Integer page, Integer pageSize, FileQueryDTO fileQueryDTO) {
-        if (page == null || pageSize == null) return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        if (page == null || pageSize == null)
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"页码和数量不能为空");
+        if (fileQueryDTO.getCategory() != null && fileQueryDTO.getPid() != null)
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"传类型的时候不能传pid");
         // 构造分页构造器
         Page<UserFileEntity> pageInfo = new Page<>(page, pageSize);
         fileQueryDTO.setCurrentUserId(BaseContext.getCurrentId());// 查询当前用户
         SortUtils.setOrderPage(pageInfo, fileQueryDTO.getSortField(), fileQueryDTO.getSortOrder());// 排序
         // 分页查询
+        pageInfo.setOptimizeCountSql(false);
         fileService.selectPageVO(pageInfo, fileQueryDTO);
         // 转换成VO
         PageResultVO<FileVO> pageResultVO = new PageResultVO<>();

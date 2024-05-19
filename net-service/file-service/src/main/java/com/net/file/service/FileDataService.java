@@ -1,10 +1,7 @@
 package com.net.file.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.net.common.enums.FileTypeEnum;
 import com.net.file.entity.FileData;
-
-import java.io.InputStream;
 
 /**
  * <p>

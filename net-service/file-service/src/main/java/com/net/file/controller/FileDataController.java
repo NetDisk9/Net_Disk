@@ -6,6 +6,7 @@ import com.net.common.dto.ResponseResult;
 import com.net.common.enums.FileTypeEnum;
 import com.net.common.exception.ParameterException;
 import com.net.common.util.LongIdUtil;
+import com.net.file.constant.FileStatusConstants;
 import com.net.file.entity.FileData;
 import com.net.file.entity.UserFileEntity;
 import com.net.file.factory.UserFileEntityFactory;
@@ -27,7 +28,7 @@ import java.util.Objects;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author 倪圳褒
@@ -47,7 +48,8 @@ public class FileDataController {
     RedissonClient redissonClient;
     @Resource
     TaskList taskList;
-    @PostMapping(value = "/upload",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseResult upload(
             @RequestPart("chunk") MultipartFile chunk,
             @RequestParam("fileMd5") String fileMd5,
@@ -57,41 +59,42 @@ public class FileDataController {
     }
 
     @PostMapping("/check")
-    public ResponseResult uploadFast(@Valid @RequestBody FileUploadDTO fileUploadDTO){
-        Long userId= BaseContext.getCurrentId();
+    public ResponseResult uploadFast(@Valid @RequestBody FileUploadDTO fileUploadDTO) {
+        Long userId = BaseContext.getCurrentId();
         FileData fileData = fileDataService.getFileDataByMd5(fileUploadDTO.getFileMd5());
-        if(fileData==null){
-            return ResponseResult.okResult(201,"需要上传");
+        if (fileData == null) {
+            return ResponseResult.okResult(201, "需要上传");
         }
         //秒传
-        UserFileEntity userFile= UserFileEntityFactory.createFileEntity(fileData, fileUploadDTO.getFilePath(), fileUploadDTO.getFileName(), userId);
+        UserFileEntity userFile = UserFileEntityFactory.createFileEntity(fileData, fileUploadDTO.getFilePath(), fileUploadDTO.getFileName(), userId);
         fileService.insertFile(userFile);
         return ResponseResult.okResult();
     }
+
     @Transactional
     @PostMapping("/upload/check")
-    public ResponseResult completeUpload(@Valid @RequestBody FileUploadDTO fileUploadDTO) throws Exception{
-        Long userId=BaseContext.getCurrentId();
-        if(fileUploadDTO.getTotalChunk()==null||fileUploadDTO.getTotalChunk()<1){
+    public ResponseResult completeUpload(@Valid @RequestBody FileUploadDTO fileUploadDTO) throws Exception {
+        Long userId = BaseContext.getCurrentId();
+        if (fileUploadDTO.getTotalChunk() == null || fileUploadDTO.getTotalChunk() < 1) {
             throw new ParameterException();
         }
-        RedissonLockWrapper redissonLockWrapper=new RedissonLockWrapper(redissonClient,fileUploadDTO.getFileMd5());
-        try{
+        RedissonLockWrapper redissonLockWrapper = new RedissonLockWrapper(redissonClient, fileUploadDTO.getFileMd5());
+        try {
             //上锁
             boolean result = redissonLockWrapper.lock();
-            if(!result){
+            if (!result) {
                 throw new RuntimeException();
             }
             FileData fileData = fileDataService.getFileDataByMd5(fileUploadDTO.getFileMd5());
-            if(fileData==null){
-                Long fileId= LongIdUtil.createLongId(fileUploadDTO);
-                String extName=PathUtil.getPlainExtName(fileUploadDTO.getFileName());
-                String fileName=fileId+"."+extName;
-                FileTypeEnum fileType=FileTypeEnum.getFileTypeEnumByExtension(extName);
-                minioUtil.composeChunk(fileUploadDTO.getFileMd5(), fileUploadDTO.getTotalChunk(),userId,fileName);
+            if (fileData == null) {
+                Long fileId = LongIdUtil.createLongId(fileUploadDTO);
+                String extName = PathUtil.getPlainExtName(fileUploadDTO.getFileName());
+                String fileName = fileId + "." + extName;
+                FileTypeEnum fileType = FileTypeEnum.getFileTypeEnumByExtension(extName);
+                minioUtil.composeChunk(fileUploadDTO.getFileMd5(), fileUploadDTO.getTotalChunk(), userId, fileName);
                 //校验完整性
-                FileUtil.FileMetaData metaData=FileUtil.getMetaData(minioUtil.getFileInputStream(fileName));
-                if(!Objects.equals(fileUploadDTO.getFileMd5(), metaData.getMd5())){
+                FileUtil.FileMetaData metaData = FileUtil.getMetaData(minioUtil.getFileInputStream(fileName));
+                if (!Objects.equals(fileUploadDTO.getFileMd5(), metaData.getMd5())) {
                     throw new Exception("文件校验失败");
                 }
                 //文件元信息
@@ -102,33 +105,33 @@ public class FileDataController {
                         .fileUrl(fileName)
                         .fileId(fileId)
                         .fileSize(metaData.getFileSize())
-                        .delFlag(0).build();
+                        .delFlag(FileStatusConstants.NORMAL).build();
                 fileDataService.save(fileData);
                 //异步上传图片到oss
                 FileData finalFileData = fileData;
-                taskList.addTask(()->{
+                taskList.addTask(() -> {
                     try {
-                        fileDataService.generateImageCover(finalFileData,userId);
+                        fileDataService.generateImageCover(finalFileData, userId);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 });
             }
             //插入用户文件信息
-            UserFileEntity userFile= UserFileEntityFactory.createFileEntity(fileData, fileUploadDTO.getFilePath(), fileUploadDTO.getFileName(), userId);
+            UserFileEntity userFile = UserFileEntityFactory.createFileEntity(fileData, fileUploadDTO.getFilePath(), fileUploadDTO.getFileName(), userId);
             fileService.insertFile(userFile);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();
-        }finally {
+        } finally {
             //释放锁
             redissonLockWrapper.unlock();
             //删除分片
-            taskList.addTask(()->{
+            taskList.addTask(() -> {
                 try {
                     System.out.println("delete begin");
-                    minioUtil.deleteChunk(fileUploadDTO.getFileMd5(), fileUploadDTO.getTotalChunk(),userId);
-                } catch (Exception e) {
+                    minioUtil.deleteChunk(fileUploadDTO.getFileMd5(), fileUploadDTO.getTotalChunk(), userId);
+                } catch (Exception ignored) {
                 }
             });
         }
