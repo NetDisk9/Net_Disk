@@ -4,14 +4,20 @@ import cn.hutool.core.io.IoUtil;
 import com.net.common.context.BaseContext;
 import com.net.file.config.MinioConfig;
 import io.minio.*;
+import io.minio.errors.*;
 import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -136,6 +142,13 @@ public class MinioUtil {
         uploadFile(inputStream, minioConfig.getDefaultBucket(), objectName);
         IoUtil.close(inputStream);
     }
+    public StatObjectResponse getFileMedaData(String path) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        StatObjectArgs statObjectArgs=StatObjectArgs.builder()
+                        .object(path)
+                        .bucket(minioConfig.getDefaultBucket())
+                        .build();
+        return minioClient.statObject(statObjectArgs);
+    }
 
     /**
      * 生成文件存放位置 + 文件名
@@ -143,4 +156,7 @@ public class MinioUtil {
     private String generateName(String fileMd5, Long currentId, Integer chunkIndex) {
         return fileMd5 + "/" + currentId + "/" + chunkIndex;
     }
+
 }
+
+

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import javax.validation.ConstraintViolationException;
 
@@ -67,6 +68,13 @@ public class GlobalExceptionHandler {
         log.error("捕获异常 ConstraintViolationException:{}",e.getMessage());
         return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"必要参数为空");
     }
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    @ResponseBody
+    public ResponseResult exception(MissingServletRequestPartException e){
+        log.error("捕获异常 MissingServletRequestPartException:{}",e.getMessage());
+        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"必要参数为空");
+    }
+
     @ExceptionHandler(ParameterException.class)
     @ResponseBody
     public ResponseResult exception(ParameterException e){
@@ -77,6 +85,13 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseResult exception(MethodArgumentTypeMismatchException e){
         log.error("捕获异常 MethodArgumentTypeMismatchException:{}",e.getMessage());
+        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"参数类型不匹配");
+
+    }
+    @ExceptionHandler(ChunkErrorException.class)
+    @ResponseBody
+    public ResponseResult exception(ChunkErrorException e){
+        log.error("捕获异常 ChunkErrorException:{}",e.getMessage());
         return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"参数类型不匹配");
 
     }

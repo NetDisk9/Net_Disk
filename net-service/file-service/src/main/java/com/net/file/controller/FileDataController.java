@@ -4,6 +4,7 @@ package com.net.file.controller;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.FileTypeEnum;
+import com.net.common.exception.ChunkErrorException;
 import com.net.common.exception.ParameterException;
 import com.net.common.util.LongIdUtil;
 import com.net.file.constant.FileStatusConstants;
@@ -16,6 +17,7 @@ import com.net.file.service.FileService;
 import com.net.file.support.TaskList;
 import com.net.file.util.*;
 import com.net.redis.lock.RedissonLockWrapper;
+import io.minio.StatObjectResponse;
 import org.redisson.api.RedissonClient;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,9 +95,11 @@ public class FileDataController {
                 FileTypeEnum fileType = FileTypeEnum.getFileTypeEnumByExtension(extName);
                 minioUtil.composeChunk(fileUploadDTO.getFileMd5(), fileUploadDTO.getTotalChunk(), userId, fileName);
                 //校验完整性
-                FileUtil.FileMetaData metaData = FileUtil.getMetaData(minioUtil.getFileInputStream(fileName));
-                if (!Objects.equals(fileUploadDTO.getFileMd5(), metaData.getMd5())) {
-                    throw new Exception("文件校验失败");
+                StatObjectResponse fileMedaData = minioUtil.getFileMedaData(fileName);
+                System.out.println(fileMedaData.etag());
+                System.out.println(fileUploadDTO.getFileMd5());
+                if (!fileMedaData.etag().equalsIgnoreCase(fileUploadDTO.getFileMd5())) {
+                    throw new ChunkErrorException("文件校验失败");
                 }
                 //文件元信息
                 fileData = FileData.builder()
@@ -104,7 +108,7 @@ public class FileDataController {
                         .fileMd5(fileUploadDTO.getFileMd5())
                         .fileUrl(fileName)
                         .fileId(fileId)
-                        .fileSize(metaData.getFileSize())
+                        .fileSize(fileMedaData.size())
                         .delFlag(FileStatusConstants.NORMAL).build();
                 fileDataService.save(fileData);
                 //异步上传图片到oss
@@ -120,6 +124,10 @@ public class FileDataController {
             //插入用户文件信息
             UserFileEntity userFile = UserFileEntityFactory.createFileEntity(fileData, fileUploadDTO.getFilePath(), fileUploadDTO.getFileName(), userId);
             fileService.insertFile(userFile);
+        }
+        catch (ChunkErrorException e){
+            e.printStackTrace();
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();

@@ -15,6 +15,7 @@ public class FileUtil {
      * @return md5 value
      */
     public static FileMetaData getMetaData(InputStream inputStream) {
+
         try {
             MessageDigest MD5 = MessageDigest.getInstance("MD5");
             byte[] buffer = new byte[1024];
