@@ -4,6 +4,7 @@ package com.net.common.exception;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -92,8 +93,14 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseResult exception(ChunkErrorException e){
         log.error("捕获异常 ChunkErrorException:{}",e.getMessage());
-        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"参数类型不匹配");
+        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"文件校验异常");
+    }
 
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseBody
+    public ResponseResult exception(HttpRequestMethodNotSupportedException e){
+        log.error("捕获异常 ChunkErrorException:{}",e.getMessage());
+        return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"请求类型不匹配");
     }
     private String getMessage(Exception e,String defaultMessage){
         if(e.getMessage()!=null&&e.getMessage().length()!=0){

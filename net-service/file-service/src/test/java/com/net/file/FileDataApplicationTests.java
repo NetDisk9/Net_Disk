@@ -1,6 +1,7 @@
 package com.net.file;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.net.api.client.AuthClient;
 import com.net.common.context.BaseContext;
 import com.net.common.util.LongIdUtil;
 import com.net.file.config.MinioConfig;
@@ -8,12 +9,14 @@ import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.controller.FileController;
 import com.net.file.controller.FileDataController;
+import com.net.file.entity.FileData;
 import com.net.file.entity.UserFileEntity;
 import com.net.file.mapper.FileMapper;
 import com.net.file.pojo.dto.FileUploadDTO;
 import com.net.file.service.FileDataService;
 import com.net.file.service.FileService;
 import com.net.file.service.Impl.FileServiceImpl;
+import com.net.file.service.ShareService;
 import com.net.file.util.FileUtil;
 import com.net.file.util.MinioUtil;
 import com.net.file.util.RegexUtil;
@@ -43,6 +46,10 @@ public class FileDataApplicationTests {
     FileDataController fileDataController;
     @Resource
     MinioClient minioClient;
+    @Resource
+    AuthClient authClient;
+    @Resource
+    ShareService shareService;
 //    @Test
 //    public void testImg(){
 //        System.out.println(RegexUtil.checkImageValid("jpg"));
@@ -91,4 +98,10 @@ public class FileDataApplicationTests {
         System.out.println(statObjectResponse.etag());
         System.out.println(statObjectResponse.size());
     }
+    @Test
+    public void testGetFileData(){
+        FileData fileData = fileDataService.getFileDataByUserFileId(1791346282007633922L, 1768546042247323649L, 0);
+        System.out.println(fileData);
+    }
+
 }

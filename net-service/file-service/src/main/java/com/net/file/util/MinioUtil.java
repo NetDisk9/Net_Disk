@@ -149,6 +149,15 @@ public class MinioUtil {
                         .build();
         return minioClient.statObject(statObjectArgs);
     }
+    public InputStream downLoadChunk(Long begin,Long length,String fileUrl) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        GetObjectArgs args= GetObjectArgs.builder()
+                .offset(begin)
+                .length(length)
+                .object(fileUrl)
+                .bucket(minioConfig.getDefaultBucket())
+                .build();
+        return minioClient.getObject(args);
+    }
 
     /**
      * 生成文件存放位置 + 文件名

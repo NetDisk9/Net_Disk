@@ -13,6 +13,7 @@ import com.net.file.entity.FileData;
  */
 public interface FileDataService extends IService<FileData> {
     FileData getFileDataByMd5(String md5);
+    FileData getFileDataByUserFileId(Long userFileId,Long userId,Integer status);
     void generateImageCover(FileData fileData,Long userId)throws Exception;
 
 }

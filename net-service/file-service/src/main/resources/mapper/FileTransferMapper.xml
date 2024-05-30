@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.net.file.mapper.FileMapper">
-
+<mapper namespace="com.net.file.mapper.FileDataMapper">
+    <resultMap type="com.net.file.entity.FileData" id="fileData">
+        <result property="fileId" column="file_id"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="fileMd5" column="file_md5"/>
+        <result property="fileUrl" column="file_url"/>
+        <result property="fileCategory" column="file_category"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileCover" column="file_cover"/>
+    </resultMap>
+    <select id="getFileDataByUserFileId" resultMap="fileData">
+        select f.file_id,file_size,file_md5,file_url,file_category,del_flag,f.file_name,file_cover
+        from file f join user_file on f.file_id=user_file.file_id
+        where user_file.user_file_id=#{userFileId} and user_id = #{userId} and status = #{status}
+    </select>
 </mapper>

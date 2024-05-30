@@ -11,4 +11,6 @@ public interface AuthClient {
     public String havePermission(@RequestParam String path);
     @GetMapping("/role/issuper")
     public String isSuperAdministrator(@RequestParam String id);
+    @GetMapping("/role/isvip")
+    public String isVIP();
 }

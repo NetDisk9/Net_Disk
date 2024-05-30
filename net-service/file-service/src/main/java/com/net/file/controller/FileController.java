@@ -3,6 +3,7 @@ package com.net.file.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
@@ -12,15 +13,19 @@ import com.net.common.util.SortUtils;
 import com.net.common.vo.PageResultVO;
 import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileStatusConstants;
+import com.net.file.entity.ShareEntity;
 import com.net.file.entity.UserFileEntity;
 import com.net.file.factory.UserFileEntityFactory;
 import com.net.file.pojo.dto.FileMoveDTO;
 import com.net.file.pojo.dto.FileQueryDTO;
+import com.net.file.pojo.dto.FileSaveDTO;
 import com.net.file.pojo.vo.FileVO;
 import com.net.file.service.FileService;
+import com.net.file.service.ShareService;
 import com.net.file.support.UserFileTree;
 import com.net.file.util.PathUtil;
 import com.net.file.util.UsefulNameUtil;
+import com.net.file.wrapper.LambdaFunctionWrapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +36,10 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/file")
@@ -39,6 +47,8 @@ import java.util.List;
 public class FileController {
     @Resource
     FileService fileService;
+    @Resource
+    ShareService shareService;
 
     @PostMapping("/copy")
     public ResponseResult copyFile(@Valid @RequestBody FileMoveDTO fileMoveDTO, @Valid @NotNull Integer mode) throws Throwable {
@@ -204,6 +214,43 @@ public class FileController {
     @DeleteMapping("/delete")
     public ResponseResult removeFile2Recycle(@Valid @NotEmpty @RequestParam("fileIds") List<Long> fileIds) {
         fileService.updateFileFoldStatus(fileIds, FileStatusConstants.NORMAL, FileStatusConstants.RECYCLED);
+        return ResponseResult.okResult();
+    }
+
+    /**
+     * 转存
+     * @param fileSaveDTO
+     * @return {@link ResponseResult }
+     */
+    @PostMapping("/transfer")
+    public ResponseResult saveFile(@Valid @RequestBody FileSaveDTO fileSaveDTO){
+        //todo 校验redis 交给褒哥
+        Long userId= BaseContext.getCurrentId();
+        ShareEntity shareEntity=shareService.getShareEntityWithCheck(fileSaveDTO.getLink());
+        UserFileEntity shareRootFile=fileService.getNormalFile(shareEntity.getUserFileId(),shareEntity.getUserId());
+        List<UserFileEntity> collect;
+        try {
+             collect = Arrays.stream(fileSaveDTO.getUserFileIds()).map(LambdaFunctionWrapper.wrap(
+                    id -> {
+                        return fileService.getNormalFile(id, shareEntity.getUserId());
+                    }
+            )).collect(Collectors.toList());
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ParameterException();
+        }
+        //校验要转存的文件是否在分享文件夹下
+        if(DirConstants.NOT_DIR.equals(shareRootFile.getIsDir())&&collect.size()>1){
+            throw new ParameterException();
+        }
+        for (UserFileEntity userFile : collect) {
+            if(!PathUtil.isChild(shareRootFile.getFilePath(),userFile.getFilePath())&&!Objects.equals(userFile.getUserFileId(),shareRootFile.getUserFileId())){
+                throw new ParameterException();
+            }
+        }
+        UserFileEntity root=UserFileEntityFactory.createRootDirEntity(userId);
+        System.out.println(collect);
+        fileService.saveFiles(root,collect,userId);
         return ResponseResult.okResult();
     }
 

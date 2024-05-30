@@ -68,7 +68,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         //恢复路径中的文件夹
         restoreParent(userFile);
         //重名处理
-        if(isExist(userFile.getFilePath())){
+        if(isExist(userFile.getFilePath(),userFile.getUserId())){
             List<UserFileEntity> temp = listUserFileByPidAndPath(userFile.getPid(),PathUtil.getPlainName(userFile.getFilePath()),FileStatusConstants.NORMAL, userFile.getUserId());
             UsefulNameUtil usefulNameUtil=new UsefulNameUtil(temp,userFile.getFileName());
             userFile.setFileName(usefulNameUtil.getNextName());
@@ -90,13 +90,13 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
     }
 
     @Override
-    public UserFileEntity getNormalUserFileByPath(String path) {
-        return getOne(new LambdaQueryWrapper<UserFileEntity>().eq(UserFileEntity::getFilePath,path).eq(UserFileEntity::getStatus,FileStatusConstants.NORMAL));
+    public UserFileEntity getNormalUserFileByPath(String path,Long userId) {
+        return getOne(new LambdaQueryWrapper<UserFileEntity>().eq(UserFileEntity::getFilePath,path).eq(UserFileEntity::getStatus,FileStatusConstants.NORMAL).eq(UserFileEntity::getUserId,userId));
     }
 
     @Override
-    public boolean isExist(String path) {
-        return getNormalUserFileByPath(path)!=null;
+    public boolean isExist(String path,Long userId) {
+        return getNormalUserFileByPath(path,userId)!=null;
     }
 
     @Override
@@ -206,9 +206,37 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
         if (!PathUtil.checkPath(parentFile, userFileEntities)) {
             throw new ParameterException("目的文件夹不能是子文件夹");
         }
+        List<UserFileEntity> list = collectFilesForMove(parentFile,userFileEntities,mode,failCollector,userId);
+        UserFileTree tree = buildUserFileTree(parentFile,list);
+        tree.rebuildPathByRootPath();
+        tree.reAssignUserFileIdExceptRoot();
+//        System.out.println(tree.collect());
+        insertBatch(tree.collect());
+        return failCollector;
+    }
+
+    /**
+     * 转存
+     * @param root
+     * @param userFileEntities
+     * @param userId
+     */
+    @Override
+    public void saveFiles(UserFileEntity root, List<UserFileEntity> userFileEntities, Long userId) {
+        userFileEntities.forEach(userFile -> userFile.setPid(null));
+        List<UserFileEntity> list=collectFilesForMove(root,userFileEntities,FileOperationModeConstants.RENAME,new ArrayList<>(),userId);
+        UserFileTree tree = buildUserFileTree(root,list);
+        tree.reAssignUserFileIdExceptRoot();
+        tree.resetUserId();
+        tree.rebuildPathByRootPath();
+        System.out.println(tree.collect());
+        insertBatch(tree.collect());
+    }
+
+    private List<UserFileEntity> collectFilesForMove(UserFileEntity parentFile, List<UserFileEntity> userFileEntities, Integer mode, List<UserFileEntity> failCollector, Long userId){
         List<UserFileEntity> list = new ArrayList<>();
         for (var entity : userFileEntities) {
-            if (isExist(parentFile.getFilePath() + "/" + entity.getFileName())) {// 存在同名文件
+            if (isExist(parentFile.getFilePath() + "/" + entity.getFileName(),userId)) {// 存在同名文件
                 if (FileOperationModeConstants.DEFAULT.equals(mode)) {// 跳过则返回重名的文件列表
                     failCollector.add(entity);
                     continue;
@@ -220,17 +248,12 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
                 }
             }
             if(DirConstants.IS_DIR.equals(entity.getIsDir())){// 如果是文件夹，则拷贝子文件
-                List<UserFileEntity> temp=listUserFileInDir(entity.getFilePath(),FileStatusConstants.NORMAL,userId);
+                List<UserFileEntity> temp=listUserFileInDir(entity.getFilePath(),FileStatusConstants.NORMAL, entity.getUserId());
                 list.addAll(temp);
             }
             list.add(entity);
         }
-        UserFileTree tree = buildUserFileTree(parentFile,list);
-        tree.rebuildPathByRootPath();
-        tree.reAssignUserFileIdExceptRoot();
-//        System.out.println(tree.collect());
-        insertBatch(tree.collect());
-        return failCollector;
+        return list;
     }
     private UserFileEntity doRestoreParent(UserFileEntity file){
         if(file==null){

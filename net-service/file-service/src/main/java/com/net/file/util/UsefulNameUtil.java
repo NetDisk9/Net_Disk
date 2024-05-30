@@ -52,7 +52,7 @@ public class UsefulNameUtil {
     public String getNextName(){
         System.out.println(list);
         for (var number:list){
-            if(number==nameNumber){
+            if(number<=nameNumber){
                 nameNumber++;
             }
             else{

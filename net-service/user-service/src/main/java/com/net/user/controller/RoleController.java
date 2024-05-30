@@ -18,5 +18,10 @@ public class RoleController {
         Long userId= BaseContext.getCurrentId();
         return roleService.isSuperAdministrator(userId).toString();
     }
+    @GetMapping("/isvip")
+    public String isVIP(){
+        Long userId= BaseContext.getCurrentId();
+        return roleService.isVIP(userId).toString();
+    }
 
 }

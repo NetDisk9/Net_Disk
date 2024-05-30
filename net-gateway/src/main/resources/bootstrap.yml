@@ -8,7 +8,8 @@ spring:
     name: gateway
   servlet:
     multipart:
-      max-file-size: 5MB
+      max-file-size: 10MB
+      max-request-size: 50MB
   cloud:
     nacos:
       server-addr:  118.178.185.226:8848

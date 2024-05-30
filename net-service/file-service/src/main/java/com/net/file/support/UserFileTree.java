@@ -36,6 +36,9 @@ public class UserFileTree {
     public void reAssignUserFileIdExceptRoot(){
         reAssignUserFileId(root);
     }
+    public void resetUserId(){
+        doResetUserId(root);
+    }
     public List<UserFileEntity> collect(){
         List<UserFileEntity> collector=new ArrayList<>();
         for(var child:root.children){
@@ -57,6 +60,15 @@ public class UserFileTree {
             userFile.setFilePath(parent.getFilePath()+"/"+userFile.getFileName());
             userFile.setUpdateTime(DateFormatUtil.getNow());
             rebuildPath(child);
+        }
+    }
+    private void doResetUserId(UserFileTreeNode node){
+        UserFileEntity parent=node.val;
+        for(var child:node.children){
+            UserFileEntity userFile=child.val;
+            userFile.setUserId(parent.getUserId());
+            userFile.setUpdateTime(DateFormatUtil.getNow());
+            doResetUserId(child);
         }
     }
     private void reAssignUserFileId(UserFileTreeNode node){

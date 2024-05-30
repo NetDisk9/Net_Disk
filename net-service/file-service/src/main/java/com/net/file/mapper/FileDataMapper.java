@@ -12,5 +12,6 @@ import com.net.file.entity.FileData;
  * @since 2024-05-11
  */
 public interface FileDataMapper extends BaseMapper<FileData> {
+    FileData getFileDataByUserFileId(Long userFileId,Integer status,Long userId);
 
 }

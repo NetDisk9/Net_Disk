@@ -27,8 +27,12 @@ public class DateFormatUtil {
     public static Date trans(String temp) throws Exception{
         if(temp==null||temp.isEmpty())
             return null;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.parse(temp);
+    }
+    public static LocalDateTime string2LocalDateTime(String str){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return LocalDateTime.parse(str, formatter);
     }
     /**
      * @Author:chenjunjie

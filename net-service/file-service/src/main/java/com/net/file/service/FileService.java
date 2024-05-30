@@ -26,9 +26,9 @@ public interface FileService extends IService<UserFileEntity> {
     void updateFile(UserFileEntity userFile);
     void insertBatch(List<UserFileEntity> list);
 
-    UserFileEntity getNormalUserFileByPath(String path);
+    UserFileEntity getNormalUserFileByPath(String path,Long userId);
 
-    boolean isExist(String path);
+    boolean isExist(String path,Long userId);
 
     UserFileEntity getFile(Long userFileId, Long userId) throws ParameterException, AuthException;
 
@@ -38,10 +38,10 @@ public interface FileService extends IService<UserFileEntity> {
 
     UserFileTree buildUserFileTree(UserFileEntity parentFile,List<UserFileEntity> list);
     List<UserFileEntity> copyFile(FileMoveDTO fileMoveDTO,Integer mode) throws Throwable;
+    void saveFiles(UserFileEntity root,List<UserFileEntity> list,Long userId);
 
     void updateFileFoldStatus(List<Long> fileIds, Integer BEFORE_MODE, Integer AFTER_MODE);
     UserFileEntity getFileIdByPath(String path,Long userId);
     void restoreParent(UserFileEntity file);
-
     IPage selectPageVO(Page<UserFileEntity> pageInfo, FileQueryDTO fileQueryDTO);
 }

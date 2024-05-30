@@ -26,6 +26,8 @@ import java.io.File;
 @Service
 public class FileDataServiceImpl extends ServiceImpl<FileDataMapper, FileData> implements FileDataService {
     @Resource
+    FileDataMapper fileDataMapper;
+    @Resource
     MinioUtil minioUtil;
     @Resource
     AliOssUtil aliOssUtil;
@@ -39,13 +41,12 @@ public class FileDataServiceImpl extends ServiceImpl<FileDataMapper, FileData> i
     @Override
     public void generateImageCover(FileData fileData,Long userId) throws Exception{
         byte[] imageBytes;
-        //todo 文件元信息
-        //todo 生成视频缩略图
+        //生成视频缩略图
         FileTypeEnum fileType=FileTypeEnum.getFileTypeEnumByCode(String.valueOf(fileData.getFileCategory()));
         if(fileType==FileTypeEnum.VIDEO){
             imageBytes= ImgTools.randomGrabberFFmpegVideoImage(minioUtil.getChunkInputStream(fileData.getFileMd5(),userId,0)).readAllBytes();
         }
-        //todo 生成图片缩略图
+        //生成图片缩略图
         else if (fileType==FileTypeEnum.IMAGE){
             imageBytes=ImgTools.generateSmallerImage(minioUtil.getFileInputStream(fileData.getFileUrl())).toByteArray();
         }
@@ -55,5 +56,10 @@ public class FileDataServiceImpl extends ServiceImpl<FileDataMapper, FileData> i
         String path = aliOssUtil.upload(imageBytes, imgName);
         fileData.setFileCover(path);
         updateById(fileData);
+    }
+
+    @Override
+    public FileData getFileDataByUserFileId(Long userFileId,Long userId,Integer status) {
+        return fileDataMapper.getFileDataByUserFileId(userFileId,status,userId);
     }
 }

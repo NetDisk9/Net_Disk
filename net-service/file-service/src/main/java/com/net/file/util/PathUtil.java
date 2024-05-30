@@ -65,6 +65,17 @@ public class PathUtil {
         }
         return name.substring(0,pos);
     }
+
+    /**
+     * 是否子文件夹
+     * @param parentPath
+     * @param childPath
+     * @return boolean
+     */
+    public static boolean isChild(String parentPath,String childPath){
+        parentPath+="/";
+        return childPath.startsWith(parentPath);
+    }
     public static boolean checkPath(UserFileEntity parent, List<UserFileEntity> list){
         String parentPath=parent.getFilePath()+"/";
         for(var userFile:list){
@@ -77,5 +88,6 @@ public class PathUtil {
         }
         return true;
     }
+
 
 }

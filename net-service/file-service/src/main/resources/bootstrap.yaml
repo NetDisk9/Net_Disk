@@ -5,7 +5,8 @@ spring:
     name: file-service # 服务名称
   servlet:
     multipart:
-      max-file-size: 5MB
+      max-file-size: 10MB
+      max-request-size: 50MB
   profiles:
     active: dev
   cloud:
