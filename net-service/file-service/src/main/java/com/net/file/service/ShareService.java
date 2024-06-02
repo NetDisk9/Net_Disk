@@ -1,7 +1,12 @@
 package com.net.file.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.net.file.entity.ShareEntity;
+import com.net.file.pojo.dto.FileShareDTO;
+import com.net.file.pojo.vo.FileVO;
+import com.net.file.pojo.vo.ShareInfoVO;
 
 public interface ShareService extends IService<ShareEntity> {
     /**
@@ -17,4 +22,8 @@ public interface ShareService extends IService<ShareEntity> {
      * @return boolean
      */
     public boolean checkShareValid(ShareEntity shareEntity);
+
+    ShareInfoVO getShareInfoByLink(String link);
+
+    IPage listShareFile(Page<FileVO> pageInfo, FileShareDTO fileShareDTO);
 }

@@ -12,6 +12,7 @@ public class ShareEntity {
     private Long shareId;
     private Long userId;
     private Long userFileId;
+    private String filePath;
     private String begTime;
     private String endTime;
     private Integer status;

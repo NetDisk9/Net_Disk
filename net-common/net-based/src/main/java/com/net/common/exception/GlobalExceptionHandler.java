@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseResult exception(CustomException e){
         log.error("捕获异常 CustomException:{}",e.getMessage());
-        return ResponseResult.errorResult(e.getResultCodeEnum());
+        return ResponseResult.errorResult(e.getResultCodeEnum(),e.getMessage());
     }
     @ExceptionHandler(AuthException.class)
     @ResponseBody
