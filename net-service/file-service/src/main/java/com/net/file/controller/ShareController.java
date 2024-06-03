@@ -1,8 +1,8 @@
 package com.net.file.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.net.common.context.BaseContext;
@@ -10,7 +10,6 @@ import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
 import com.net.common.util.SortUtils;
 import com.net.common.vo.PageResultVO;
-import com.net.file.constant.DirConstants;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.entity.ShareEntity;
 import com.net.file.entity.UserFileEntity;
@@ -28,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 
 @RestController
@@ -84,45 +84,36 @@ public class ShareController {
 
     @GetMapping("/list")
     public ResponseResult listShareFile(Integer page, Integer pageSize, FileShareDTO fileShareDTO) {
-        // 参数校验
-        if (page == null || pageSize == null)
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "页码和数量不能为空");
-        ShareEntity one = shareService.getOne(Wrappers.<ShareEntity>lambdaQuery().eq(ShareEntity::getLink, fileShareDTO.getLink()));
-        if (!shareService.checkShareValid(one))
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "分享链接失效");
-        // 构造分页构造器
-        Page<FileVO> pageInfo = new Page<>(page, pageSize);
-        SortUtils.setOrderPage(pageInfo, fileShareDTO.getSortField(), fileShareDTO.getSortOrder()); // 排序
-        // 分页查询
-        pageInfo.setOptimizeCountSql(false);
-        fileShareDTO.setUserId(one.getUserId()); // 分享人的文件
-        shareService.listShareFile(pageInfo, fileShareDTO);
-        // 转换成VO
-        PageResultVO<FileVO> pageResultVO = new PageResultVO<>();
-        pageResultVO.setList(pageInfo.getRecords());
-        pageResultVO.setLen((int) pageInfo.getSize());
-        pageResultVO.setTot((int) pageInfo.getTotal());
-        return ResponseResult.okResult(pageResultVO);
+        ShareEntity one = shareService.checkListShareFileParam(page, pageSize, fileShareDTO);
+        boolean isRoot = fileShareDTO.getPid() == null;
+        if (isRoot) {
+            List<UserFileEntity> root = fileService.list(Wrappers.<UserFileEntity>lambdaQuery()
+                    .eq(UserFileEntity::getUserFileId,one.getUserFileId())
+                    .eq(UserFileEntity::getUserId, one.getUserId())
+                    .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL)
+            );
+            List<FileVO> fileVOS = BeanUtil.copyToList(root, FileVO.class);
+            return shareService.convertToPageVO(fileVOS, 1, 1);
+        }else{
+            return shareService.listShareFile(page, pageSize, fileShareDTO, one);
+        }
     }
 
     @GetMapping("/list/path")
-    public ResponseResult listFileByPath(Integer page, Integer pageSize, FileShareDTO fileShareDTO) {
-        if (page == null || pageSize == null)
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "页码和数量不能为空");
-        ShareEntity one = shareService.getOne(Wrappers.<ShareEntity>lambdaQuery().eq(ShareEntity::getLink, fileShareDTO.getLink()));
-        if (!shareService.checkShareValid(one))
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "分享链接失效");
+    public ResponseResult listShareFileByPath(Integer page, Integer pageSize, FileShareDTO fileShareDTO) {
+        ShareEntity one = shareService.checkListShareFileParam(page, pageSize, fileShareDTO);
         boolean isRoot = fileShareDTO.getPath().equals("/");
-        UserFileEntity parentFile = fileService.getOne(
-                new LambdaQueryWrapper<UserFileEntity>()
-                        .eq(isRoot,UserFileEntity::getUserFileId, one.getUserFileId())
-                        .eq(!isRoot, UserFileEntity::getFilePath, one.getFilePath() +fileShareDTO.getPath())
-                        .eq(UserFileEntity::getUserId, one.getUserId())
-                        .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL));
-        if (parentFile == null || DirConstants.NOT_DIR.equals(parentFile.getIsDir())) {
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "路径错误");
+        if (isRoot) {
+            List<UserFileEntity> root = fileService.list(Wrappers.<UserFileEntity>lambdaQuery()
+                    .eq(UserFileEntity::getFilePath, one.getFilePath())
+                    .eq(UserFileEntity::getUserId, one.getUserId())
+                    .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL)
+            );
+            List<FileVO> fileVOS = BeanUtil.copyToList(root, FileVO.class);
+            return shareService.convertToPageVO(fileVOS, 1, 1);
+        } else {
+            return shareService.listShareFileByPath(page, pageSize, fileShareDTO, one);
         }
-        fileShareDTO.setPid(parentFile.getUserFileId());
-        return listShareFile(page, pageSize, fileShareDTO);
     }
+
 }

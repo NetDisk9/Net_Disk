@@ -13,6 +13,7 @@ public class ShareInfoVO {
     private String code;
     private String link;
     private String filePath;
+    private String fileName;
     private String username;
     private String avatar;
     private Integer check;

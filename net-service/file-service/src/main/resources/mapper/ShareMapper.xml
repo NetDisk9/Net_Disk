@@ -14,11 +14,12 @@
             <result property="code" column="code" jdbcType="CHAR"/>
             <result property="link" column="link" jdbcType="VARCHAR"/>
             <result property="filePath" column="file_path" jdbcType="VARCHAR"/>
+            <result property="fileName" column="file_name" jdbcType="VARCHAR"/>
             <result property="username" column="username" jdbcType="VARCHAR"/>
             <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List">
-        us.share_id,us.user_id,us.user_file_id,
+        us.share_id,us.user_id,us.user_file_id,us.file_name,
         us.beg_time,us.end_time,us.status,
         us.code,us.link,us.file_path,
         su.username,su.avatar

@@ -3,10 +3,13 @@ package com.net.file.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.net.common.dto.ResponseResult;
 import com.net.file.entity.ShareEntity;
 import com.net.file.pojo.dto.FileShareDTO;
 import com.net.file.pojo.vo.FileVO;
 import com.net.file.pojo.vo.ShareInfoVO;
+
+import java.util.List;
 
 public interface ShareService extends IService<ShareEntity> {
     /**
@@ -25,5 +28,16 @@ public interface ShareService extends IService<ShareEntity> {
 
     ShareInfoVO getShareInfoByLink(String link);
 
-    IPage listShareFile(Page<FileVO> pageInfo, FileShareDTO fileShareDTO);
+    IPage listShareFilePage(Page<FileVO> pageInfo, FileShareDTO fileShareDTO);
+
+    ResponseResult listShareFileByPath(Integer page, Integer pageSize, FileShareDTO fileShareDTO, ShareEntity one);
+
+    ResponseResult listShareFile(Integer page, Integer pageSize, FileShareDTO fileShareDTO, ShareEntity one);
+
+    ResponseResult convertToPageVO(List<FileVO> fileVOS, int size, int total);
+
+    ShareEntity checkListShareFileParam(Integer page, Integer pageSize, FileShareDTO fileShareDTO);
+
+    // 是否已校验提取码
+    void checkHasValid(String link);
 }

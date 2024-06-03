@@ -3,7 +3,6 @@ package com.net.file.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
@@ -224,7 +223,8 @@ public class FileController {
      */
     @PostMapping("/transfer")
     public ResponseResult saveFile(@Valid @RequestBody FileSaveDTO fileSaveDTO){
-        //todo 校验redis 交给褒哥
+        // 检查校验提取码
+        shareService.checkHasValid(fileSaveDTO.getLink());
         Long userId= BaseContext.getCurrentId();
         ShareEntity shareEntity=shareService.getShareEntityWithCheck(fileSaveDTO.getLink());
         UserFileEntity shareRootFile=fileService.getNormalFile(shareEntity.getUserFileId(),shareEntity.getUserId());
