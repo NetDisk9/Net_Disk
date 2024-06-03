@@ -18,5 +18,5 @@ public class RedisConstants {
 
     public static final String FILE_SHARE_COUNT = "file:share:count:";
     public static final String FILE_SHARE_RES_KEY = "file:share:check:res:";
-    public static final Long FILE_SHARE_TTL = 2 * 60L;
+    public static final Long FILE_SHARE_TTL = 2 * 60 * 60L;
 }
