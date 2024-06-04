@@ -234,8 +234,10 @@ public class FileDataController {
         if(fileData==null){
             throw new ParameterException();
         }
+        StatObjectResponse fileMedaData = minioUtil.getFileMedaData(fileData.getFileUrl());
         InputStream inputStream = minioUtil.getFileInputStream(fileData.getFileUrl());
         ServletOutputStream outputStream = response.getOutputStream();
+        response.setHeader("etag",fileMedaData.etag());
         response.setHeader("Content-type","application/octet-stream;charset=UTF-8");
         response.setHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(fileData.getFileName(), StandardCharsets.UTF_8.name()));
         response.setHeader("Content-length",fileData.getFileSize().toString());
