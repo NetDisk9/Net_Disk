@@ -168,11 +168,7 @@ public class ShareServiceImpl extends ServiceImpl<ShareMapper, ShareEntity> impl
         pageInfo.setOptimizeCountSql(false);
         fileShareDTO.setUserId(one.getUserId()); // 分享人的文件
         this.listShareFilePage(pageInfo, fileShareDTO);
-        // 转换成VO
-        List<FileVO> fileVOS = pageInfo.getRecords();
-        int size = (int) pageInfo.getSize();
-        int total = (int) pageInfo.getTotal();
-        return convertToPageVO(fileVOS, size, total);
+        return PageResultVO.convertPageInfoToPageVO(pageInfo);
     }
 
     @Override

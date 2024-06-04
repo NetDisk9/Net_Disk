@@ -27,7 +27,9 @@ import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -48,7 +50,7 @@ public class ShareController {
                 (!Objects.equals(time, "1") && !Objects.equals(time, "7") && !Objects.equals(time, "30") && !Objects.equals(time, "-1"))) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
-        if(!Boolean.parseBoolean(authClient.isVIP()) && Objects.equals(time, "-1")){
+        if (!Boolean.parseBoolean(authClient.isVIP()) && Objects.equals(time, "-1")) {
             return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
         }
         UserFileEntity userFileEntity = fileService.getFile(Long.valueOf(userFileId), BaseContext.getCurrentId());
@@ -64,20 +66,17 @@ public class ShareController {
     public ResponseResult getShareInfoByLink(@Valid @NotBlank String link) {
         ShareInfoVO shareInfoVO = shareService.getShareInfoByLink(link);
         Integer redisCount = (Integer) redisUtil.get(RedisConstants.FILE_SHARE_COUNT + link);
-        if (redisCount == null) {
-            redisUtil.set(RedisConstants.FILE_SHARE_COUNT + link, 1);
-            shareInfoVO.setCount(1);
-        } else {
-            redisUtil.set(RedisConstants.FILE_SHARE_COUNT + link, redisCount + 1);
-            shareInfoVO.setCount(redisCount + 1);
-        }
+        // 添加点击次数
+        redisUtil.set(RedisConstants.FILE_SHARE_COUNT + link, redisCount == null ? 0 : redisCount + 1);
+        shareInfoVO.setCount(redisCount == null ? 0 : redisCount + 1);
+        // 是否已校验验证码
         Integer checked = (Integer) redisUtil.get(RedisConstants.FILE_SHARE_RES_KEY + link + CharPool.COLON + BaseContext.getCurrentIp());
         shareInfoVO.setCheck(checked == null ? 0 : 1);
         return ResponseResult.okResult(shareInfoVO);
     }
 
     @GetMapping("/code/check")
-    public ResponseResult getShareInfoByLink(@Valid @NotBlank String link, @Valid @NotBlank String code) {
+    public ResponseResult checkCode(@Valid @NotBlank String link, @Valid @NotBlank String code) {
         ShareEntity one = shareService.getOne(Wrappers.<ShareEntity>lambdaQuery().eq(ShareEntity::getLink, link));
         if (StrUtil.isBlank(one.getCode()) || !one.getCode().equals(code))
             return ResponseResult.errorResult(ResultCodeEnum.CODE_ERROR, "提取码错误");
@@ -95,8 +94,23 @@ public class ShareController {
         // 分页查询
         shareService.page(pageInfo, Wrappers.<ShareEntity>lambdaQuery().eq(ShareEntity::getUserId, BaseContext.getCurrentId()));
         // 转换成VO
+        List<ShareEntity> records = pageInfo.getRecords();
+        // 获取所有链接对应的 Redis 计数
+        Map<String, Integer> redisCounts = records.parallelStream()
+                .map(shareEntity -> RedisConstants.FILE_SHARE_COUNT + shareEntity.getLink())
+                .distinct() // 确保只有唯一的链接
+                .collect(Collectors.toMap(
+                        linkKey -> linkKey,
+                        linkKey -> (Integer) redisUtil.get(linkKey)
+                ));
+        // 更新每个记录的计数
+        records.forEach(shareEntity -> {
+            Integer redisCount = redisCounts.get(RedisConstants.FILE_SHARE_COUNT + shareEntity.getLink());
+            shareEntity.setCount(redisCount);
+        });
+        // 转换成PageResultVO
         PageResultVO<ShareEntity> pageResultVO = new PageResultVO<>();
-        pageResultVO.setList(pageInfo.getRecords());
+        pageResultVO.setList(records);
         pageResultVO.setLen((int) pageInfo.getSize());
         pageResultVO.setTot((int) pageInfo.getTotal());
         return ResponseResult.okResult(pageResultVO);
@@ -108,13 +122,13 @@ public class ShareController {
         boolean isRoot = fileShareDTO.getPid() == null;
         if (isRoot) {
             List<UserFileEntity> root = fileService.list(Wrappers.<UserFileEntity>lambdaQuery()
-                    .eq(UserFileEntity::getUserFileId,one.getUserFileId())
+                    .eq(UserFileEntity::getUserFileId, one.getUserFileId())
                     .eq(UserFileEntity::getUserId, one.getUserId())
                     .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL)
             );
             List<FileVO> fileVOS = BeanUtil.copyToList(root, FileVO.class);
-            return shareService.convertToPageVO(fileVOS, 1, 1);
-        }else{
+            return PageResultVO.convertListToPageVO(fileVOS, 1, 1);
+        } else {
             return shareService.listShareFile(page, pageSize, fileShareDTO, one);
         }
     }
@@ -130,7 +144,7 @@ public class ShareController {
                     .eq(UserFileEntity::getStatus, FileStatusConstants.NORMAL)
             );
             List<FileVO> fileVOS = BeanUtil.copyToList(root, FileVO.class);
-            return shareService.convertToPageVO(fileVOS, 1, 1);
+            return PageResultVO.convertListToPageVO(fileVOS, 1, 1);
         } else {
             return shareService.listShareFileByPath(page, pageSize, fileShareDTO, one);
         }
