@@ -24,6 +24,7 @@ import com.net.file.util.PathUtil;
 import com.net.file.util.UsefulNameUtil;
 import com.net.file.wrapper.LambdaFunctionWrapper;
 import lombok.SneakyThrows;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -97,6 +98,13 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
     @Override
     public boolean isExist(String path,Long userId) {
         return getNormalUserFileByPath(path,userId)!=null;
+    }
+
+    @Override
+    public boolean isFileExist(String userFileId) {
+        return getOne(new LambdaQueryWrapper<UserFileEntity>()
+                        .eq(UserFileEntity::getUserFileId, userFileId)
+                        .eq(UserFileEntity::getStatus,FileStatusConstants.NORMAL)) != null;
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
 import com.net.common.exception.CustomException;
+import com.net.common.util.IPUtil;
 import com.net.common.util.JWTUtil;
 import com.net.redis.constant.RedisConstants;
 import com.net.redis.utils.RedisUtil;
@@ -27,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 
@@ -58,7 +58,7 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
             token = list.get(0);
         }
         String userId;
-        System.out.println(exchange.getRequest().getPath()+" "+token);
+        System.out.println(exchange.getRequest().getPath() + " " + token);
         try {
             // 从redis中获取相同的token
             String redisToken = (String) redisUtil.get(RedisConstants.LOGIN_USER_KEY + token);
@@ -71,18 +71,21 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
             System.out.println(userId);
         } catch (Exception e) {
             e.printStackTrace();
-            return finishResponse(exchange.getResponse(),ResponseResult.errorResult(ResultCodeEnum.TOKEN_ERROR));
+            return finishResponse(exchange.getResponse(), ResponseResult.errorResult(ResultCodeEnum.TOKEN_ERROR));
         }
-        String path=request.getPath().toString();
+        String path = request.getPath().toString();
         System.out.println(path);
         BaseContext.setCurrentId(Long.parseLong(userId));
-        if(!havePermission(userId,request.getPath().toString())){
-            return finishResponse(exchange.getResponse(),ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED));
+        BaseContext.setCurrentIp(IPUtil.getIp(request));
+        System.out.println("CurrentId==> " + userId);
+        System.out.println("CurrentIp==> " + IPUtil.getIp(request));
+        if (!havePermission(userId, request.getPath().toString())) {
+            return finishResponse(exchange.getResponse(), ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED));
         }
-        if(canRedirect(path)){
-            if(Boolean.parseBoolean(authClient.isSuperAdministrator(userId))){
-                path=path.replace("admin","super");
-                return chain.filter(createRedirectRequest(exchange,path));
+        if (canRedirect(path)) {
+            if (Boolean.parseBoolean(authClient.isSuperAdministrator(userId))) {
+                path = path.replace("admin", "super");
+                return chain.filter(createRedirectRequest(exchange, path));
             }
         }
         exchange.mutate()
@@ -90,7 +93,7 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
                 .build();
 
         System.out.println(exchange.getRequest().getPath());
-        System.out.println("放行"+request.getPath());
+        System.out.println("放行" + request.getPath());
         return chain.filter(exchange);
     }
 
@@ -102,30 +105,33 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
     private boolean isExclude(String antPath) {
         for (String pathPattern : excludePath) {
             //antPathMatcher来匹配 类似/search/**
-            if(antPathMatcher.match(pathPattern, antPath)){
+            if (antPathMatcher.match(pathPattern, antPath)) {
                 return true;
             }
         }
         return false;
     }
+
     private boolean canRedirect(String antPath) {
         for (String pathPattern : redirectPath) {
-            if(antPathMatcher.match(pathPattern, antPath)){
+            if (antPathMatcher.match(pathPattern, antPath)) {
                 return true;
             }
         }
         return false;
     }
-    private ServerWebExchange createRedirectRequest(ServerWebExchange exchange,String path){
+
+    private ServerWebExchange createRedirectRequest(ServerWebExchange exchange, String path) {
         URI newUri = UriComponentsBuilder.newInstance()
-        .path(path)
-        .build()
-        .toUri();
+                .path(path)
+                .build()
+                .toUri();
         ServerHttpRequest modifiedRequest = exchange.getRequest().mutate().uri(newUri).build();
         ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
         return modifiedExchange;
     }
-    private Mono<Void> finishResponse(ServerHttpResponse response,ResponseResult result)  {
+
+    private Mono<Void> finishResponse(ServerHttpResponse response, ResponseResult result) {
         try {
             DataBufferFactory bufferFactory = response.bufferFactory();
             ObjectMapper objectMapper = new ObjectMapper();
@@ -134,16 +140,16 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
 //                response.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
 //                response.getHeaders().setLocation(URI.create(RedirectConstants.TOKEN_ERROR_REDIRECT_URL));
             return response.writeWith(Mono.fromSupplier(() -> wrap));
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return response.setComplete();
         }
     }
-    private boolean havePermission(String userId,String path){
-        String permissionKey=RedisConstants.USER_PERMISSION+userId;
-        if(redisUtil.hasKey(permissionKey)){
-            Set set=redisUtil.sGet(permissionKey);
+
+    private boolean havePermission(String userId, String path) {
+        String permissionKey = RedisConstants.USER_PERMISSION + userId;
+        if (redisUtil.hasKey(permissionKey)) {
+            Set set = redisUtil.sGet(permissionKey);
             return set.contains(path);
         }
         return Boolean.parseBoolean(authClient.havePermission(path));

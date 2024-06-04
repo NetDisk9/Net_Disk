@@ -1,9 +1,7 @@
 package com.net.user.util;
 
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import org.lionsoul.ip2region.xdb.Searcher;
-import org.springframework.util.ResourceUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;

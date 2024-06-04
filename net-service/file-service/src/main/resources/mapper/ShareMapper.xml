@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.net.file.mapper.ShareMapper">
+
+    <resultMap id="BaseResultMap" type="com.net.file.pojo.vo.ShareInfoVO">
+            <id property="shareId" column="share_id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="userFileId" column="user_file_id" jdbcType="BIGINT"/>
+            <result property="begTime" column="beg_time" jdbcType="VARCHAR"/>
+            <result property="endTime" column="end_time" jdbcType="VARCHAR"/>
+            <result property="status" column="status" jdbcType="INTEGER"/>
+            <result property="code" column="code" jdbcType="CHAR"/>
+            <result property="link" column="link" jdbcType="VARCHAR"/>
+            <result property="filePath" column="file_path" jdbcType="VARCHAR"/>
+            <result property="fileName" column="file_name" jdbcType="VARCHAR"/>
+            <result property="username" column="username" jdbcType="VARCHAR"/>
+            <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        us.share_id,us.user_id,us.user_file_id,us.file_name,
+        us.beg_time,us.end_time,us.status,
+        us.code,us.link,us.file_path,
+        su.username,su.avatar
+    </sql>
+    <sql id="file_select_sql">
+        u.user_file_id,u.user_id,u.pid,u.file_id,
+        u.file_name,u.file_path,u.create_time,
+        u.update_time,u.status,u.is_dir,
+        file_category,file_size,file_cover
+    </sql>
+    <select id="getShareInfoByLink" resultType="com.net.file.pojo.vo.ShareInfoVO">
+        select <include refid="Base_Column_List"></include>
+        from user_share us left join sys_user su on us.user_id = su.id;
+    </select>
+    <select id="listShareFile" resultType="com.net.file.pojo.vo.FileVO">
+        select <include refid="file_select_sql"></include>
+        from user_file u
+        left join file
+        on u.file_id = file.file_id
+        <where>
+            <if test="param.userId != null">
+                user_id = #{param.userId}
+            </if>
+                and status = 0
+            <if test="param.pid != null">
+                and pid = #{param.pid}
+            </if>
+            <if test="param.pid == null">
+                and pid is null
+            </if>
+        </where>
+    </select>
+</mapper>
