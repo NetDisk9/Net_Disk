@@ -1,6 +1,7 @@
 package com.net.file.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -25,4 +26,6 @@ public class ShareEntity {
     private String link;
     private String filePath;
     private String fileName;
+    @TableField(exist = false)
+    private Integer count;
 }
