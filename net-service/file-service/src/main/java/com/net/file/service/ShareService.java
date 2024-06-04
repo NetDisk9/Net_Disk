@@ -26,6 +26,16 @@ public interface ShareService extends IService<ShareEntity> {
      */
     public boolean checkShareValid(ShareEntity shareEntity);
 
+
+    /**
+     * 创建分享链接
+     * @param time, code, userFileId
+     * @return ResponseResult
+     */
+    public ResponseResult createShareLink(String time, String code, String userFileId, String filePath, String fileName);
+
+    public ResponseResult deleteShareLink(String shareId);
+
     ShareInfoVO getShareInfoByLink(String link);
 
     IPage listShareFilePage(Page<FileVO> pageInfo, FileShareDTO fileShareDTO);

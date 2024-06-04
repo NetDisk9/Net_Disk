@@ -30,6 +30,8 @@ public interface FileService extends IService<UserFileEntity> {
 
     boolean isExist(String path,Long userId);
 
+    boolean isFileExist(String userFileId);
+
     UserFileEntity getFile(Long userFileId, Long userId) throws ParameterException, AuthException;
 
     UserFileEntity getNormalFile(Long userFileId, Long userId) throws AuthException, ParameterException;

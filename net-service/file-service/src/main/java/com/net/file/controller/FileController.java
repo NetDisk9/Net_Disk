@@ -253,5 +253,4 @@ public class FileController {
         fileService.saveFiles(root,collect,userId);
         return ResponseResult.okResult();
     }
-
 }

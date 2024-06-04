@@ -5,6 +5,7 @@ import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.net.api.client.AuthClient;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
@@ -20,14 +21,13 @@ import com.net.file.service.FileService;
 import com.net.file.service.ShareService;
 import com.net.redis.constant.RedisConstants;
 import com.net.redis.utils.RedisUtil;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Objects;
 
 
 @RestController
@@ -39,6 +39,26 @@ public class ShareController {
     RedisUtil redisUtil;
     @Resource
     FileService fileService;
+    @Resource
+    AuthClient authClient;
+
+    @PostMapping("/create")
+    public ResponseResult createShare(String time, String code, String userFileId) {
+        if (!fileService.isFileExist(userFileId) || (code != null && code.length() != 4) ||
+                (!Objects.equals(time, "1") && !Objects.equals(time, "7") && !Objects.equals(time, "30") && !Objects.equals(time, "-1"))) {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        if(!Boolean.parseBoolean(authClient.isVIP()) && Objects.equals(time, "-1")){
+            return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
+        }
+        UserFileEntity userFileEntity = fileService.getFile(Long.valueOf(userFileId), BaseContext.getCurrentId());
+        return shareService.createShareLink(time, code, userFileId, userFileEntity.getFilePath(), userFileEntity.getFileName());
+    }
+
+    @DeleteMapping("/cancel")
+    public ResponseResult deleteShare(String shareId) {
+        return shareService.deleteShareLink(shareId);
+    }
 
     @GetMapping("/info")
     public ResponseResult getShareInfoByLink(@Valid @NotBlank String link) {
