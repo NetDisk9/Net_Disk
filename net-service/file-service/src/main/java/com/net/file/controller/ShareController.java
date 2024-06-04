@@ -109,11 +109,7 @@ public class ShareController {
             shareEntity.setCount(redisCount);
         });
         // 转换成PageResultVO
-        PageResultVO<ShareEntity> pageResultVO = new PageResultVO<>();
-        pageResultVO.setList(records);
-        pageResultVO.setLen((int) pageInfo.getSize());
-        pageResultVO.setTot((int) pageInfo.getTotal());
-        return ResponseResult.okResult(pageResultVO);
+        return PageResultVO.convertPageInfoToPageVO(pageInfo);
     }
 
     @GetMapping("/list")
