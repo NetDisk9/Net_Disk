@@ -46,4 +46,7 @@ public interface FileService extends IService<UserFileEntity> {
     UserFileEntity getFileIdByPath(String path,Long userId);
     void restoreParent(UserFileEntity file);
     IPage selectPageVO(Page<UserFileEntity> pageInfo, FileQueryDTO fileQueryDTO);
+
+
+
 }

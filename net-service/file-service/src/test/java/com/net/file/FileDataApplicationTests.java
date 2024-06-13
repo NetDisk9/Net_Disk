@@ -13,6 +13,7 @@ import com.net.file.entity.FileData;
 import com.net.file.entity.UserFileEntity;
 import com.net.file.mapper.FileMapper;
 import com.net.file.pojo.dto.FileUploadDTO;
+import com.net.file.service.FileCollectService;
 import com.net.file.service.FileDataService;
 import com.net.file.service.FileService;
 import com.net.file.service.Impl.FileServiceImpl;
@@ -50,6 +51,8 @@ public class FileDataApplicationTests {
     AuthClient authClient;
     @Resource
     ShareService shareService;
+    @Resource
+    FileCollectService fileCollectService;
 //    @Test
 //    public void testImg(){
 //        System.out.println(RegexUtil.checkImageValid("jpg"));
@@ -103,5 +106,8 @@ public class FileDataApplicationTests {
         FileData fileData = fileDataService.getFileDataByUserFileId(1791346282007633922L, 1768546042247323649L, 0);
         System.out.println(fileData);
     }
-
+    @Test
+    public void testSend() throws InterruptedException {
+        BaseContext.setCurrentId(1L);
+    }
 }

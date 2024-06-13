@@ -231,9 +231,10 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, UserFileEntity> imp
      */
     @Override
     public void saveFiles(UserFileEntity root, List<UserFileEntity> userFileEntities, Long userId) {
-        userFileEntities.forEach(userFile -> userFile.setPid(null));
+        userFileEntities.forEach(userFile -> userFile.setPid(root.getUserFileId()));
         List<UserFileEntity> list=collectFilesForMove(root,userFileEntities,FileOperationModeConstants.RENAME,new ArrayList<>(),userId);
         UserFileTree tree = buildUserFileTree(root,list);
+        System.out.println(list);
         tree.reAssignUserFileIdExceptRoot();
         tree.resetUserId();
         tree.rebuildPathByRootPath();

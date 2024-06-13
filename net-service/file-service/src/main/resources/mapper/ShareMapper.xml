@@ -32,7 +32,7 @@
     </sql>
     <select id="getShareInfoByLink" resultType="com.net.file.pojo.vo.ShareInfoVO">
         select <include refid="Base_Column_List"></include>
-        from user_share us left join sys_user su on us.user_id = su.id;
+        from user_share us left join sys_user su on us.user_id = su.id where link = #{link};
     </select>
     <select id="listShareFile" resultType="com.net.file.pojo.vo.FileVO">
         select <include refid="file_select_sql"></include>

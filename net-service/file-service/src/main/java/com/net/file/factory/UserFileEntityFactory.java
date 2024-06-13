@@ -47,7 +47,9 @@ public class UserFileEntityFactory {
                 .filePath("")
                 .isDir(DirConstants.IS_DIR)
                 .status(FileStatusConstants.NORMAL)
-                .userId(userId).build();
+                .userId(userId)
+                .userFileId(null)
+                .build();
         return root;
     }
     public static UserFileEntity createFileEntity(FileData fileData,String path,String name,Long userId){

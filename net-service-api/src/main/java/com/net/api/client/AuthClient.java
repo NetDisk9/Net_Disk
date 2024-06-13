@@ -1,6 +1,7 @@
 package com.net.api.client;
 
 import com.net.common.context.BaseContext;
+import com.net.common.dto.ResponseResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,4 +14,6 @@ public interface AuthClient {
     public String isSuperAdministrator(@RequestParam String id);
     @GetMapping("/role/isvip")
     public String isVIP();
+    @GetMapping("/user/info")
+    public ResponseResult getUserInfo();
 }

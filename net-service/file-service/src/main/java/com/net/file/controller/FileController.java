@@ -2,7 +2,9 @@ package com.net.file.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.net.api.client.AuthClient;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
 import com.net.common.enums.ResultCodeEnum;
@@ -11,7 +13,10 @@ import com.net.common.exception.ParameterException;
 import com.net.common.util.SortUtils;
 import com.net.common.vo.PageResultVO;
 import com.net.file.constant.DirConstants;
+import com.net.file.constant.FileSendStatus;
 import com.net.file.constant.FileStatusConstants;
+import com.net.file.entity.FileCollectEntity;
+import com.net.file.entity.FileSendEntity;
 import com.net.file.entity.ShareEntity;
 import com.net.file.entity.UserFileEntity;
 import com.net.file.factory.UserFileEntityFactory;
@@ -19,6 +24,8 @@ import com.net.file.pojo.dto.FileMoveDTO;
 import com.net.file.pojo.dto.FileQueryDTO;
 import com.net.file.pojo.dto.FileSaveDTO;
 import com.net.file.pojo.vo.FileVO;
+import com.net.file.service.FileCollectService;
+import com.net.file.service.FileSendService;
 import com.net.file.service.FileService;
 import com.net.file.service.ShareService;
 import com.net.file.support.UserFileTree;
@@ -34,10 +41,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -48,6 +52,13 @@ public class FileController {
     FileService fileService;
     @Resource
     ShareService shareService;
+    @Resource
+    AuthClient authClient;
+    @Resource
+    FileCollectService collectService;
+    @Resource
+    FileSendService sendService;
+
 
     @PostMapping("/copy")
     public ResponseResult copyFile(@Valid @RequestBody FileMoveDTO fileMoveDTO, @Valid @NotNull Integer mode) throws Throwable {
@@ -251,6 +262,24 @@ public class FileController {
         UserFileEntity root=UserFileEntityFactory.createRootDirEntity(userId);
         System.out.println(collect);
         fileService.saveFiles(root,collect,userId);
+        return ResponseResult.okResult();
+    }
+    @PostMapping("/collect/send")
+    public ResponseResult sendFile(@Valid @NotNull Long userFileId,String signer,@Valid @NotBlank String link) throws InterruptedException {
+        Long userId=BaseContext.getCurrentId();
+        UserFileEntity userFile=fileService.getNormalFile(userFileId,userId);
+//        if(Objects.equals(DirConstants.IS_DIR,userFile.getIsDir())){
+//            throw new ParameterException("目标文件不能是文件夹");
+//        }
+        if(StringUtils.isBlank(signer)){
+            signer=((LinkedHashMap)(authClient.getUserInfo().getData())).get("username").toString();
+        }
+        sendService.sendFile(link,userFile,signer);
+        return ResponseResult.okResult();
+    }
+    @PostMapping("/collect/save")
+    public ResponseResult saveFile(@Valid @NotNull Long sendId){
+        sendService.saveFile(sendId);
         return ResponseResult.okResult();
     }
 }
