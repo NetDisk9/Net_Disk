@@ -13,7 +13,7 @@ public interface ShareMapper extends BaseMapper<ShareEntity> {
 
     ShareInfoVO getShareInfoByLink(String link);
 
-    IPage listShareFile(Page<FileVO> pageInfo, @Param("param") FileShareDTO fileShareDTO);
+    IPage<FileVO>listShareFile(Page<FileVO> pageInfo, @Param("param") FileShareDTO fileShareDTO);
 }
 
 
