@@ -20,6 +20,7 @@ import com.net.file.entity.FileSendEntity;
 import com.net.file.entity.ShareEntity;
 import com.net.file.entity.UserFileEntity;
 import com.net.file.factory.UserFileEntityFactory;
+import com.net.file.pojo.dto.FileCollectCreateDTO;
 import com.net.file.pojo.dto.FileMoveDTO;
 import com.net.file.pojo.dto.FileQueryDTO;
 import com.net.file.pojo.dto.FileSaveDTO;
@@ -263,6 +264,31 @@ public class FileController {
         System.out.println(collect);
         fileService.saveFiles(root,collect,userId);
         return ResponseResult.okResult();
+    }
+    @PostMapping("/collect/create")
+    public ResponseResult createCollect(@RequestBody FileCollectCreateDTO fileCollectCreateDTO) {
+        String title = fileCollectCreateDTO.getTitle();
+        Integer duration = fileCollectCreateDTO.getDuration();
+        Integer maxNum = fileCollectCreateDTO.getMaxNum();
+        String signer = fileCollectCreateDTO.getSigner();
+        Integer autoCollect = fileCollectCreateDTO.getAutoCollect();
+        if ((!Objects.equals(duration, 1) && !Objects.equals(duration, 7) && !Objects.equals(duration, 30) && !Objects.equals(duration, -1))
+            || (!Objects.equals(autoCollect, 0) && !Objects.equals(autoCollect, 1))
+            || maxNum <= 0) {
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
+        }
+        if (!Boolean.parseBoolean(authClient.isVIP()) && Objects.equals(duration, -1)) {
+            return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
+        }
+        return collectService.createCollect(title, duration, maxNum, signer, autoCollect);
+    }
+    @DeleteMapping("/collect/delete")
+    public ResponseResult deleteCollect(String collectId) {
+        return collectService.deleteCollectByCollectId(Long.valueOf(collectId));
+    }
+    @GetMapping("/collect/get")
+    public ResponseResult getCollect(String link) {
+        return collectService.getCollectByLink(link);
     }
     @PostMapping("/collect/send")
     public ResponseResult sendFile(@Valid @NotNull Long userFileId,String signer,@Valid @NotBlank String link) throws InterruptedException {

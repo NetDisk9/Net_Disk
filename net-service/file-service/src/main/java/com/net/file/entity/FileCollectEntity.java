@@ -3,11 +3,13 @@ package com.net.file.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 @Data
+@Builder
 @TableName("file_collect")
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
 public class FileCollectEntity {
     @TableId(value = "collect_id",type = IdType.ASSIGN_ID)
