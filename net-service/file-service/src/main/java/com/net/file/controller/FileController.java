@@ -3,6 +3,7 @@ package com.net.file.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.net.api.client.AuthClient;
 import com.net.common.context.BaseContext;
@@ -13,17 +14,13 @@ import com.net.common.exception.ParameterException;
 import com.net.common.util.SortUtils;
 import com.net.common.vo.PageResultVO;
 import com.net.file.constant.DirConstants;
-import com.net.file.constant.FileSendStatus;
 import com.net.file.constant.FileStatusConstants;
 import com.net.file.entity.FileCollectEntity;
-import com.net.file.entity.FileSendEntity;
 import com.net.file.entity.ShareEntity;
 import com.net.file.entity.UserFileEntity;
 import com.net.file.factory.UserFileEntityFactory;
-import com.net.file.pojo.dto.FileCollectCreateDTO;
-import com.net.file.pojo.dto.FileMoveDTO;
-import com.net.file.pojo.dto.FileQueryDTO;
-import com.net.file.pojo.dto.FileSaveDTO;
+import com.net.file.pojo.dto.*;
+import com.net.file.pojo.vo.FileSendPageVO;
 import com.net.file.pojo.vo.FileVO;
 import com.net.file.service.FileCollectService;
 import com.net.file.service.FileSendService;
@@ -172,9 +169,9 @@ public class FileController {
     @GetMapping("/list")
     public ResponseResult listFile(Integer page, Integer pageSize, FileQueryDTO fileQueryDTO) {
         if (page == null || pageSize == null)
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"页码和数量不能为空");
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "页码和数量不能为空");
         if (fileQueryDTO.getCategory() != null && fileQueryDTO.getPid() != null)
-            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR,"传类型的时候不能传pid");
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "传类型的时候不能传pid");
         // 构造分页构造器
         Page<UserFileEntity> pageInfo = new Page<>(page, pageSize);
         fileQueryDTO.setCurrentUserId(BaseContext.getCurrentId());// 查询当前用户
@@ -183,12 +180,7 @@ public class FileController {
         pageInfo.setOptimizeCountSql(false);
         fileService.selectPageVO(pageInfo, fileQueryDTO);
         // 转换成VO
-        PageResultVO<FileVO> pageResultVO = new PageResultVO<>();
-        List<FileVO> fileVOS = BeanUtil.copyToList(pageInfo.getRecords(), FileVO.class);
-        pageResultVO.setList(fileVOS);
-        pageResultVO.setLen((int) pageInfo.getSize());
-        pageResultVO.setTot((int) pageInfo.getTotal());
-        return ResponseResult.okResult(pageResultVO);
+        return PageResultVO.convertListToPageVO(pageInfo.getRecords(), (int) pageInfo.getSize(), (int) pageInfo.getTotal());
     }
 
     @GetMapping("/list/path")
@@ -230,41 +222,41 @@ public class FileController {
 
     /**
      * 转存
+     *
      * @param fileSaveDTO
      * @return {@link ResponseResult }
      */
     @PostMapping("/transfer")
-    public ResponseResult saveFile(@Valid @RequestBody FileSaveDTO fileSaveDTO){
+    public ResponseResult saveFile(@Valid @RequestBody FileSaveDTO fileSaveDTO) {
         // 检查校验提取码
         shareService.checkHasValid(fileSaveDTO.getLink());
-        Long userId= BaseContext.getCurrentId();
-        ShareEntity shareEntity=shareService.getShareEntityWithCheck(fileSaveDTO.getLink());
-        UserFileEntity shareRootFile=fileService.getNormalFile(shareEntity.getUserFileId(),shareEntity.getUserId());
+        Long userId = BaseContext.getCurrentId();
+        ShareEntity shareEntity = shareService.getShareEntityWithCheck(fileSaveDTO.getLink());
+        UserFileEntity shareRootFile = fileService.getNormalFile(shareEntity.getUserFileId(), shareEntity.getUserId());
         List<UserFileEntity> collect;
         try {
-             collect = Arrays.stream(fileSaveDTO.getUserFileIds()).map(LambdaFunctionWrapper.wrap(
-                    id -> {
-                        return fileService.getNormalFile(id, shareEntity.getUserId());
-                    }
+            collect = Arrays.stream(fileSaveDTO.getUserFileIds()).map(LambdaFunctionWrapper.wrap(
+                    id -> fileService.getNormalFile(id, shareEntity.getUserId())
             )).collect(Collectors.toList());
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw new ParameterException();
         }
         //校验要转存的文件是否在分享文件夹下
-        if(DirConstants.NOT_DIR.equals(shareRootFile.getIsDir())&&collect.size()>1){
+        if (DirConstants.NOT_DIR.equals(shareRootFile.getIsDir()) && collect.size() > 1) {
             throw new ParameterException();
         }
         for (UserFileEntity userFile : collect) {
-            if(!PathUtil.isChild(shareRootFile.getFilePath(),userFile.getFilePath())&&!Objects.equals(userFile.getUserFileId(),shareRootFile.getUserFileId())){
+            if (!PathUtil.isChild(shareRootFile.getFilePath(), userFile.getFilePath()) && !Objects.equals(userFile.getUserFileId(), shareRootFile.getUserFileId())) {
                 throw new ParameterException();
             }
         }
-        UserFileEntity root=UserFileEntityFactory.createRootDirEntity(userId);
+        UserFileEntity root = UserFileEntityFactory.createRootDirEntity(userId);
         System.out.println(collect);
-        fileService.saveFiles(root,collect,userId);
+        fileService.saveFiles(root, collect, userId);
         return ResponseResult.okResult();
     }
+
     @PostMapping("/collect/create")
     public ResponseResult createCollect(@RequestBody FileCollectCreateDTO fileCollectCreateDTO) {
         String title = fileCollectCreateDTO.getTitle();
@@ -273,8 +265,8 @@ public class FileController {
         String signer = fileCollectCreateDTO.getSigner();
         Integer autoCollect = fileCollectCreateDTO.getAutoCollect();
         if ((!Objects.equals(duration, 1) && !Objects.equals(duration, 7) && !Objects.equals(duration, 30) && !Objects.equals(duration, -1))
-            || (!Objects.equals(autoCollect, 0) && !Objects.equals(autoCollect, 1))
-            || maxNum <= 0) {
+                || (!Objects.equals(autoCollect, 0) && !Objects.equals(autoCollect, 1))
+                || maxNum <= 0) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
         if (!Boolean.parseBoolean(authClient.isVIP()) && Objects.equals(duration, -1)) {
@@ -282,30 +274,61 @@ public class FileController {
         }
         return collectService.createCollect(title, duration, maxNum, signer, autoCollect);
     }
+
     @DeleteMapping("/collect/delete")
     public ResponseResult deleteCollect(String collectId) {
         return collectService.deleteCollectByCollectId(Long.valueOf(collectId));
     }
+
     @GetMapping("/collect/get")
     public ResponseResult getCollect(String link) {
         return collectService.getCollectByLink(link);
     }
+
     @PostMapping("/collect/send")
-    public ResponseResult sendFile(@Valid @NotNull Long userFileId,String signer,@Valid @NotBlank String link) throws InterruptedException {
-        Long userId=BaseContext.getCurrentId();
-        UserFileEntity userFile=fileService.getNormalFile(userFileId,userId);
+    public ResponseResult sendFile(@Valid @NotNull Long userFileId, String signer, @Valid @NotBlank String link) throws InterruptedException {
+        Long userId = BaseContext.getCurrentId();
+        UserFileEntity userFile = fileService.getNormalFile(userFileId, userId);
 //        if(Objects.equals(DirConstants.IS_DIR,userFile.getIsDir())){
 //            throw new ParameterException("目标文件不能是文件夹");
 //        }
-        if(StringUtils.isBlank(signer)){
-            signer=((LinkedHashMap)(authClient.getUserInfo().getData())).get("username").toString();
+        if (StringUtils.isBlank(signer)) {
+            signer = ((LinkedHashMap) (authClient.getUserInfo().getData())).get("username").toString();
         }
-        sendService.sendFile(link,userFile,signer);
+        sendService.sendFile(link, userFile, signer);
         return ResponseResult.okResult();
     }
+
     @PostMapping("/collect/save")
-    public ResponseResult saveFile(@Valid @NotNull Long sendId){
+    public ResponseResult saveFile(@Valid @NotNull Long sendId) {
         sendService.saveFile(sendId);
         return ResponseResult.okResult();
+    }
+
+    @GetMapping("/collect/list")
+    public ResponseResult listAllCollectTask(Integer page, Integer pageSize, FileCollectQueryDTO collectQueryDTO) {
+        if (page == null || pageSize == null)
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "分页参数page或pageSize不能为空");
+        // 构造分页构造器
+        Page<FileCollectEntity> pageInfo = new Page<>(page, pageSize);
+        SortUtils.setOrderPage(pageInfo, collectQueryDTO.getSortField(), collectQueryDTO.getSortOrder()); // 排序
+        // 查询当前用户
+        collectService.page(pageInfo, Wrappers.<FileCollectEntity>lambdaQuery().eq(FileCollectEntity::getUserId, BaseContext.getCurrentId()));
+        return PageResultVO.convertPageInfoToPageVO(pageInfo);
+    }
+
+    @GetMapping("/collect/send/list")
+    public ResponseResult listTaskFilesById(Integer page, Integer pageSize, FileCollectQueryDTO collectQueryDTO) {
+        if (page == null || pageSize == null)
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "分页参数page或pageSize不能为空");
+        if (collectQueryDTO.getCollectId() == null)
+            return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR, "collectId不能为空");
+        // 构造分页构造器
+        Page<FileSendPageVO> pageInfo = new Page<>(page, pageSize);
+        SortUtils.setOrderPage(pageInfo, collectQueryDTO.getSortField(), collectQueryDTO.getSortOrder());// 排序
+        pageInfo.setOptimizeCountSql(false);
+        // 查询对应发送的文件
+        sendService.selectPageVO(pageInfo, collectQueryDTO);
+        return PageResultVO.convertPageInfoToPageVO(pageInfo);
     }
 }

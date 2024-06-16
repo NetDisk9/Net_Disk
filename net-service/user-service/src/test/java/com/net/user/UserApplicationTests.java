@@ -1,19 +1,9 @@
 package com.net.user;
 
-import com.net.common.util.SHAUtil;
-import com.net.redis.utils.RedisUtil;
-import com.net.user.entity.SysUser;
-import com.net.user.service.SysUserService;
-import com.net.user.util.RegexUtil;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.crypto.digest.DigestUtil;
+import com.net.common.enums.FileTypeEnum;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import javax.annotation.Resource;
-import java.io.IOException;
-import java.io.InputStream;
 
 //@SpringBootTest
 public class UserApplicationTests {
@@ -35,10 +25,10 @@ public class UserApplicationTests {
 //                username("baozi").status(0).nickname("包子").build()
 //        );
 //    }
-//    @Test
-//    public void testPassword(){
-//        System.out.println(SHAUtil.encrypt("Baozi0318"));
-//    }
+    @Test
+    public void testPassword(){
+        System.out.println(FileTypeEnum.IMAGE.getExtensions());
+    }
 //    @Test
 //    public void test() throws IOException {
 //        InputStream in = this.getClass().getClassLoader().getResourceAsStream("新增用户数据模板.xlsx");

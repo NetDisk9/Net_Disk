@@ -3,7 +3,7 @@ package com.net.file.pojo.dto;
 import lombok.Data;
 
 @Data
-public class FileQueryDTO {
+public class FileQueryDTO extends FileCollectQueryDTO {
     Long userFileId;
     Long pid;
     Long currentUserId;

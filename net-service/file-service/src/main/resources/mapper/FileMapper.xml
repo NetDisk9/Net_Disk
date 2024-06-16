@@ -17,19 +17,21 @@
         <result property="fileSize" column="file_size"/>
         <result property="fileCover" column="file_cover"/>
     </resultMap>
-    <sql id="file_select_sql">select u.user_file_id,
-                                     u.user_id,
-                                     u.pid,
-                                     u.file_id,
-                                     u.file_name,
-                                     u.file_path,
-                                     u.create_time,
-                                     u.update_time,
-                                     u.status,
-                                     u.is_dir,
-                                     file_category,
-                                     file_size,
-                                     file_cover</sql>
+    <sql id="file_select_sql">
+        select u.user_file_id,
+               u.user_id,
+               u.pid,
+               u.file_id,
+               u.file_name,
+               u.file_path,
+               u.create_time,
+               u.update_time,
+               u.status,
+               u.is_dir,
+               file_category,
+               file_size,
+               file_cover
+    </sql>
     <select id="listUserFileByPidAndPath" resultMap="userFileMap">
         <include refid="file_select_sql"></include>
         from user_file u
@@ -82,5 +84,12 @@
                 and file_category = #{param.category}
             </if>
         </where>
+    </select>
+    <select id="selectSendPageVO" resultType="com.net.file.pojo.vo.FileSendPageVO">
+        select usf.user_file_id, usf.file_name, f.file_size, fs.send_time, fs.signer, fs.status
+        from user_file usf
+                 left join file f on usf.file_id = f.file_id
+                 left join file_send fs on usf.user_file_id = fs.user_file_id
+        where collect_id = #{param.collectId}
     </select>
 </mapper>
