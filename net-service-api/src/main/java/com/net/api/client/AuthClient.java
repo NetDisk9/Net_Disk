@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(value = "user-service")
 public interface AuthClient {
     @GetMapping("/permission/authenticate")
-    public String havePermission(@RequestParam String path);
+    public Boolean havePermission(@RequestParam String path);
     @GetMapping("/role/issuper")
-    public String isSuperAdministrator(@RequestParam String id);
+    public Boolean isSuperAdministrator(@RequestParam String id);
     @GetMapping("/role/isvip")
-    public String isVIP();
+    public Boolean isVIP();
     @GetMapping("/user/info")
     public ResponseResult getUserInfo();
 }

@@ -17,14 +17,14 @@ public class RoleController {
     @Resource
     SysVIPService sysVIPService;
     @GetMapping("/issuper")
-    public String isSuperAdministrator(){
+    public Boolean isSuperAdministrator(){
         Long userId= BaseContext.getCurrentId();
-        return roleService.isSuperAdministrator(userId).toString();
+        return roleService.isSuperAdministrator(userId);
     }
     @GetMapping("/isvip")
-    public String isVIP(){
+    public Boolean isVIP(){
         Long userId= BaseContext.getCurrentId();
-        return String.valueOf(sysVIPService.isVip(userId));
+        return sysVIPService.isVip(userId)==1;
     }
 
 }

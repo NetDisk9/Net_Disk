@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.net.common.context.BaseContext;
 import com.net.common.dto.ResponseResult;
+import com.net.common.util.DateFormatUtil;
 import com.net.user.entity.LoginLog;
 import com.net.user.entity.SysUser;
 import com.net.user.mapper.LoginLogMapper;
@@ -44,6 +45,10 @@ public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLog> i
                 devices.get(cnt).setFirstLoginTime(log.getLoginTime().toString());
                 cnt += 1;
             }
+        }
+        for (DeviceVO device : devices) {
+            device.setLoginTime(DateFormatUtil.format(LocalDateTime.parse(device.getLoginTime())));
+            device.setFirstLoginTime(DateFormatUtil.format(LocalDateTime.parse(device.getFirstLoginTime())));
         }
         return ResponseResult.okResult(devices);
     }

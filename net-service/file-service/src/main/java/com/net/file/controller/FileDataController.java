@@ -207,7 +207,7 @@ public class FileDataController {
         //下载
         RateLimitInputStream rateLimitInputStream;
         //vip
-        if(Boolean.parseBoolean(authClient.isVIP())){
+        if(authClient.isVIP()){
             rateLimitInputStream=new RateLimitInputStream(inputStream,redisTemplate, FileTokenKeyConstants.TOKEN_KEY+userId, RateLimit.RateLimitConfig.getVIPRateLimitConfig());
         }
         else

@@ -28,6 +28,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         }
         List<String> permissionList = getPermissionList(userId);
         redisUtil.sSetAndTime(RedisConstants.USER_PERMISSION+userId,RedisConstants.LOGIN_USER_TTL,permissionList.toArray());
+        System.out.println(permissionList.contains(path));
         return permissionList.contains(path);
     }
 

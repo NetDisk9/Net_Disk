@@ -269,7 +269,7 @@ public class FileController {
                 || maxNum <= 0) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
-        if (!Boolean.parseBoolean(authClient.isVIP()) && Objects.equals(duration, -1)) {
+        if (!authClient.isVIP() && Objects.equals(duration, -1)) {
             return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
         }
         return collectService.createCollect(title, duration, maxNum, signer, autoCollect);

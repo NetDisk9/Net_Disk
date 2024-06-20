@@ -6,7 +6,7 @@ import java.util.List;
 public enum FileTypeEnum {
     IMAGE("1000", Arrays.asList("jpg", "jpeg", "png", "gif", "bmp", "tiff", "tif", "psd", "raw", "svg", "ico")),
     VIDEO("2000", Arrays.asList("mp4", "avi", "mov", "wmv", "m4v", "flv")),
-    DOCUMENT("x", Arrays.asList("txt", "doc", "docx", "pdf", "xls", "xlsx", "ppt", "pptx", "md", "csv", "rtf")),
+    DOCUMENT("3000", Arrays.asList("txt", "doc", "docx", "pdf", "xls", "xlsx", "ppt", "pptx", "md", "csv", "rtf")),
     MUSIC("4000", Arrays.asList("mp3", "wav", "wma", "ape", "flac", "aac", "ogg")),
     ARCHIVE("5000", Arrays.asList("zip", "rar", "7z", "tar", "gz", "bz2", "xz")),
     OTHER("6000", List.of("other"));

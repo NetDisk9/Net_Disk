@@ -50,7 +50,7 @@ public class ShareController {
                 (!Objects.equals(time, "1") && !Objects.equals(time, "7") && !Objects.equals(time, "30") && !Objects.equals(time, "-1"))) {
             return ResponseResult.errorResult(ResultCodeEnum.PARAM_ERROR);
         }
-        if (!Boolean.parseBoolean(authClient.isVIP()) && Objects.equals(time, "-1")) {
+        if (!authClient.isVIP() && Objects.equals(time, "-1")) {
             return ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED);
         }
         UserFileEntity userFileEntity = fileService.getFile(Long.valueOf(userFileId), BaseContext.getCurrentId());

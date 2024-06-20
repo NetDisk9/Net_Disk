@@ -83,7 +83,7 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
             return finishResponse(exchange.getResponse(), ResponseResult.errorResult(ResultCodeEnum.UNAUTHORIZED));
         }
         if (canRedirect(path)) {
-            if (Boolean.parseBoolean(authClient.isSuperAdministrator(userId))) {
+            if (authClient.isSuperAdministrator(userId)) {
                 path = path.replace("admin", "super");
                 return chain.filter(createRedirectRequest(exchange, path));
             }
@@ -152,7 +152,7 @@ public class NetGlobalFilter implements GlobalFilter, Ordered {
             Set set = redisUtil.sGet(permissionKey);
             return set.contains(path);
         }
-        return Boolean.parseBoolean(authClient.havePermission(path));
+        return authClient.havePermission(path);
     }
 
 }

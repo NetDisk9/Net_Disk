@@ -16,10 +16,10 @@ public class PermissionController {
     @Resource
     PermissionService permissionService;
     @GetMapping("/authenticate")
-    public String havePermission(@RequestParam String path){
+    public Boolean havePermission(@RequestParam String path){
         Long userId=BaseContext.getCurrentId();
         System.out.println("test");
-        return permissionService.havePermission(path).toString();
+        return permissionService.havePermission(path);
     }
 
 }

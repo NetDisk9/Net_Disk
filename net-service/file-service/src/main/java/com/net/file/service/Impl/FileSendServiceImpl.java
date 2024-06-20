@@ -57,9 +57,9 @@ public class FileSendServiceImpl extends ServiceImpl<FileSendMapper, FileSendEnt
             if (collect.getMaxNum() < collect.getCurNum() + 1) {
                 throw new ParameterException("发送人数已达上限");
             }
-            if (getSendEntityByUserIdAndCollectId(userFile.getUserId(), collect.getCollectId()) != null) {
-                throw new ParameterException("不能重复发送");
-            }
+//            if (getSendEntityByUserIdAndCollectId(userFile.getUserId(), collect.getCollectId()) != null) {
+//                throw new ParameterException("不能重复发送");
+//            }
 
             FileSendEntity fileSend = FileSendEntity.builder()
                     .userFileId(userFile.getUserFileId())

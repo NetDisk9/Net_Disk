@@ -29,11 +29,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @SpringBootTest
 public class FileDataApplicationTests {
-    //    @Resource
-//    FileService fileService;
+        @Resource
+        FileController fileController;
 //    @Resource
 //    FileDataService fileDataService;
 //    @Resource
@@ -136,8 +137,9 @@ public class FileDataApplicationTests {
 
     @Test
     public void testGetFileData() {
-        FileData fileData = fileDataService.getFileDataByUserFileId(1791346282007633922L, 1768546042247323649L, 0);
-        System.out.println(fileData);
+        BaseContext.setCurrentId(1768546042247323649L);
+        fileController.removeFile2Recycle(List.of(1801267931095449602L));
     }
+
 
 }
